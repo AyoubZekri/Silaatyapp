@@ -35,7 +35,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     _scaleAnimation =
-        Tween<double>(begin: 0.5, end: 1.0).animate(CurvedAnimation(
+        Tween<double>(begin: 0.0, end: 1.0).animate(CurvedAnimation(
       parent: _controller,
       curve: Curves.easeOutBack,
     ));
@@ -49,7 +49,12 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _startAnimationSequence() async {
-    await Future.delayed(const Duration(milliseconds: 300));
+    String? token = myServices.sharedPreferences?.getString("token");
+
+    if (token != null && token.isNotEmpty) {
+      await contrller.getUser();
+    }
+
     _controller.forward();
 
     await Future.delayed(const Duration(seconds: 3));
@@ -57,13 +62,9 @@ class _SplashScreenState extends State<SplashScreen>
 
     await Future.delayed(const Duration(milliseconds: 800));
 
-    String? token = myServices.sharedPreferences?.getString("token");
-
     if (token != null && token.isNotEmpty) {
-      await contrller.getUser();
-
       if (contrller.statusrequest == Statusrequest.success &&
-          contrller.Status == 0 || contrller.Status == 1) {
+          (contrller.Status == 0 || contrller.Status == 1)) {
         Get.offAllNamed(Approutes.Login);
       } else {
         Get.offAllNamed(Approutes.HomeScreen);
@@ -95,12 +96,9 @@ class _SplashScreenState extends State<SplashScreen>
               position: _slideAnimation,
               child: ScaleTransition(
                 scale: _scaleAnimation,
-                child: Hero(
-                  tag: 'appLogo',
-                  child: Image.asset(
-                    Appimageassets.logo,
-                    height: 200,
-                  ),
+                child: Image.asset(
+                  Appimageassets.logo,
+                  height: 200,
                 ),
               ),
             ),

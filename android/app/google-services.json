@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "901733706115",
+    "project_id": "silaaty-8dbc2",
+    "storage_bucket": "silaaty-8dbc2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:901733706115:android:b871672fd2524e9c02eeb6",
+        "android_client_info": {
+          "package_name": "com.example.silaaty"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA73Hbp3bdl1CiGrBzthDEDcn7HrTK00Lg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

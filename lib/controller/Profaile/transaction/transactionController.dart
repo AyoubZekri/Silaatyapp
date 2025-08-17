@@ -9,6 +9,8 @@ import 'package:get/get.dart';
 
 class Transactioncontroller extends GetxController {
   final Transactiondata transactiondata = Transactiondata(Get.find());
+  String query = "" ;
+
   List<Data> transaction = [];
   Statusrequest statusrequest = Statusrequest.none;
   int? type;
@@ -17,7 +19,10 @@ class Transactioncontroller extends GetxController {
     statusrequest = Statusrequest.loadeng;
     update();
 
-    Map data = {'transactions': type.toString()};
+    Map data = {
+      'transactions': type.toString(),
+       "query":query,
+      };
     var response = await transactiondata.Shwotransaction(data);
     print("============================================== $response");
 

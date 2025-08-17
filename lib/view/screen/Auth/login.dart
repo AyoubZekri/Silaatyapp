@@ -34,12 +34,9 @@ class Login extends StatelessWidget {
                           key: controller.formstate,
                           child: ListView(
                             children: [
-                              Hero(
-                                tag: 'appLogo',
-                                child: Image.asset(
-                                  Appimageassets.logo,
-                                  height: 200,
-                                ),
+                              Image.asset(
+                                Appimageassets.logo,
+                                height: 200,
                               ),
                               Custemtitle(
                                 tatli: "1".tr,

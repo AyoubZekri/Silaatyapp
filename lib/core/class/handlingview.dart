@@ -27,7 +27,6 @@ class Handlingview extends StatelessWidget {
       case Statusrequest.failure:
         return ListView(
           children: [
-            SizedBox(height: MediaQuery.of(context).size.height * 0.25),
             Center(
               child: Column(
                 children: [

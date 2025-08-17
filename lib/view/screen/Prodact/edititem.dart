@@ -217,7 +217,6 @@ class _EdititemState extends State<Edititem> {
                           }
 
                           controller.EditProduct();
-                          Get.back();
                         },
                         vertical: 10,
                         horizontal: 10,

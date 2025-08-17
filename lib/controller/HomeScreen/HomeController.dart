@@ -22,6 +22,8 @@ class Homecontroller extends GetxController {
   bool isSearching = false;
 
   Statusrequest statusrequest = Statusrequest.none;
+  Statusrequest statusrequestcat = Statusrequest.none;
+
   // late int catid;
 
   // ignore: non_constant_identifier_names
@@ -39,16 +41,16 @@ class Homecontroller extends GetxController {
   }
 
   getCategoris() async {
-    statusrequest = Statusrequest.loadeng;
+    statusrequestcat = Statusrequest.loadeng;
     update();
     var response = await categorisData.viewdata();
     print("============================================== $response");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success && response["status"] == 1) {
+    statusrequestcat = handlingData(response);
+    if (statusrequestcat == Statusrequest.success && response["status"] == 1) {
       final model = Categoris_Model.fromJson(response);
       categories = model.data?.catdata ?? [];
     } else {
-      statusrequest = Statusrequest.failure;
+      statusrequestcat = Statusrequest.failure;
     }
     update();
   }

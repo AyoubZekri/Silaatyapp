@@ -66,7 +66,7 @@ class _ReportState extends State<Report> {
                       final rep = controller.report[index];
                       return TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
-                          duration: Duration(milliseconds: 300 + (index * 200)),
+                          duration: Duration(milliseconds: 300 + (index * 2)),
                           builder: (context, value, child) {
                             return Opacity(
                               opacity: value,

@@ -94,7 +94,7 @@ class _HomeState extends State<Necessary> {
                                 child: Wrap(
                                   spacing: 10,
                                   runSpacing: 10,
-                                  children: controller.statusrequest ==
+                                  children: controller.statusrequestcat ==
                                           Statusrequest.loadeng
                                       ? List.generate(
                                           4,
@@ -149,7 +149,7 @@ class _HomeState extends State<Necessary> {
                                   return TweenAnimationBuilder(
                                     tween: Tween<double>(begin: 0, end: 1),
                                     duration: Duration(
-                                        milliseconds: 300 + (index * 200)),
+                                        milliseconds: 300 + (index * 2)),
                                     builder: (context, value, child) {
                                       return Opacity(
                                         opacity: value,

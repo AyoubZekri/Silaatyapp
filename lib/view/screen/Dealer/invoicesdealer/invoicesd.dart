@@ -246,8 +246,6 @@ class _InvoicesdState extends State<Invoicesd> {
                   widget: SizedBox(
                     height: MediaQuery.of(context).size.height * 0.6,
                     child: ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
                       itemCount: controller.invoice?.invoices?.where((inv) {
                             final isPaid =
                                 double.parse(inv.invoicesum!.toString()) <=
@@ -271,7 +269,7 @@ class _InvoicesdState extends State<Invoicesd> {
                         final inv = filteredInvoices[index];
                         return TweenAnimationBuilder(
                           tween: Tween<double>(begin: 0, end: 1),
-                          duration: Duration(milliseconds: 300 + (index * 200)),
+                          duration: Duration(milliseconds: 300 + (index * 2)),
                           builder: (context, value, child) {
                             return Opacity(
                               opacity: value,

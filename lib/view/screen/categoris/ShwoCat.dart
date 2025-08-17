@@ -55,7 +55,7 @@ class _ShwocatState extends State<Shwocat> {
                         return TweenAnimationBuilder(
                             tween: Tween<double>(begin: 0, end: 1),
                             duration:
-                                Duration(milliseconds: 300 + (index * 200)),
+                                Duration(milliseconds: 300 + (index * 2)),
                             builder: (context, value, child) {
                               return Opacity(
                                 opacity: value,
@@ -67,7 +67,9 @@ class _ShwocatState extends State<Shwocat> {
                             },
                             child: Custemcartcat(
                               imgitems: cat.categorisImage,
-                              name: cat.categorisName!,
+                              name: Get.locale?.languageCode == "ar"
+                                  ? cat.categorisName!
+                                  : cat.categorisNameFr!,
                               image: false,
                               onEdit: () {
                                 controller.GotoEditcat(index);

@@ -31,7 +31,7 @@ class _NotificationState extends State<Notification> {
         ),
       ),
       body: Container(
-          margin:const EdgeInsets.all(5),
+          margin: const EdgeInsets.all(5),
           child: GetBuilder<Notificaitioncontroller>(builder: (controller) {
             return Handlingview(
                 statusrequest: controller.statusrequest,
@@ -45,8 +45,7 @@ class _NotificationState extends State<Notification> {
                         final not = controller.notification[index];
                         return TweenAnimationBuilder(
                             tween: Tween<double>(begin: 0, end: 1),
-                            duration:
-                                Duration(milliseconds: 300 + (index * 200)),
+                            duration: Duration(milliseconds: 300 + (index * 2)),
                             builder: (context, value, child) {
                               return Opacity(
                                 opacity: value,
