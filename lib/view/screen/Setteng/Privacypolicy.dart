@@ -53,7 +53,7 @@ class _PrivacypolicyState extends State<Privacypolicy> {
             Custemtitleorbody(
               title: "24".tr,
               Body:"25".tr,
-              email: "ayobzekri670@gmail.com",
+              email: "codedev39@gmail.com",
             ),
           ],
         ),
