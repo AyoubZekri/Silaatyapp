@@ -13,7 +13,7 @@ class Custemtype extends StatelessWidget {
     required this.NameItems,
     this.onPressed,
     required this.isActive,
-    this.isLoading = false, 
+    this.isLoading = false,
   });
 
   @override
@@ -55,12 +55,14 @@ class Custemtype extends StatelessWidget {
         ),
       ),
     );
-
     if (isLoading) {
       return Shimmer.fromColors(
         baseColor: Colors.grey.shade300,
         highlightColor: Colors.grey.shade100,
-        child: content,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(10),
+          child: content,
+        ),
       );
     }
 

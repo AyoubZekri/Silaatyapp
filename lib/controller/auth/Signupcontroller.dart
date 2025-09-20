@@ -58,6 +58,8 @@ class SignupControllerImp extends SignupController {
           showSnackbar("Warning".tr, "email_already_exists".tr, Colors.orange);
           statusrequest = Statusrequest.failure;
         }
+      } else{
+          showSnackbar("Warning".tr, "email_already_exists".tr, Colors.orange);
       }
       update();
     } else {

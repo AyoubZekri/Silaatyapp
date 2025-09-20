@@ -49,7 +49,7 @@ class CheckEmail extends StatelessWidget {
                         label: "Email",
                         iconData: Icons.email_outlined,
                         valid: (Val) {
-                          return validInput(Val!, 5, 100, "Email");
+                          return validInput(Val!, 100, 5, "Email");
                         },
                         keyboardType: TextInputType.emailAddress,
                       ),

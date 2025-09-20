@@ -125,10 +125,21 @@ class _CustemcartdealerState extends State<Custemcartdealer> {
                                 overflow: TextOverflow.ellipsis,
                               ),
                               const SizedBox(height: 1),
-                              Text(
-                                "Price: ${widget.Price} DA",
-                                style:
-                                    Theme.of(context).textTheme.headlineLarge,
+                              Row(
+                                children: [
+                                  Text(
+                                    widget.Price,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineLarge,
+                                  ),
+                                  Text(
+                                    "DA".tr,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineLarge,
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -165,7 +176,7 @@ class _CustemcartdealerState extends State<Custemcartdealer> {
                         ),
                       ),
                       child: Text(
-                        widget.Status == 0 ? "hopeless" : "hopeful",
+                        widget.Status == 0 ? "hopeful".tr : "hopeless".tr,
                         style:
                             const TextStyle(color: Colors.white, fontSize: 12),
                       ),

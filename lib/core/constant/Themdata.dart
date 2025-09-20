@@ -12,15 +12,17 @@ ThemeData themeEn = ThemeData(
         fontSize: 25),
     iconTheme: IconThemeData(color: AppColor.primarycolor),
     backgroundColor: AppColor.backgroundcolor,
-    elevation: 0,
+    elevation: 4,
   ),
   textTheme: const TextTheme(
     headlineMedium: TextStyle(
-        fontWeight: FontWeight.bold, fontSize: 22, color: AppColor.black),
+        fontWeight: FontWeight.bold, fontSize: 20, color: AppColor.black),
     headlineSmall: TextStyle(
         fontWeight: FontWeight.bold, fontSize: 26, color: AppColor.black),
     headlineLarge: TextStyle(
-        fontWeight: FontWeight.w400, fontSize: 20, color: AppColor.red),
+        fontWeight: FontWeight.bold,
+        fontSize: 20,
+        color: Color.fromARGB(255, 244, 111, 54)),
     bodyMedium: TextStyle(
         height: 2,
         color: AppColor.grey,
@@ -45,7 +47,7 @@ ThemeData themeAr = ThemeData(
         fontSize: 25),
     iconTheme: IconThemeData(color: AppColor.primarycolor),
     backgroundColor: AppColor.backgroundcolor,
-    elevation: 0,
+    elevation: 4,
   ),
   textTheme: const TextTheme(
     headlineMedium: TextStyle(

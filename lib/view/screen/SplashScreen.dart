@@ -60,7 +60,7 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(seconds: 3));
     setState(() => animate = true);
 
-    await Future.delayed(const Duration(milliseconds: 800));
+    await Future.delayed(const Duration(milliseconds: 0));
 
     if (token != null && token.isNotEmpty) {
       if (contrller.statusrequest == Statusrequest.success &&

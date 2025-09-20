@@ -2,6 +2,8 @@ import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/services/Services.dart';
+
 class Custemlanguge extends StatelessWidget {
   final String Langugs;
   final String long;
@@ -17,13 +19,16 @@ class Custemlanguge extends StatelessWidget {
   Widget build(BuildContext context) {
     final currentLang = Get.locale?.languageCode;
     final bool isSelected = currentLang == Langugs;
+    Myservices myServices = Get.find();
+
     return GestureDetector(
       onTap: () {
+        myServices.sharedPreferences!.setString("lang", Langugs);
         Get.updateLocale(Locale(Langugs));
         Get.back();
       },
       child: Container(
-        margin:const EdgeInsets.symmetric(horizontal: 50),
+        margin: const EdgeInsets.symmetric(horizontal: 50),
         child: Card(
           color: isSelected
               // ignore: deprecated_member_use

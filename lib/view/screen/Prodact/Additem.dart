@@ -1,4 +1,3 @@
-
 import 'package:Silaaty/controller/items/AdditemsController.dart';
 import 'package:Silaaty/core/class/handlingview.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
@@ -24,7 +23,6 @@ class _AdditemState extends State<Additem> {
     super.initState();
     final controller = Get.put(Additemscontroller());
     controller.resetForm();
-
   }
 
   @override
@@ -67,7 +65,7 @@ class _AdditemState extends State<Additem> {
                                 onPressed: () {
                                   controller.imageupload();
                                 },
-                                child:Text("اضافة صورة".tr),
+                                child: Text("اضافة صورة".tr),
                               )
                             : Stack(
                                 children: [
@@ -137,7 +135,7 @@ class _AdditemState extends State<Additem> {
                       //   onChanged: (val) {
                       //     setState(() {
                       //       controller.selectedCategoryId = val;
-              
+
                       //       if (val == 1) {
                       //         controller.selectedCategoryId = 1;
                       //       } else if (val == 2) {
@@ -165,7 +163,8 @@ class _AdditemState extends State<Additem> {
                       //     }),
                       QuantityInput(
                         initialValue:
-                            int.tryParse(controller.quantityController.text) ?? 1,
+                            int.tryParse(controller.quantityController.text) ??
+                                1,
                         Mycontroller: controller.quantityController,
                         hintText: "Quantity".tr,
                         label: "Quantity".tr,
@@ -187,8 +186,8 @@ class _AdditemState extends State<Additem> {
                       ),
                       Custemtextfromfild(
                         MyController: TextEditingController(
-                            text:
-                                controller.priceTotalPurchase.toStringAsFixed(2)),
+                            text: controller.priceTotalPurchase
+                                .toStringAsFixed(2)),
                         keyboardType: TextInputType.number,
                         hintText: "Purchase Price Total".tr,
                         label: "Purchase Price Total".tr,
@@ -205,11 +204,11 @@ class _AdditemState extends State<Additem> {
                       Custembutton(
                         text: "Add".tr,
                         onPressed: () {
-                          if (!validInputsnak(
-                              controller.nameController.text, 3, 20, "Name".tr)) {
+                          if (!validInputsnak(controller.nameController.text, 1,
+                              20, "Name".tr)) {
                             return;
                           }
-              
+
                           controller.addProduct();
                           Get.back(result: true);
                         },

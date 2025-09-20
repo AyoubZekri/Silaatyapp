@@ -88,6 +88,7 @@ class _HomeState extends State<Necessary> {
                         if (controller.isSearching == false)
                           Container(
                             margin: const EdgeInsets.all(15),
+
                             height: 55,
                             child: SingleChildScrollView(
                                 scrollDirection: Axis.horizontal,

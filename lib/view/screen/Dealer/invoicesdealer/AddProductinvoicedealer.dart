@@ -81,7 +81,7 @@ class _AddproductinvoiceState extends State<Addproductinvoicedealer> {
                         text: "Add".tr,
                         onPressed: () {
                           if (!validInputsnak(
-                              controller.nameController.text, 3, 10, "Name".tr)) {
+                              controller.nameController.text, 1, 20, "Name".tr)) {
                             return;
                           }
               

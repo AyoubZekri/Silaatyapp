@@ -22,7 +22,7 @@ class LocalController extends GetxController {
     } else if (sharedPreflang == "en") {
       language =const Locale("en");
     } else {
-      language = Locale(Get.deviceLocale!.languageCode);
+      language =const Locale("ar");
     }
     super.onInit();
   }

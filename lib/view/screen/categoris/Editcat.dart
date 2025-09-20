@@ -109,9 +109,9 @@ class _EditcatState extends State<Editcat> {
                       Custembutton(
                         text: "Add".tr,
                         onPressed: () {
-                          if (!validInputsnak(controler.nameController.text, 3,
+                          if (!validInputsnak(controler.nameController.text, 1,
                               20, "Name Categoris".tr)) return;
-                          if (!validInputsnak(controler.nameController.text, 3,
+                          if (!validInputsnak(controler.nameController.text, 1,
                               20, "Name Categoris fr".tr)) return;
               
                           controller.Editcat();

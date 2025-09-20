@@ -211,7 +211,7 @@ class _EdititemState extends State<Edititem> {
                       Custembutton(
                         text: "Edit".tr,
                         onPressed: () {
-                          if (!validInputsnak(controller.nameController.text, 3,
+                          if (!validInputsnak(controller.nameController.text, 1,
                               20, "Name".tr)) {
                             return;
                           }

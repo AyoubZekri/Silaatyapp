@@ -68,7 +68,7 @@ class _SignupState extends State<Signup> {
                           label: "Username".tr,
                           iconData: Icons.person_2_outlined,
                           valid: (Val) {
-                            return validInput(Val!, 20, 5, "username");
+                            return validInput(Val!, 20, 1, "username");
                           },
                         ),
                         Custemtextformauth(
@@ -78,7 +78,7 @@ class _SignupState extends State<Signup> {
                           label: "Familyname".tr,
                           iconData: Icons.person_2_outlined,
                           valid: (Val) {
-                            return validInput(Val!, 20, 5, "username");
+                            return validInput(Val!, 20, 1, "username");
                           },
                         ),
                         Custemtextformauth(

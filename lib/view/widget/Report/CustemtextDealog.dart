@@ -49,7 +49,7 @@ class _CustomReportDialogState extends State<CustomReportDialog> {
           maxLines: 6,
           minLines: 4,
           validator: (val) {
-            return validInput(val!, 100, 10, "Username");
+            return validInput(val!, 100, 1, "Username");
           },
           decoration: InputDecoration(
             errorStyle: const TextStyle(fontSize: 12),

@@ -202,7 +202,7 @@ class _ShwoinvoiceState extends State<Shwoinvoice> {
                         Title: "Total".tr,
                         Prise:
                             controller.invoice?.sumPrice?.toString() ?? "0.00",
-                        DA: "DA",
+                        DA: "DA".tr,
                         fontSize: 24,
                         color: AppColor.grey,
                         colorp: AppColor.grey,
@@ -213,7 +213,7 @@ class _ShwoinvoiceState extends State<Shwoinvoice> {
                         Prise: controller.invoice?.invoice?.paymentPrice
                                 ?.toString() ??
                             "0.00",
-                        DA: "DA",
+                        DA: "DA".tr,
                         fontSize: 24,
                         color: Colors.green[800]!,
                         colorp: Colors.green[800]!,
@@ -283,7 +283,7 @@ class _ShwoinvoiceState extends State<Shwoinvoice> {
                         Title: "Remaining".tr,
                         Prise:
                             controller.getRemainingAmount().toStringAsFixed(2),
-                        DA: "DA",
+                        DA: "DA".tr,
                         fontSize: 24,
                         color: Colors.red[800]!,
                         colorp: Colors.red[800]!,

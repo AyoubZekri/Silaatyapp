@@ -195,7 +195,7 @@ class _ShwoinvoicedealerState extends State<Shwoinvoicedealer> {
                         Title: "Total".tr,
                         Prise:
                             controller.invoice?.sumPrice?.toString() ?? "0.00",
-                        DA: "DA",
+                        DA: "DA".tr,
                         fontSize: 24,
                         color: AppColor.grey,
                         colorp: AppColor.grey,
@@ -276,7 +276,7 @@ class _ShwoinvoicedealerState extends State<Shwoinvoicedealer> {
                         Title: "Remaining".tr,
                         Prise:
                             controller.getRemainingAmount().toStringAsFixed(2),
-                        DA: "DA",
+                        DA: "DA".tr,
                         fontSize: 24,
                         color: Colors.red[800]!,
                         colorp: Colors.red[800]!,

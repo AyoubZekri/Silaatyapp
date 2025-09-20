@@ -1,8 +1,14 @@
 plugins {
     id "com.android.application"
     id "kotlin-android"
-    id "dev.flutter.flutter-gradle-plugin" 
-    id 'com.google.gms.google-services'
+    id "dev.flutter.flutter-gradle-plugin"
+    id "com.google.gms.google-services"
+}
+
+def keyProperties = new Properties()
+def keyPropertiesFile = rootProject.file("key.properties")
+if (keyPropertiesFile.exists()) {
+    keyProperties.load(new FileInputStream(keyPropertiesFile))
 }
 
 android {
@@ -22,15 +28,28 @@ android {
 
     defaultConfig {
         applicationId = "com.example.silaaty"
-        minSdk = 23
+        minSdkVersion = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        release {
+            if (keyProperties["storeFile"]) {
+                storeFile file(keyProperties["storeFile"])
+                storePassword keyProperties["storePassword"]
+                keyAlias keyProperties["keyAlias"]
+                keyPassword keyProperties["keyPassword"]
+            }
+        }
+    }
+
     buildTypes {
         release {
-            signingConfig = signingConfigs.debug
+            signingConfig = signingConfigs.release
+            minifyEnabled false
+            shrinkResources false
         }
     }
 }
@@ -40,9 +59,7 @@ flutter {
 }
 
 dependencies {
-    implementation platform('com.google.firebase:firebase-bom:33.16.0')
-    implementation 'com.google.firebase:firebase-analytics'
-
-
-    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
+    implementation platform("com.google.firebase:firebase-bom:33.16.0")
+    implementation "com.google.firebase:firebase-analytics"
+    coreLibraryDesugaring "com.android.tools:desugar_jdk_libs:2.1.4"
 }

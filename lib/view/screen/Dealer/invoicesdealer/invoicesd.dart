@@ -144,7 +144,7 @@ class _InvoicesdState extends State<Invoicesd> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            " Account details:".tr,
+                            "Account_Supplier".tr,
                             style: const TextStyle(
                               fontSize: 18,
                               fontWeight: FontWeight.bold,
@@ -157,12 +157,23 @@ class _InvoicesdState extends State<Invoicesd> {
                             children: [
                               Text("Price Total".tr,
                                   style: TextStyle(color: Colors.grey[700])),
-                              Text(
-                                "${controller.invoice?.sumPrice ?? 0},00 DA",
-                                style: const TextStyle(
-                                  color: AppColor.black,
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    "${controller.invoice?.sumPrice ?? 0} ",
+                                    style: const TextStyle(
+                                      color: AppColor.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "DA".tr,
+                                    style: TextStyle(
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -172,12 +183,23 @@ class _InvoicesdState extends State<Invoicesd> {
                             children: [
                               Text("Paid-for".tr,
                                   style: TextStyle(color: Colors.grey[700])),
-                              Text(
-                                "${controller.invoice?.sumpaymentPrice ?? 0},00 DA",
-                                style: TextStyle(
-                                  color: Colors.green[700],
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    "${controller.invoice?.sumpaymentPrice ?? 0} ",
+                                    style: TextStyle(
+                                      color: Colors.green[700],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "DA".tr,
+                                    style: TextStyle(
+                                      color: Colors.green[700],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),
@@ -187,12 +209,23 @@ class _InvoicesdState extends State<Invoicesd> {
                             children: [
                               Text("The rest".tr,
                                   style: TextStyle(color: Colors.grey[700])),
-                              Text(
-                                "${controller.getRemainingAmount()} DA",
-                                style: TextStyle(
-                                  color: Colors.red[700],
-                                  fontWeight: FontWeight.bold,
-                                ),
+                              Row(
+                                children: [
+                                  Text(
+                                    "${controller.getRemainingAmount()} ",
+                                    style: TextStyle(
+                                      color: Colors.red[700],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Text(
+                                    "DA".tr,
+                                    style: TextStyle(
+                                      color: Colors.red[700],
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           ),

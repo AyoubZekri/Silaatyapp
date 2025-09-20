@@ -116,9 +116,11 @@ class _CustemcartinvoiceState extends State<Custemcartinvoice> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
-                              Text(widget.day, style:const TextStyle(height: 1)),
+                              Text(widget.day,
+                                  style: const TextStyle(height: 1)),
                               const SizedBox(height: 2),
-                              Text(widget.Mon, style:const TextStyle(height: 1)),
+                              Text(widget.Mon,
+                                  style: const TextStyle(height: 1)),
                             ],
                           ),
                         ),
@@ -133,10 +135,21 @@ class _CustemcartinvoiceState extends State<Custemcartinvoice> {
                                       .headlineSmall!
                                       .copyWith(fontSize: 20)),
                               const SizedBox(height: 6),
-                              Text(
-                                "${widget.Price} DA",
-                                style:
-                                    Theme.of(context).textTheme.headlineLarge,
+                              Row(
+                                children: [
+                                  Text(
+                                    "${widget.Price} ",
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineLarge,
+                                  ),
+                                  Text(
+                                    "DA".tr,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .headlineLarge,
+                                  ),
+                                ],
                               ),
                             ],
                           ),

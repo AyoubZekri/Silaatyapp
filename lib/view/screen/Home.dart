@@ -78,6 +78,9 @@ class _HomeState extends State<Home> {
                       Container(
                         margin: const EdgeInsets.all(15),
                         height: 55,
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(10),
+                        ),
                         child: SingleChildScrollView(
                           scrollDirection: Axis.horizontal,
                           child: Wrap(

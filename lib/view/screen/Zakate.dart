@@ -112,6 +112,15 @@ class _ZakatState extends State<Zakat> {
                           ),
                           const SizedBox(height: 15),
                           Custemrow(
+                            Title: "zakat_mal".tr,
+                            Prise: controller.totalzakat.toString(),
+                            DA: "DA".tr,
+                            fontSize: 20,
+                            color: AppColor.backgroundcolor,
+                            colorp: AppColor.grey,
+                          ),
+                          const SizedBox(height: 15),
+                          Custemrow(
                             Title: "Current Nisab".tr,
                             Prise: controller.zakat[0].zakatNisab ?? "0.00",
                             DA: "DA".tr,

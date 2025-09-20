@@ -70,15 +70,15 @@ class _AddConvictState extends State<AddConvict> {
                             onPressed: () {
                               if (!validInputsnak(
                                   controller.nameController.text,
-                                  3,
-                                  7,
+                                  1,
+                                  10,
                                   "Name".tr)) {
                                 return;
                               }
                               if (!validInputsnak(
                                   controller.familyNameController.text,
-                                  3,
-                                  7,
+                                  1,
+                                  10,
                                   "FrsetName".tr)) {
                                 return;
                               }

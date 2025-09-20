@@ -104,11 +104,11 @@ class _AddcatState extends State<Addcat> {
                       Custembutton(
                         text: "Add".tr,
                         onPressed: () {
-                          if (!validInputsnak(controler.nameController.text, 3, 20,
+                          if (!validInputsnak(controler.nameController.text, 1, 20,
                               "Name Categoris".tr)) {
                             return;
                           }
-                          if (!validInputsnak(controler.nameFrController.text, 3, 20,
+                          if (!validInputsnak(controler.nameFrController.text, 1, 20,
                               "Name Categoris fr".tr)) {
                             return;
                           }
