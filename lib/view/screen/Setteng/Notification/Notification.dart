@@ -35,6 +35,8 @@ class _NotificationState extends State<Notification> {
           child: GetBuilder<Notificaitioncontroller>(builder: (controller) {
             return Handlingview(
                 statusrequest: controller.statusrequest,
+                iconData: Icons.notifications,
+                title: "لا يوجد إشعارات".tr,
                 widget: RefreshIndicator(
                     onRefresh: () async {
                       await controller.refreshdata();
@@ -57,20 +59,22 @@ class _NotificationState extends State<Notification> {
                             },
                             child: Custemcartnotification(
                               onTap: () {
-                                controller.Gotoshownotification(not.id);
+                                controller.Gotoshownotification(not.uuid);
                               },
                               onDelete: () {
                                 Get.defaultDialog(
                                   backgroundColor: AppColor.white,
-                                  title: "تنبيه",
+                                  title: "تنبيه".tr,
                                   titleStyle: const TextStyle(
                                       fontWeight: FontWeight.bold,
                                       color: AppColor.backgroundcolor),
-                                  middleText: "هل تريد حذف الاشعار؟",
+                                  middleText: "هل تريد حذف الاشعار؟".tr,
                                   onConfirm: () {
-                                    controller.deleteNotification(not.id);
+                                    controller.deleteNotification(not.uuid);
                                   },
-                                  onCancel: () {},
+                                  onCancel: () {
+                                    Get.back();
+                                  },
                                   buttonColor: AppColor.backgroundcolor,
                                   confirmTextColor: AppColor.primarycolor,
                                   cancelTextColor: AppColor.backgroundcolor,

@@ -55,6 +55,7 @@ class Data {
 
 class Notifications {
   int? id;
+  String? uuid;
   String? title;
   String? content;
   int? isRead;
@@ -64,6 +65,7 @@ class Notifications {
 
   Notifications(
       {this.id,
+      this.uuid,
       this.title,
       this.content,
       this.isRead,
@@ -73,6 +75,7 @@ class Notifications {
 
   Notifications.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    uuid = json['uuid'];
     title = json['title'];
     content = json['content'];
     isRead = json['is_read'];
@@ -84,6 +87,7 @@ class Notifications {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
+    data['uuid'] = this.uuid;
     data['title'] = this.title;
     data['content'] = this.content;
     data['is_read'] = this.isRead;

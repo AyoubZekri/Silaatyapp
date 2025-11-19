@@ -17,6 +17,7 @@ class CheckEmail extends StatelessWidget {
   Widget build(BuildContext context) {
     Get.put(CheckEmailControllerImp());
     return Scaffold(
+      backgroundColor: AppColor.white,
         appBar: AppBar(
           centerTitle: true,
           backgroundColor: AppColor.backgroundcolor,

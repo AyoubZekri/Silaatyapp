@@ -29,70 +29,90 @@ class _SettengState extends State<Setteng> {
           ),
         ),
         body: GetBuilder<Settengcontriller>(builder: (controller) {
-                  return ListView(
-        children: [
-          Container(
-            margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
-            padding: const EdgeInsets.only(top: 20),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(15),
-              boxShadow: [
-                BoxShadow(
-                  // ignore: deprecated_member_use
-                  color: Colors.black.withOpacity(0.1),
-                  spreadRadius: 2,
-                  blurRadius: 8,
-                  offset: const Offset(0, 0),
+          return ListView(
+            children: [
+              Container(
+                margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
+                padding: const EdgeInsets.only(top: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(15),
+                  boxShadow: [
+                    BoxShadow(
+                      // ignore: deprecated_member_use
+                      color: Colors.black.withOpacity(0.1),
+                      spreadRadius: 2,
+                      blurRadius: 8,
+                      offset: const Offset(0, 0),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-            child: Column(
-              children: [
-                Custemcartbutton(
-                    ontap: () {
-                      contrller.showLanguageSheet(context);
-                    },
-                    Title: "Langugs".tr,
-                    iconData: Icons.language),
-                Custemcartbutton(
-                    ontap: () {
-                      contrller.GotoPrivacypolicy();
-                    },
-                    Title: "Privacy Policy".tr,
-                    iconData: Icons.privacy_tip),
-                Custemcartbutton(
-                    ontap: () {
-                      contrller.GotoInformationapp();
-                    },
-                    Title: "informationApp".tr,
-                    iconData: Icons.info),
-                Custemcartbutton(
-                    ontap: () {
-                      Get.defaultDialog(
-                        backgroundColor: AppColor.white,
-                        title: "Alert".tr,
-                        titleStyle: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: AppColor.backgroundcolor),
-                        middleText: "هل تريد تسجيل الخروج".tr,
-                        onConfirm: () {
-                          contrller.logout();
-                          Get.back(result: true);
+                child: Column(
+                  children: [
+                    Custemcartbutton(
+                        ontap: () {
+                          contrller.gotoProfail();
                         },
-                        onCancel: () {},
-                        buttonColor: AppColor.backgroundcolor,
-                        confirmTextColor: AppColor.primarycolor,
-                        cancelTextColor: AppColor.backgroundcolor,
-                      );
-                    },
-                    Title: "Logout".tr,
-                    iconData: Icons.logout),
-              ],
-            ),
-          ),
-        ],
-                  );
-                }));
+                        Title: "Profile".tr,
+                        iconData: Icons.person),
+                    Custemcartbutton(
+                        ontap: () {
+                          contrller.showLanguageSheet(context);
+                        },
+                        Title: "Langugs".tr,
+                        iconData: Icons.language),
+                    Custemcartbutton(
+                        ontap: () {
+                          contrller.GotoProfaile();
+                        },
+                        Title: "إعدادات المتجر".tr,
+                        iconData: Icons.store_outlined),
+                    Custemcartbutton(
+                        ontap: () {
+                          contrller.ChangePassword();
+                        },
+                        Title: "Change the Password".tr,
+                        iconData: Icons.admin_panel_settings),
+                    Custemcartbutton(
+                        ontap: () {
+                          contrller.GotoPrivacypolicy();
+                        },
+                        Title: "Privacy Policy".tr,
+                        iconData: Icons.privacy_tip),
+                    Custemcartbutton(
+                        ontap: () {
+                          contrller.GotoInformationapp();
+                        },
+                        Title: "informationApp".tr,
+                        iconData: Icons.info),
+                    Custemcartbutton(
+                        ontap: () {
+                          Get.defaultDialog(
+                            backgroundColor: AppColor.white,
+                            title: "Alert".tr,
+                            titleStyle: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColor.backgroundcolor),
+                            middleText: "هل تريد تسجيل الخروج".tr,
+                            onConfirm: () {
+                              contrller.logout();
+                              Get.back(result: true);
+                            },
+                            onCancel: () {
+                              Get.back();
+                            },
+                            buttonColor: AppColor.backgroundcolor,
+                            confirmTextColor: AppColor.primarycolor,
+                            cancelTextColor: AppColor.backgroundcolor,
+                          );
+                        },
+                        Title: "Logout".tr,
+                        iconData: Icons.logout),
+                  ],
+                ),
+              ),
+            ],
+          );
+        }));
   }
 }

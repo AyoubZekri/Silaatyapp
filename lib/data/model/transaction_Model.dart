@@ -54,6 +54,7 @@ class Transaction {
   int? id;
   int? userId;
   String? name;
+  String? uuid;
   String? familyName;
   String? phoneNumber;
   int? transactions;
@@ -65,6 +66,7 @@ class Transaction {
       {this.id,
       this.userId,
       this.name,
+      this.uuid,
       this.familyName,
       this.phoneNumber,
       this.Status,
@@ -75,6 +77,7 @@ class Transaction {
   Transaction.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     userId = json['user_id'];
+    uuid = json['uuid'];
     name = json['name'];
     familyName = json['family_name'];
     phoneNumber = json['phone_number'];
@@ -88,6 +91,7 @@ class Transaction {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['user_id'] = this.userId;
+    data['uuid'] = this.uuid;
     data['name'] = this.name;
     data['family_name'] = this.familyName;
     data['phone_number'] = this.phoneNumber;

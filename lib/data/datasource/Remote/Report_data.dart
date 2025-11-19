@@ -1,33 +1,100 @@
-import 'package:Silaaty/LinkApi.dart';
 import 'package:Silaaty/core/class/Crud.dart';
+import 'package:Silaaty/core/class/Sqldb.dart';
+import 'package:Silaaty/core/class/SyncServer.dart';
+import 'package:get/get.dart';
+
+import '../../../core/services/Services.dart';
 
 class ReportData {
   Crud crud;
-
+  SQLDB db = SQLDB();
+  SyncService syncService = SyncService();
   ReportData(this.crud);
 
-  addReport(Map data) async {
-    var response = await crud.postDataheaders(Applink.addReport, data);
-    return response.fold((l) => l, (r) => r);
+  int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
+
+  Future<Map<String, Object?>> addReport(Map<String, Object?> data) async {
+    try {
+      final result = await db.insert("reports", data);
+
+      if (result > 0) {
+        await syncService.addToQueue(
+            "reports", data["uuid"] as String, "insert", data);
+        return {"status": 1};
+      }
+      return {"status": 0};
+    } catch (e) {
+      print("errer add_data $e");
+      return {"status": 0};
+    }
   }
 
-  EditReport(Map data) async {
-    var response = await crud.postDataheaders(Applink.updatrReport, data);
-    return response.fold((l) => l, (r) => r);
+  Future<Map<String, Object?>> EditReport(Map<String, Object?> data) async {
+    final uuid = data["uuid"] as String;
+    try {
+      final result = await db.update("reports", data, "uuid = ?", [uuid]);
+
+      if (result > 0) {
+        await syncService.addToQueue("reports", uuid, "update", data);
+        return {"status": 1};
+      }
+      return {"status": 0};
+    } catch (e) {
+      print("Errer Updateç_data $e");
+      return {"status": 0};
+    }
   }
 
-  deleteReport(Map data) async {
-    var response = await crud.postDataheaders(Applink.deleteReport, data);
-    return response.fold((l) => l, (r) => r);
+  Future<Map<String, Object?>> deleteReport(Map<String, Object?> data) async {
+    final uuid = data["uuid"] as String;
+    try {
+      final result = await db.update(
+          "reports",
+          {
+            'is_delete': 1,
+            'updated_at': DateTime.now().toIso8601String(),
+          },
+          "uuid = ?",
+          [uuid]);
+
+      if (result > 0) {
+        await syncService.addToQueue("reports", uuid, "update", data);
+        return {"status": 1};
+      }
+      return {"status": 0};
+    } catch (e) {
+      print("Errer delete_data $e");
+      return {"status": 0};
+    }
   }
 
-  ShwoReport() async {
-    var response = await crud.getData(Applink.Report);
-    return response.fold((l) => l, (r) => r);
+  Future<Map<String, Object?>> ShwoReport() async {
+    try {
+      final result = await db.readData(
+          "SELECT * FROM reports Where report_id = ? AND is_delete = 0", [id]);
+      return {
+        "status": 1,
+        "data": {"Report": result}
+      };
+    } catch (e) {
+      print("❌ viewdata error: $e");
+      return {"status": 0};
+    }
   }
 
-  ShwoinfoReport(Map data) async {
-    var response = await crud.postDataheaders(Applink.ShwoinfoReport, data);
-    return response.fold((l) => l, (r) => r);
+  Future<Map<String, Object?>> ShwoinfoReport(Map<String, Object?> data) async {
+    final uuid = data["uuid"];
+    try {
+      final result = await db.readData(
+          "SELECT * FROM reports Where report_id = ? AND uuid = ? AND is_delete = 0 LIMIT 1",
+          [id, uuid]);
+      return {
+        "status": 1,
+        "data": {"Report": result}
+      };
+    } catch (e) {
+      print("❌ viewdata error: $e");
+      return {"status": 0};
+    }
   }
 }

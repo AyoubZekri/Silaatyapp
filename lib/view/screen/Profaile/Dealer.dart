@@ -5,6 +5,7 @@ import 'package:Silaaty/view/widget/Profaile/custemCartDealer.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../main.dart';
 import '../../widget/Home/custemSearch.dart';
 
 class Dealer extends StatefulWidget {
@@ -14,8 +15,27 @@ class Dealer extends StatefulWidget {
   State<Dealer> createState() => _DealerState();
 }
 
-class _DealerState extends State<Dealer> {
+class _DealerState extends State<Dealer> with RouteAware {
   Transactioncontroller controller = Get.put(Transactioncontroller());
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    routeObserver.subscribe(this, ModalRoute.of(context)!);
+  }
+
+  @override
+  void dispose() {
+    routeObserver.unsubscribe(this);
+    super.dispose();
+  }
+
+  @override
+  void didPopNext() {
+    controller.getTransactions();
+    super.didPopNext();
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<Transactioncontroller>(builder: (controller) {
@@ -61,6 +81,10 @@ class _DealerState extends State<Dealer> {
                 Expanded(
                     child: Handlingview(
                   statusrequest: controller.statusrequest,
+                                    iconData: Icons.people,
+                   title: controller.query.isNotEmpty
+                      ? "لم يتم العثور على موردون مطابق للبحث".tr
+                      : "لم تتم إضافة موردون".tr,
                   widget: ListView.builder(
                     shrinkWrap: true,
                     physics: NeverScrollableScrollPhysics(),
@@ -80,32 +104,35 @@ class _DealerState extends State<Dealer> {
                             );
                           },
                           child: Custemcartdealer(
-                            Title: tran.transaction!.name!,
+                            Title: tran.transaction?.name ?? "",
                             Body: tran.transaction!.phoneNumber!,
                             Price:
                                 "${(tran.sumPrice ?? 0) < 0 ? 0 : tran.sumPrice}",
                             Status: tran.transaction!.Status!,
                             isStatus: false,
                             onEdit: () {
-                              controller.GotoEditDealer();
+                              controller.GotoEditDealer(
+                                  tran.transaction!.uuid!);
                             },
                             onTap: () {
-                              controller.GotoinvoiceDealer(
-                                  tran.transaction!.id!);
+                              controller.Gotoinvoiceconvist(
+                                  tran.transaction!.uuid!);
                             },
                             onDelete: () {
                               Get.defaultDialog(
                                 backgroundColor: AppColor.white,
-                                title: "تنبيه",
+                                title: "تنبيه".tr,
                                 titleStyle: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: AppColor.backgroundcolor),
-                                middleText: "هل تريد حذف المنتج؟",
+                                middleText: "هل تريد حذف المعاملة؟".tr,
                                 onConfirm: () {
-                                  controller
-                                      .deletetransaction(tran.transaction!.id!);
+                                  controller.deletetransaction(
+                                      tran.transaction!.uuid!);
                                 },
-                                onCancel: () {},
+                                onCancel: () {
+                                  Get.back();
+                                },
                                 buttonColor: AppColor.backgroundcolor,
                                 confirmTextColor: AppColor.primarycolor,
                                 cancelTextColor: AppColor.backgroundcolor,

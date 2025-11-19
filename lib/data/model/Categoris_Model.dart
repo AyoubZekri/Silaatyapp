@@ -47,6 +47,7 @@ class Data {
 
 class Catdata {
   int? id;
+  String? uuid;
   int? userId;
   String? categorisName;
   String? categorisNameFr;
@@ -57,6 +58,7 @@ class Catdata {
   Catdata(
       {this.id,
       this.userId,
+      this.uuid,
       this.categorisName,
       this.categorisNameFr,
       this.categorisImage,
@@ -65,6 +67,7 @@ class Catdata {
 
   Catdata.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    uuid = json['uuid'];
     userId = json['user_id'];
     categorisName = json['categoris_name'];
     categorisNameFr = json['categoris_name_fr'];
@@ -76,6 +79,7 @@ class Catdata {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
+    data['uuid'] = this.uuid;
     data['user_id'] = this.userId;
     data['categoris_name'] = this.categorisName;
     data['categoris_name_fr'] = this.categorisNameFr;

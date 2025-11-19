@@ -15,6 +15,7 @@ class VerifiycodeSignUp extends StatelessWidget {
   Widget build(BuildContext context) {
     Get.put(VerifiycodesignupControllerImp());
     return Scaffold(
+        backgroundColor: AppColor.white,
         appBar: AppBar(
           backgroundColor: AppColor.white,
           title: Text(
@@ -32,8 +33,8 @@ class VerifiycodeSignUp extends StatelessWidget {
                   statusrequest: controller.statusrequest,
                   widget: Container(
                     color: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 35),
                     child: ListView(
                       children: [
                         const SizedBox(
@@ -55,7 +56,7 @@ class VerifiycodeSignUp extends StatelessWidget {
                           child: OtpTextField(
                             borderRadius: BorderRadius.circular(10),
                             numberOfFields: 5,
-                            borderColor:const Color(0xFF512DA8),
+                            borderColor: const Color(0xFF512DA8),
                             showFieldAsBox: true,
                             onCodeChanged: (String code) {},
                             onSubmit: (String verificationCode) {
@@ -74,11 +75,12 @@ class VerifiycodeSignUp extends StatelessWidget {
                                 child: Text(
                               "rsend Verify code",
                               style: TextStyle(
-                                  fontSize: 20, color: AppColor.backgroundcolor),
+                                  fontSize: 20,
+                                  color: AppColor.backgroundcolor),
                             )))
                       ],
                     ),
                   ),
-            )));
+                )));
   }
 }

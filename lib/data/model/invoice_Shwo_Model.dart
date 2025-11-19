@@ -63,10 +63,12 @@ class Data {
 
 class Invoice {
   int? id;
+  String? uuid;
   int? transactionId;
   int? userId;
   String? invoiesNumper;
   String? invoiesDate;
+  double? discount;
   String? invoiesPaymentDate;
   int? paymentPrice;
   String? createdAt;
@@ -75,8 +77,10 @@ class Invoice {
   Invoice(
       {this.id,
       this.transactionId,
+      this.uuid,
       this.userId,
       this.invoiesNumper,
+      this.discount,
       this.invoiesDate,
       this.invoiesPaymentDate,
       this.paymentPrice,
@@ -85,8 +89,10 @@ class Invoice {
 
   Invoice.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    uuid = json['uuid'];
     transactionId = json['Transaction_id'];
     userId = json['user_id'];
+    discount = double.tryParse(json['discount']?.toString() ?? "0") ?? 0.0;
     invoiesNumper = json['invoies_numper'];
     invoiesDate = json['invoies_date'];
     invoiesPaymentDate = json['invoies_payment_date'];
@@ -98,8 +104,10 @@ class Invoice {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
+    data['uuid'] = this.uuid;
     data['Transaction_id'] = this.transactionId;
     data['user_id'] = this.userId;
+    data['discount'] = this.discount;
     data['invoies_numper'] = this.invoiesNumper;
     data['invoies_date'] = this.invoiesDate;
     data['invoies_payment_date'] = this.invoiesPaymentDate;
@@ -159,16 +167,17 @@ class Product {
   int? id;
   int? categorieId;
   int? userId;
+  String? uuid;
   int? invoiesId;
   int? categorisId;
   String? productName;
   String? productImage;
   String? productDescription;
   String? productQuantity;
-  String? productPrice;
-  String? productPricePurchase;
-  String? productPriceTotalPurchase;
-  String? productPriceTotal;
+  double? productPrice;
+  double? productPricePurchase;
+  double? productPriceTotalPurchase;
+  double? productPriceTotal;
   int? codepar;
   String? createdAt;
   String? updatedAt;
@@ -176,6 +185,8 @@ class Product {
   Product(
       {this.id,
       this.categorieId,
+      thid,
+      uuid,
       this.userId,
       this.invoiesId,
       this.categorisId,
@@ -195,6 +206,7 @@ class Product {
     id = json['id'];
     categorieId = json['categorie_id'];
     userId = json['user_id'];
+    uuid = json['uuid'];
     invoiesId = json['invoies_id'];
     categorisId = json['categoris_id'];
     productName = json['product_name'];
@@ -213,6 +225,7 @@ class Product {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
+    data['uuid'] = this.uuid;
     data['categorie_id'] = this.categorieId;
     data['user_id'] = this.userId;
     data['invoies_id'] = this.invoiesId;

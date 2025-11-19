@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Silaaty/LinkApi.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/constant/imageassets.DART';
@@ -57,11 +59,10 @@ class Custemcartitems extends StatelessWidget {
                     ? null
                     : DecorationImage(
                         image: (imgitems?.isNotEmpty ?? false)
-                            ? NetworkImage(
-                                Applink.image + "/storage/${imgitems!}")
+                            ? FileImage(File(imgitems!)) as ImageProvider
                             : const AssetImage(Appimageassets.test2)
                                 as ImageProvider,
-                        fit: BoxFit.cover,
+                        fit: BoxFit.contain,
                       ),
                 color: isLoading ? Colors.white : null,
               ),

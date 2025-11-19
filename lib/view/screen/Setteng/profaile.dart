@@ -23,7 +23,7 @@ class _ProfaileState extends State<Profaile> {
     return Scaffold(
         backgroundColor: AppColor.white,
         appBar: AppBar(
-          title: Text('Profail Account'.tr,
+          title: Text('إعدادات المتجر'.tr,
               style: Theme.of(context)
                   .textTheme
                   .headlineMedium!
@@ -60,16 +60,64 @@ class _ProfaileState extends State<Profaile> {
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
                         Custemcardprofail(
-                          Title: "iformation user".tr,
+                          Title: "iformation Stor".tr,
                           iconData: Icons.credit_card,
                         ),
                         const SizedBox(
                           height: 20,
                         ),
+                        Container(
+                          margin: const EdgeInsets.symmetric(horizontal: 30),
+                          height: 150,
+                          width: 150,
+                          decoration: BoxDecoration(
+                            color: AppColor.primarycolor,
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(width: 2),
+                          ),
+                          child: controller.file == null
+                              ? MaterialButton(
+                                  onPressed: () {
+                                    controller.imageupload();
+                                  },
+                                  child: Text("شعار المتجر".tr),
+                                )
+                              : Stack(
+                                  children: [
+                                    Center(
+                                      child: SizedBox(
+                                        height: 120,
+                                        child: ClipRRect(
+                                          borderRadius:
+                                              BorderRadius.circular(10),
+                                          child: Image.file(
+                                            controller.file!,
+                                            fit: BoxFit.cover,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                    Positioned(
+                                      bottom: 5,
+                                      right: 5,
+                                      child: IconButton(
+                                        icon: const Icon(Icons.edit,
+                                            color: Colors.white),
+                                        onPressed: () {
+                                          //  controller.imageupload();
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
                         Custemtextfildprofail(
-                          MyController: controller.nameController,
-                          hintText: "name".tr,
-                          label: "name".tr,
+                          MyController: controller.FamlynameController,
+                          hintText: "إسم المتجر".tr,
+                          label: "إسم المتجر".tr,
                           valid: (Val) {
                             return validInput(Val!, 100, 3, "username");
                           },
@@ -80,16 +128,6 @@ class _ProfaileState extends State<Profaile> {
                           height: 10,
                         ),
                         Custemtextfildprofail(
-                          MyController: controller.FamlynameController,
-                          hintText: "famly name".tr,
-                          label: "famly name".tr,
-                          valid: (Val) {
-                            return validInput(Val!, 100, 3, "username");
-                          },
-                          keyboardType: TextInputType.name,
-                          contentPaddingvertical: 10,
-                        ),
-                        Custemtextfildprofail(
                           MyController: controller.PhoneController,
                           hintText: "Phone Namper".tr,
                           label: "Phone Namper".tr,
@@ -97,6 +135,26 @@ class _ProfaileState extends State<Profaile> {
                             return validInput(Val!, 12, 10, "phone");
                           },
                           keyboardType: TextInputType.phone,
+                          contentPaddingvertical: 10,
+                        ),
+                        // Custemtextfildprofail(
+                        //   MyController: controller.emailController,
+                        //   hintText: "email".tr,
+                        //   label: "email".tr,
+                        //   valid: (Val) {
+                        //     return validInput(Val!, 100, 3, "username");
+                        //   },
+                        //   keyboardType: TextInputType.emailAddress,
+                        //   contentPaddingvertical: 10,
+                        // ),
+                        Custemtextfildprofail(
+                          MyController: controller.adresseController,
+                          hintText: "adresse".tr,
+                          label: "adresse".tr,
+                          valid: (Val) {
+                            return validInput(Val!, 100, 3, "username");
+                          },
+                          keyboardType: TextInputType.emailAddress,
                           contentPaddingvertical: 10,
                         ),
                       ],

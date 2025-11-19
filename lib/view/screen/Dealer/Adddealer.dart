@@ -49,13 +49,15 @@ class _AddDealerState extends State<AddDealer> {
                           hintText: "Name".tr,
                           label: "Name".tr,
                           iconData: Icons.person_outline,
+                          enabled: true,
                         ),
                         Custemtextfromfild(
                           MyController: controller.familyNameController,
                           keyboardType: TextInputType.name,
-                          hintText: "FrsetName".tr,
-                          label: "FrsetName".tr,
+                          hintText: "familyName".tr,
+                          label: "familyName".tr,
                           iconData: Icons.family_restroom,
+                          enabled: true,
                         ),
                         Custemtextfromfild(
                           MyController: controller.phoneController,
@@ -63,12 +65,13 @@ class _AddDealerState extends State<AddDealer> {
                           hintText: "Phone Numper".tr,
                           label: "Phone Numper".tr,
                           iconData: Icons.phone_outlined,
+                          enabled: true,
                         ),
                         Custembutton(
                           text: "Add".tr,
                           onPressed: () {
-                            if (!validInputsnak(
-                                controller.nameController.text, 1, 10, "Name".tr)) {
+                            if (!validInputsnak(controller.nameController.text,
+                                1, 10, "Name".tr)) {
                               return;
                             }
                             if (!validInputsnak(
@@ -78,11 +81,11 @@ class _AddDealerState extends State<AddDealer> {
                                 "FrsetName".tr)) {
                               return;
                             }
-                            if (!validInputsnak(controller.phoneController.text, 10,
-                                12, "Phone Numper".tr)) {
+                            if (!validInputsnak(controller.phoneController.text,
+                                10, 12, "Phone Numper".tr)) {
                               return;
                             }
-                
+
                             controller.type = 1;
                             controller.addTransaction();
                           },

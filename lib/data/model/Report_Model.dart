@@ -54,6 +54,7 @@ class Data {
 
 class Report {
   int? id;
+  String? uuid;
   int? reportId;
   String? report;
   String? createdAt;
@@ -63,6 +64,7 @@ class Report {
 
   Report.fromJson(Map<String, dynamic> json) {
     id = json['id'];
+    uuid = json['uuid'];
     reportId = json['report_id'];
     report = json['report'];
     createdAt = json['created_at'];
@@ -72,6 +74,7 @@ class Report {
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
+    data['uuid'] = this.uuid;
     data['report_id'] = this.reportId;
     data['report'] = this.report;
     data['created_at'] = this.createdAt;

@@ -65,13 +65,25 @@ class _CustemcartinvoiceState extends State<Custemcartinvoice> {
               child: Row(
                 children: [
                   IconButton(
-                    icon: const Icon(Icons.edit, color: Colors.blue),
-                    onPressed: widget.onEdit,
-                  ),
+                      icon: const Icon(Icons.edit, color: Colors.blue),
+                      onPressed: () {
+                        widget.onEdit?.call();
+                        if (mounted) {
+                          setState(() {
+                            showActions = false;
+                          });
+                        }
+                      }),
                   IconButton(
-                    icon: const Icon(Icons.delete, color: Colors.red),
-                    onPressed: widget.onDelete,
-                  ),
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        widget.onDelete?.call();
+                        if (mounted) {
+                          setState(() {
+                            showActions = false;
+                          });
+                        }
+                      }),
                 ],
               ),
             ),

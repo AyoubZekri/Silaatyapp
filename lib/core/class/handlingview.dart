@@ -4,14 +4,21 @@ import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 
+import '../constant/Colorapp.dart';
+
 class Handlingview extends StatelessWidget {
   final Statusrequest statusrequest;
+  final IconData iconData;
+  final String title;
+
   final Widget widget;
 
   const Handlingview({
     super.key,
     required this.statusrequest,
     required this.widget,
+    required this.iconData,
+    required this.title,
   });
 
   @override
@@ -25,16 +32,27 @@ class Handlingview extends StatelessWidget {
       case Statusrequest.offlinefailure:
         return Center(child: Lottie.asset(Appimageassets.offline, width: 190));
       case Statusrequest.failure:
-        return ListView(
-          children: [
-            Center(
-              child: Column(
-                children: [
-                  Lottie.asset(Appimageassets.nodata, width: 190),
-                ],
+        return Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                iconData,
+                color: AppColor.backgroundcolor,
+                size: 50,
               ),
-            ),
-          ],
+              SizedBox(height: 10),
+              Text(
+                title,
+                style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColor.grey),
+              ),
+            ],
+          ),
         );
       default:
         return widget;

@@ -59,6 +59,8 @@ class _ReportState extends State<Report> {
               },
               child: Handlingview(
                 statusrequest: controller.statusrequest,
+                iconData: Icons.report,
+                title: "لم تتم إضافة إبلاغات".tr,
                 widget: Container(
                   child: ListView.builder(
                     itemCount: controller.report.length,
@@ -87,9 +89,9 @@ class _ReportState extends State<Report> {
                                         controller:
                                             controller.reportEditController,
                                         formKey: controller.formstate,
-                                        title: "Edit Report",
+                                        title: "Edit Report".tr,
                                         onSubmit: () {
-                                          controller.EditReport(rep.id);
+                                          controller.EditReport(rep.uuid);
                                         },
                                         onCancel: () {
                                           Get.back();
@@ -97,20 +99,22 @@ class _ReportState extends State<Report> {
                                       ));
                             },
                             onTap: () {
-                              controller.Gotoinforeport(rep.id);
+                              controller.Gotoinforeport(rep.uuid);
                             },
                             onDelete: () {
                               Get.defaultDialog(
                                 backgroundColor: AppColor.white,
-                                title: "تنبيه",
+                                title: "تنبيه".tr,
                                 titleStyle: const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: AppColor.backgroundcolor),
-                                middleText: "هل تريد حذف الابلاغ؟",
+                                middleText: "هل تريد حذف الابلاغ؟".tr,
                                 onConfirm: () {
-                                  controller.deleteReport(rep.id);
+                                  controller.deleteReport(rep.uuid);
                                 },
-                                onCancel: () {},
+                                onCancel: () {
+                                  Get.back();
+                                },
                                 buttonColor: AppColor.backgroundcolor,
                                 confirmTextColor: AppColor.primarycolor,
                                 cancelTextColor: AppColor.backgroundcolor,

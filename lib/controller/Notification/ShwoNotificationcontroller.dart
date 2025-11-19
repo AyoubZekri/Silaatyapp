@@ -1,5 +1,4 @@
 import 'package:Silaaty/core/class/Statusrequest.dart';
-import 'package:Silaaty/core/functions/handlingdatacontroller.dart';
 import 'package:Silaaty/data/datasource/Remote/Notification_data.dart';
 import 'package:Silaaty/data/model/Notification_Model.dart';
 import 'package:flutter/material.dart';
@@ -11,20 +10,19 @@ class ShwoNotificationcontroller extends GetxController {
   NotificationData notificationData = NotificationData(Get.find());
   Statusrequest statusrequest = Statusrequest.none;
   List<Notifications> notification = [];
-  int? id;
+  String? uuid;
 
   ShwoNotification() async {
-    statusrequest = Statusrequest.loadeng;
-    update();
-    Map data = {
-      "id": id,
+
+    Map<String, Object?> data = {
+      "uuid": uuid,
     };
-    var response = await notificationData.ShwoinfoNotification(data);
-    print("============================================== $response");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success && response["status"] == 1) {
-      final model = Notification_Model.fromJson(response);
+    var result = await notificationData.ShwoinfoNotification(data);
+    print("============================================== $result");
+    if (result["status"] == 1) {
+      final model = Notification_Model.fromJson(result);
       notification = model.data!.notifications ?? [];
+      statusrequest = Statusrequest.success;
       if (notification.isEmpty) {
         statusrequest = Statusrequest.failure;
       }
@@ -32,21 +30,18 @@ class ShwoNotificationcontroller extends GetxController {
     update();
   }
 
-  deleteNotification(int? id) async {
+  deleteNotification(String? uuid) async {
     update();
-    Map data = {
-      "id": id,
+    Map<String, Object?> data = {
+      "uuid": uuid,
     };
-    var response = await notificationData.deleteNotification(data);
-    if (response == Statusrequest.serverfailure) {
-      showSnackbar("error".tr, "noInternet".tr, Colors.red);
-    }
-    print("==================================================$response");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success && response["status"] == 1) {
+    var result = await notificationData.deleteNotification(data);
+
+    print("==================================================$result");
+    if (result["status"] == 1) {
+      statusrequest = Statusrequest.success;
       Get.back();
       Get.back(result: true);
-
       showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operationFailed".tr, Colors.orange);
@@ -55,9 +50,8 @@ class ShwoNotificationcontroller extends GetxController {
 
   @override
   void onInit() {
-    id = Get.arguments['id'];
+    uuid = Get.arguments['uuid'];
     ShwoNotification();
-    print("============================================== $id");
     super.onInit();
   }
 }

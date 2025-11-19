@@ -15,8 +15,6 @@ class Addcategoriscontroller extends GetxController {
 
 
   getCategoris() async {
-    statusrequest = Statusrequest.loadeng;
-    update();
     var response = await categorisData.viewdata();
     print("============================================== $response");
     statusrequest = handlingData(response);

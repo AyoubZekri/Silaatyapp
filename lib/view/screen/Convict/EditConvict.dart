@@ -1,4 +1,3 @@
-
 import 'package:Silaaty/controller/Profaile/transaction/Edittransactioncontroller.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/functions/valiedinput.dart';
@@ -34,7 +33,7 @@ class _EditConvictState extends State<EditConvict> {
         ),
       ),
       body: Container(
-        padding:const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
         child: Form(
             key: controller.formKey,
             child: GetBuilder<EditTransactionController>(builder: (controller) {
@@ -50,6 +49,7 @@ class _EditConvictState extends State<EditConvict> {
                           hintText: "Name".tr,
                           label: "Name".tr,
                           iconData: Icons.person_outline,
+                          enabled: true,
                         ),
                         Custemtextfromfild(
                           MyController: controller.familyNameController,
@@ -57,8 +57,10 @@ class _EditConvictState extends State<EditConvict> {
                           hintText: "FrsetName".tr,
                           label: "FrsetName".tr,
                           iconData: Icons.family_restroom,
+                          enabled: true,
                         ),
                         Custemtextfromfild(
+                          enabled: true,
                           MyController: controller.phoneController,
                           keyboardType: TextInputType.name,
                           hintText: "Phone Numper".tr,
@@ -68,19 +70,19 @@ class _EditConvictState extends State<EditConvict> {
                         Custembutton(
                           text: "Edit".tr,
                           onPressed: () {
-                            if (!validInputsnak(
-                                controller.nameController.text, 1, 10, "Name".tr)) {
+                            if (!validInputsnak(controller.nameController.text,
+                                1, 10, "Name".tr)) {
                               return;
                             }
                             if (!validInputsnak(
                                 controller.familyNameController.text,
                                 1,
-                              10,
+                                10,
                                 "FrsetName".tr)) {
                               return;
                             }
-                            if (!validInputsnak(controller.phoneController.text, 10,
-                                12, "Phone Numper".tr)) {
+                            if (!validInputsnak(controller.phoneController.text,
+                                10, 12, "Phone Numper".tr)) {
                               return;
                             }
                             controller.editTransaction();

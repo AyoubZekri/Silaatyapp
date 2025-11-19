@@ -20,11 +20,13 @@ class Login extends StatelessWidget {
     Logincontroller controller = Get.put(Logincontroller());
 
     return Scaffold(
+        backgroundColor: AppColor.white,
         body: Container(
             // onWillPop: alertExitApp,
+
             color: Colors.white,
             child: GetBuilder<Logincontroller>(
-                builder: (controller) => HandlingviewAuth(
+                builder: (_) => HandlingviewAuth(
                       statusrequest: controller.statusrequest,
                       widget: Container(
                         color: Colors.white,

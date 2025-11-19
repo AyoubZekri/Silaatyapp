@@ -1,5 +1,4 @@
 import 'package:Silaaty/core/class/Statusrequest.dart';
-import 'package:Silaaty/core/functions/handlingdatacontroller.dart';
 import 'package:Silaaty/data/datasource/Remote/transactiondata.dart';
 import 'package:Silaaty/data/model/transaction_Model.dart';
 import 'package:get/get.dart';
@@ -9,7 +8,7 @@ import '../../../core/functions/Snacpar.dart';
 
 class EditTransactionController extends GetxController {
   int? type;
-  int? id;
+  String? uuid;
 
   final nameController = TextEditingController();
   final familyNameController = TextEditingController();
@@ -23,25 +22,22 @@ class EditTransactionController extends GetxController {
   Future<void> editTransaction() async {
     if (!formKey.currentState!.validate()) return;
 
-    statusrequest = Statusrequest.loadeng;
     update();
 
     final data = {
-      "id": id,
+      "uuid": uuid,
       "transactions": type.toString(),
       "name": nameController.text,
       "family_name": familyNameController.text,
       "phone_number": phoneController.text,
+      "updated_at": DateTime.now().toIso8601String(),
     };
 
-    final response = await transactiondata.Edittransaction(data);
-    if (response == Statusrequest.serverfailure) {
-      showSnackbar("error".tr, "noInternet".tr, Colors.red);
-    }
-    print("================================================== $response");
+    final result = await transactiondata.edittransaction(data);
 
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success && response["status"] == 1) {
+    print("================================================== $result");
+
+    if (result == true) {
       Get.back(result: true);
       showSnackbar("success".tr, "edit_success".tr, Colors.green);
     } else {
@@ -53,14 +49,12 @@ class EditTransactionController extends GetxController {
   }
 
   void initData(Data trans) {
-    id = trans.transaction?.id;
+    uuid = trans.transaction?.uuid;
     type = trans.transaction?.transactions;
     nameController.text = trans.transaction?.name ?? "";
     familyNameController.text = trans.transaction?.familyName ?? "";
     phoneController.text = trans.transaction?.phoneNumber ?? "";
   }
-
-
 
   @override
   void onClose() {

@@ -1,13 +1,14 @@
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/constant/routes.dart';
-import 'package:Silaaty/core/functions/handlingdatacontroller.dart';
 import 'package:Silaaty/core/services/Services.dart';
 import 'package:Silaaty/data/datasource/Remote/Categoris_data.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 
-import 'package:Silaaty/data/model/Categoris_model.dart';
+import 'package:Silaaty/data/model/Categoris_model.dart' hide Data;
 import 'package:Silaaty/data/model/Product_Model.dart' as Prodact;
 import 'package:get/get.dart';
+
+import '../../../data/model/Product_Model.dart';
 
 class Necessarycontroller extends GetxController {
   CategorisData categorisData = CategorisData(Get.find());
@@ -23,10 +24,10 @@ class Necessarycontroller extends GetxController {
 
   // late int catid;
 
-  Future<void> GotoIformationItem(int? id) async {
+  Future<void> GotoIformationItem(String? uuid) async {
     final result = await Get.toNamed(
       Approutes.informationitem,
-      arguments: {"id": id},
+      arguments: {"uuid": uuid},
     );
 
     if (result == true) {
@@ -47,64 +48,67 @@ class Necessarycontroller extends GetxController {
   }
 
   getCategoris() async {
-    statusrequestcat = Statusrequest.loadeng;
-    update();
-    var response = await categorisData.viewdata();
-    print("============================================== $response");
-    statusrequestcat = handlingData(response);
-    if (statusrequestcat == Statusrequest.success && response["status"] == 1) {
-      final model = Categoris_Model.fromJson(response);
-      categories = model.data?.catdata ?? [];
-    } else {
-      statusrequestcat = Statusrequest.failure;
+    try {
+      update();
+      var response = await categorisData.viewdata();
+      print("============================================== $response");
+
+      if (response.isNotEmpty) {
+        categories = (response as List)
+            .map((e) => Catdata.fromJson(e as Map<String, dynamic>))
+            .toList();
+        statusrequest = Statusrequest.success;
+      } else {
+        statusrequest = Statusrequest.failure;
+      }
+    } catch (e) {
+      print("❌ getcat error: $e");
+      statusrequest = Statusrequest.serverfailure;
     }
     update();
   }
 
-  getProdact(int? id) async {
-    statusrequest = Statusrequest.loadeng;
-    update();
-    Map data = {
+  getProdact(String? uuid) async {
+
+
+    Map<String, Object?> data = {
       "Categorie_id": 2,
-      'Categoris_id': id,
+      "Categoris_uuid": uuid,
     };
-    var response = await prodactData.getCatProdactbytype(data);
-    print("============================================== $response");
-    print("$id");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success) {
-      if (response["status"] == 1) {
-        final model = Prodact.Product_Model.fromJson(response);
-        product = model.data ?? [];
-        if (product.isEmpty) {
-          statusrequest = Statusrequest.failure;
-        }
-      } else {
-        statusrequest = Statusrequest.failure;
-      }
+
+    var result = await prodactData.getCatProdactbytype(data);
+    print("============================================== $result");
+
+    if (result.isNotEmpty) {
+      product =
+          result.map((e) => Data.fromJson(e as Map<String, dynamic>)).toList();
+
+      statusrequest =
+          product.isNotEmpty ? Statusrequest.success : Statusrequest.failure;
+    } else {
+      product = [];
+      statusrequest = Statusrequest.failure;
     }
+
     update();
   }
 
   getProdactnotcat() async {
-    statusrequest = Statusrequest.loadeng;
-    update();
-    Map data = {
+
+    Map<String, Object?> data = {
       "Categoris_id": 2,
     };
-    var response = await prodactData.getProdact(data);
-    print("============================================== $response");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success) {
-      if (response["status"] == 1) {
-        final model = Prodact.Product_Model.fromJson(response);
-        product = model.data ?? [];
-        if (product.isEmpty) {
-          statusrequest = Statusrequest.failure;
-        }
-      } else {
-        statusrequest = Statusrequest.failure;
-      }
+    var result = await prodactData.getProdact(data);
+    print("============================================== $result");
+    if (result.isNotEmpty) {
+      product =
+          result.map((e) => Data.fromJson(e as Map<String, dynamic>)).toList();
+
+      statusrequest =
+          product.isNotEmpty ? Statusrequest.success : Statusrequest.failure;
+    } else {
+      product = [];
+      statusrequest = Statusrequest.failure;
     }
 
     update();
@@ -119,24 +123,24 @@ class Necessarycontroller extends GetxController {
 
     isSearching = true;
 
-    statusrequest = Statusrequest.loadeng;
-    update();
+ 
 
     Map data = {
       "query": query,
-      'categorie': 2,
+      'Categorie_id': 2,
     };
-    var response = await prodactData.search(data);
-    print("🔍 Search Response: $response");
-    statusrequest = handlingData(response);
+    var result = await prodactData.search(data);
+    print("🔍 Search Response: $result");
 
-    if (statusrequest == Statusrequest.success) {
-      if (response["status"] == 1) {
-        final model = Prodact.Product_Model.fromJson(response);
-        product = model.data ?? [];
-      } else {
-        statusrequest = Statusrequest.failure;
-      }
+    if (result.isNotEmpty) {
+      product =
+          result.map((e) => Data.fromJson(e as Map<String, dynamic>)).toList();
+
+      statusrequest =
+          product.isNotEmpty ? Statusrequest.success : Statusrequest.failure;
+    } else {
+      product = [];
+      statusrequest = Statusrequest.failure;
     }
 
     update();
@@ -153,15 +157,15 @@ class Necessarycontroller extends GetxController {
     super.onInit();
   }
 
-  int selectedCategoryId = 0;
-  void selectCategory(int id) {
-    selectedCategoryId = id;
-    getProdact(id);
+  String selectedCategoryId = "";
+  void selectCategory(String uuid) {
+    selectedCategoryId = uuid;
+    getProdact(uuid);
     update();
   }
 
   refreshData() async {
-    selectedCategoryId = 0;
+    selectedCategoryId = "";
     await getCategoris();
     await getProdactnotcat();
   }

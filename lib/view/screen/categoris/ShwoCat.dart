@@ -46,6 +46,8 @@ class _ShwocatState extends State<Shwocat> {
               },
               child: Handlingview(
                   statusrequest: controller.statusrequest,
+                  iconData: Icons.category,
+                  title: "لا يوجد فئات مضافة".tr,
                   widget: Container(
                     margin: const EdgeInsets.all(5),
                     child: ListView.builder(
@@ -54,8 +56,7 @@ class _ShwocatState extends State<Shwocat> {
                         final cat = controller.Categoris[index];
                         return TweenAnimationBuilder(
                             tween: Tween<double>(begin: 0, end: 1),
-                            duration:
-                                Duration(milliseconds: 300 + (index * 2)),
+                            duration: Duration(milliseconds: 300 + (index * 2)),
                             builder: (context, value, child) {
                               return Opacity(
                                 opacity: value,
@@ -84,9 +85,11 @@ class _ShwocatState extends State<Shwocat> {
                                   middleText:
                                       "Do you want to delete the categoris?".tr,
                                   onConfirm: () {
-                                    controller.deletecat(cat.id!);
+                                    controller.deletecat(cat.uuid!);
                                   },
-                                  onCancel: () {},
+                                  onCancel: () {
+                                    Get.back();
+                                  },
                                   buttonColor: AppColor.backgroundcolor,
                                   confirmTextColor: AppColor.primarycolor,
                                   cancelTextColor: AppColor.backgroundcolor,

@@ -60,15 +60,18 @@ class _ShwonotificationState extends State<Shwonotification> {
                           onTap: () {
                             Get.defaultDialog(
                               backgroundColor: AppColor.white,
-                              title: "تنبيه",
+                              title: "تنبيه".tr,
                               titleStyle: const TextStyle(
                                   fontWeight: FontWeight.bold,
                                   color: AppColor.backgroundcolor),
-                              middleText: "هل تريد تريد حذف الاشعار",
+                              middleText: "هل تريد حذف الاشعار؟".tr,
                               onConfirm: () {
-                                controller.deleteNotification(controller.id);
+                                controller.deleteNotification(
+                                    controller.notification[0].uuid);
                               },
-                              onCancel: () {},
+                              onCancel: () {
+                                Get.back();
+                              },
                               buttonColor: AppColor.backgroundcolor,
                               confirmTextColor: AppColor.primarycolor,
                               cancelTextColor: AppColor.backgroundcolor,
@@ -89,7 +92,7 @@ class _ShwonotificationState extends State<Shwonotification> {
                     ),
                     Custembody(
                         body:
-                            "Date : ${controller.notification[0].createdAt?.substring(0, 10) ?? ""}")
+                            "${'Date'.tr} : ${controller.notification[0].createdAt?.substring(0, 10) ?? ""}")
                   ],
                 ),
               )

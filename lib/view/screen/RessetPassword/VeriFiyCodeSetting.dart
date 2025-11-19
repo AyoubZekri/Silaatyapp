@@ -15,6 +15,7 @@ class Verifiycodesetting extends StatelessWidget {
   Widget build(BuildContext context) {
     Get.put(VeriFyCodeControllerImp());
     return Scaffold(
+        backgroundColor: AppColor.white,
         appBar: AppBar(
           backgroundColor: AppColor.white,
           title: Text(
@@ -32,8 +33,8 @@ class Verifiycodesetting extends StatelessWidget {
                   statusrequest: controller.statusrequest,
                   widget: Container(
                     color: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 35),
                     child: ListView(
                       children: [
                         const SizedBox(
@@ -83,15 +84,16 @@ class Verifiycodesetting extends StatelessWidget {
                                 child: Text(
                               "rsend Verify code".tr,
                               style: const TextStyle(
-                                  fontSize: 17, color: AppColor.backgroundcolor),
+                                  fontSize: 17,
+                                  color: AppColor.backgroundcolor),
                             ))),
-              
+
                         const SizedBox(
                           height: 30,
                         ),
                       ],
                     ),
                   ),
-            )));
+                )));
   }
 }

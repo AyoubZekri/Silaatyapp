@@ -1,16 +1,21 @@
 import 'package:Silaaty/controller/items/Edititemcontroller.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/constant/routes.dart';
-import 'package:Silaaty/core/functions/handlingdatacontroller.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 import 'package:Silaaty/data/model/Product_Model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
+import 'package:uuid/uuid.dart';
 import '../../core/functions/Snacpar.dart';
+import '../../core/services/Services.dart';
 
 class Informationitemcontroller extends GetxController {
-  late int id;
+  late String uuid;
+  final quantityController = TextEditingController();
+  Myservices myservices = Get.find();
+  late int? id = myservices.sharedPreferences?.getInt("id");
+
   ProdactData prodactData = ProdactData(Get.find());
   Statusrequest statusrequest = Statusrequest.none;
   List<Data> InfoProduct = [];
@@ -24,71 +29,32 @@ class Informationitemcontroller extends GetxController {
   }
 
   getProdact() async {
-    statusrequest = Statusrequest.loadeng;
-    update();
-    Map data = {'id': id};
-    var response = await prodactData.ShwoProdact(data);
-    print("============================================== $response");
-    print("$id");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success && response["status"] == 1) {
-      final model = Product_Model.fromJson(response);
-      InfoProduct = model.data ?? [];
+    Map<String, Object?> data = {'uuid': uuid};
+    var result = await prodactData.ShwoProdact(data);
+
+    print("============================================== $result");
+    print("User ID: $uuid");
+
+    if (result.isNotEmpty) {
+      InfoProduct =
+          result.map((e) => Data.fromJson(e as Map<String, dynamic>)).toList();
+
+      statusrequest = Statusrequest.success;
     } else {
       statusrequest = Statusrequest.failure;
     }
+
     update();
   }
 
-  SwitchProduct(int idpro) async {
-    statusrequest = Statusrequest.loadeng;
+  deleteProdact(String uid) async {
     update();
-    Map data = {
-      "id": id,
-    };
-    var response = await prodactData.Switchupdate(data);
-    print("==================================================$response");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success && response["status"] == 1) {
-      Get.back(result: true);
-      Get.snackbar(
-        "success".tr,
-        "product_updated_successfully".tr,
-        backgroundColor: Colors.green,
-        colorText: Colors.white,
-        icon:const Icon(Icons.check_circle, color: Colors.white),
-        snackPosition: SnackPosition.TOP,
-      );
+    Map<String, Object?> data = {'uuid': uid};
+    var result = await prodactData.deleteProdact(data);
 
-      // WidgetsBinding.instance.addPostFrameCallback((_) {
-      //   Get.find<Homecontroller>().getCategoris();
-      // });
-    } else {
-      print(response);
-      Get.snackbar(
-        "error".tr,
-        "error_updating_product".tr,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-        icon: const Icon(Icons.error, color: Colors.white),
-        snackPosition: SnackPosition.TOP,
-      );
-      statusrequest = Statusrequest.failure;
-    }
-  }
-
-  deleteProdact(int iditem) async {
-    statusrequest = Statusrequest.loadeng;
-    update();
-    Map data = {'id': iditem};
-    var response = await prodactData.deleteProdact(data);
-    if (response == Statusrequest.serverfailure) {
-      showSnackbar("error".tr, "noInternet".tr, Colors.red);
-    }
-    print("============================================== $response");
-    print("$id");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success && response["status"] == 1) {
+    print("============================================== $result");
+    print("$uid");
+    if (result == true) {
       Get.back(result: true);
       showSnackbar(
           "success".tr, "product_deleted_successfully".tr, Colors.green);
@@ -100,10 +66,94 @@ class Informationitemcontroller extends GetxController {
     update();
   }
 
+  Future<void> editquantityProduct() async {
+    if (int.parse(quantityController.text) < 1) {
+      showSnackbar(
+          "error".tr, "لا يمكن أن تكون الكمية أقل من 1".tr, Colors.red);
+      return;
+    }
+    final int quantity = int.parse(InfoProduct.first.productQuantity ?? "0") +
+        int.parse(quantityController.text);
+    final data = {
+      "uuid": uuid,
+      'product_quantity': quantity,
+      'updated_at': DateTime.now().toIso8601String(),
+    };
+
+    Map<String, Object?> dataSale = {
+      "uuid": Uuid().v4(),
+      "product_uuid": uuid,
+      "quantity": int.parse(quantityController.text),
+      "unit_price": InfoProduct.first.productPricePurchase ?? "0",
+      "subtotal": int.parse(quantityController.text) *
+          double.parse(InfoProduct.first.productPricePurchase.toString()),
+      "type_sales": 3, // 1 = in 2 = out 3
+      "user_id": id,
+      "created_at": DateTime.now().toIso8601String(),
+    };
+
+    final result = await prodactData.updateQuantityProduct(data, dataSale);
+    print("========================================$result");
+    if (result) {
+      Get.back();
+      quantityController.clear();
+      showSnackbar("success".tr, "updateSuccess".tr, Colors.green);
+    } else {
+      showSnackbar("error".tr, "operation_failed".tr, Colors.red);
+      statusrequest = Statusrequest.failure;
+    }
+
+    update();
+  }
+
+  Future<void> printProductTicket({
+    required String name,
+    required String barcode,
+    required double price,
+  }) async {
+    try {
+      // ✅ تحقق من الاتصال بشكل صحيح
+      bool? status = await PrintBluetoothThermal.connectionStatus;
+      if (status != true) {
+        print("❌ لم يتم الاتصال بالطابعة");
+        showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
+        return;
+      }
+
+      // تحضير النص للطباعة
+      List<String> lines = [
+        "-----------------------------",
+        "           $name             ",
+        "                             ",
+        "          $barcode           ",
+        "                             ",
+        " ${price.toStringAsFixed(2)} دج",
+        "-----------------------------",
+        "\n\n",
+      ];
+
+      await PrintBluetoothThermal.writeString(
+        printText: PrintTextSize(
+          size: 2,
+          text: lines.join("\n"),
+        ),
+      );
+
+      print("✅ تم إرسال الطباعة بنجاح");
+    } catch (e) {
+      showSnackbar("error".tr, "حدث خطأ".tr, Colors.red);
+    }
+  }
+
+  void onQuantityChanged(int value) {
+    quantityController.text = value.toString();
+  }
+
   @override
   void onInit() {
     super.onInit();
-    id = Get.arguments['id'];
+    uuid = Get.arguments['uuid'];
+
     getProdact();
   }
 }

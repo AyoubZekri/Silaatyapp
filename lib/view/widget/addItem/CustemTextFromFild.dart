@@ -5,6 +5,7 @@ class Custemtextfromfild extends StatelessWidget {
   final String hintText;
   final String label;
   final IconData iconData;
+  final bool enabled;
   // ignore: non_constant_identifier_names
   final TextEditingController? MyController;
   final TextInputType? keyboardType;
@@ -17,7 +18,7 @@ class Custemtextfromfild extends StatelessWidget {
       // ignore: non_constant_identifier_names
       this.MyController,
       this.keyboardType,
-      this.obscureText});
+      this.obscureText,required this.enabled});
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +55,7 @@ class Custemtextfromfild extends StatelessWidget {
                   controller: MyController,
                   keyboardType: keyboardType,
                   decoration: InputDecoration(
+                    enabled: enabled,
                     labelText: label,
                     labelStyle: TextStyle(
                         fontSize: 26,

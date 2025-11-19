@@ -50,8 +50,10 @@ class _AddConvictState extends State<AddConvict> {
                             hintText: "Name".tr,
                             label: "Name".tr,
                             iconData: Icons.person_outline,
+                            enabled: true,
                           ),
                           Custemtextfromfild(
+                            enabled: true,
                             MyController: controller.familyNameController,
                             keyboardType: TextInputType.name,
                             hintText: "FrsetName".tr,
@@ -59,6 +61,7 @@ class _AddConvictState extends State<AddConvict> {
                             iconData: Icons.family_restroom,
                           ),
                           Custemtextfromfild(
+                            enabled: true,
                             MyController: controller.phoneController,
                             keyboardType: TextInputType.name,
                             hintText: "Phone Numper".tr,

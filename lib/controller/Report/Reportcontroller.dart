@@ -1,12 +1,13 @@
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/constant/routes.dart';
-import 'package:Silaaty/core/functions/handlingdatacontroller.dart';
 import 'package:Silaaty/data/datasource/Remote/Report_data.dart';
 import 'package:Silaaty/data/model/Report_Model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:uuid/uuid.dart';
 
 import '../../core/functions/Snacpar.dart';
+import '../../core/services/Services.dart';
 
 class Reportcontroller extends GetxController {
   final reportController = TextEditingController();
@@ -14,103 +15,95 @@ class Reportcontroller extends GetxController {
 
   GlobalKey<FormState> formstate = GlobalKey<FormState>();
 
+  int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
+
   ReportData reportData = ReportData(Get.find());
   Statusrequest statusrequest = Statusrequest.none;
   List<Report> report = [];
 
   getReport() async {
-    statusrequest = Statusrequest.loadeng;
     update();
-    var response = await reportData.ShwoReport();
+    var result = await reportData.ShwoReport();
 
-    print("============================================== $response");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success) {
-      final model = Report_Model.fromJson(response);
+    print("============================================== $result");
+    if (result["status"] == 1) {
+      final model = Report_Model.fromJson(result);
       report = model.data!.report ?? [];
-      if (report.isEmpty) {
-        statusrequest = Statusrequest.failure;
-      }
+      report.isEmpty
+          ? statusrequest = Statusrequest.failure
+          : statusrequest = Statusrequest.success;
+    } else {
+      statusrequest = Statusrequest.failure;
     }
     update();
   }
 
   addReport() async {
     if (formstate.currentState!.validate()) {
-      statusrequest = Statusrequest.loadeng;
+      final uuid = Uuid().v4();
       update();
-      Map data = {
+      Map<String, Object?> data = {
+        "uuid": uuid,
         'report': reportController.text,
+        "report_id": id,
+        "created_at": DateTime.now().toIso8601String(),
       };
-      var response = await reportData.addReport(data);
-      print("==================================================$response");
-      statusrequest = handlingData(response);
-      if (statusrequest == Statusrequest.success && response["status"] == 1) {
+      var result = await reportData.addReport(data);
+      print("==================================================$result");
+      if (result["status"] == 1) {
+        statusrequest = Statusrequest.success;
         reportController.clear();
         Get.back();
         getReport();
         showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
       } else {
-        print(response);
         showSnackbar("error".tr, "operationFailed".tr, Colors.red);
-        statusrequest = Statusrequest.failure;
       }
     }
   }
 
-  EditReport(int? id) async {
+  EditReport(String? uuid) async {
     if (formstate.currentState!.validate()) {
-      statusrequest = Statusrequest.loadeng;
-      update();
-      Map data = {
-        "id": id,
+      Map<String, Object?> data = {
+        "uuid": uuid,
         'report': reportEditController.text,
       };
-      var response = await reportData.EditReport(data);
-      if (response == Statusrequest.serverfailure) {
-        showSnackbar("error".tr, "noInternet".tr, Colors.red);
-      }
+      var result = await reportData.EditReport(data);
 
-      print("==================================================$response");
-      statusrequest = handlingData(response);
-      if (statusrequest == Statusrequest.success && response["status"] == 1) {
+      print("==================================================$result");
+      if (result["status"] == 1) {
+        statusrequest = Statusrequest.success;
         reportEditController.clear();
         Get.back();
         getReport();
         showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
       } else {
-        print(response);
         showSnackbar("error".tr, "operationFailed".tr, Colors.red);
-        statusrequest = Statusrequest.failure;
       }
     }
   }
 
-  deleteReport(int? id) async {
+  deleteReport(String? uuid) async {
     update();
-    Map data = {
-      "id": id,
+    Map<String, Object?> data = {
+      "uuid": uuid,
+      'updated_at': DateTime.now().toIso8601String(),
     };
-    var response = await reportData.deleteReport(data);
-    if (response == Statusrequest.serverfailure) {
-      showSnackbar("error".tr, "noInternet".tr, Colors.red);
-    }
-
-    print("==================================================$response");
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success && response["status"] == 1) {
+    var result = await reportData.deleteReport(data);
+    print("==================================================$result");
+    if (result["status"] == 1) {
+      statusrequest = Statusrequest.success;
       Get.back();
       getReport();
       showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else {
-      print(response);
       showSnackbar("error".tr, "operationFailed".tr, Colors.red);
       statusrequest = Statusrequest.failure;
     }
   }
 
-  Gotoinforeport(int? id) {
-    Get.toNamed(Approutes.shwoReport, arguments: {"id": id});
+  Gotoinforeport(String? uuid) {
+    Get.toNamed(Approutes.shwoReport, arguments: {"uuid": uuid});
   }
 
   refreshdata() async {

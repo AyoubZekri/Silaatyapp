@@ -17,6 +17,7 @@ class Forgenpasswordsetting extends StatelessWidget {
   Widget build(BuildContext context) {
     Get.put(ForgenControllerImp());
     return Scaffold(
+        backgroundColor: AppColor.white,
         appBar: AppBar(
           backgroundColor: AppColor.white,
           title: Text(
@@ -30,51 +31,53 @@ class Forgenpasswordsetting extends StatelessWidget {
           centerTitle: true,
         ),
         body: GetBuilder<ForgenControllerImp>(
-          builder: (controller) =>
-                HandlingviewAuth(statusrequest: controller.statusrequest, widget:
-              Container(
-            color: Colors.white,
-            padding:const EdgeInsets.symmetric(vertical: 15, horizontal: 35),
-            child: Form(
-              key: controller.formstate,
-              child: ListView(
-                children: [
-                  const SizedBox(
-                    height: 20,
+            builder: (controller) => HandlingviewAuth(
+                  statusrequest: controller.statusrequest,
+                  widget: Container(
+                    color: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 35),
+                    child: Form(
+                      key: controller.formstate,
+                      child: ListView(
+                        children: [
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Custemtexttitleauth(
+                            Title: "Check Email".tr,
+                          ),
+                          const SizedBox(
+                            height: 20,
+                          ),
+                          Custemtextbodyauth(
+                              Body: "enterEmailToReceiveCode".tr),
+                          const SizedBox(
+                            height: 55,
+                          ),
+                          Custemtextformauth(
+                            MyController: controller.email,
+                            hintText: "Enter Your Email".tr,
+                            label: "Email".tr,
+                            iconData: Icons.email_outlined,
+                            valid: (Val) {
+                              return validInput(Val!, 100, 5, "Email");
+                            },
+                            keyboardType: TextInputType.emailAddress,
+                          ),
+                          Custembuttonauth(
+                            onPressed: () {
+                              controller.CheckEmail("VerFiyCodeSetteng");
+                            },
+                            Textname: "check".tr,
+                          ),
+                          const SizedBox(
+                            height: 30,
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
-                  Custemtexttitleauth(
-                    Title: "Check Email".tr,
-                  ),
-                  const SizedBox(
-                    height: 20,
-                  ),
-                  Custemtextbodyauth(Body: "enterEmailToReceiveCode".tr),
-                  const SizedBox(
-                    height: 55,
-                  ),
-                  Custemtextformauth(
-                    MyController: controller.email,
-                    hintText: "Enter Your Email".tr,
-                    label: "Email".tr,
-                    iconData: Icons.email_outlined,
-                    valid: (Val) {
-                      return validInput(Val!, 100, 5, "Email");
-                    },
-                    keyboardType: TextInputType.emailAddress,
-                  ),
-                  Custembuttonauth(
-                    onPressed: () {
-                      controller.CheckEmail("VerFiyCodeSetteng");
-                    },
-                    Textname: "check".tr,
-                  ),
-                  const SizedBox(
-                    height: 30,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        )));
+                )));
   }
 }

@@ -1,11 +1,13 @@
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class CustemEditInvoiceDialog extends StatefulWidget {
   final TextEditingController? Mycontroller;
   final Function() onPressed;
-    // final String? Function(String?) valid;
+  // final String? Function(String?) valid;
   final Function() onback;
+  final String lableText;
   final Key? form;
   final String title;
 
@@ -15,7 +17,7 @@ class CustemEditInvoiceDialog extends StatefulWidget {
       required this.onPressed,
       required this.onback,
       this.form,
-      required this.title});
+      required this.title, required this.lableText});
 
   @override
   State<CustemEditInvoiceDialog> createState() => _AddInvoiceDialogState();
@@ -84,7 +86,7 @@ class _AddInvoiceDialogState extends State<CustemEditInvoiceDialog> {
               controller: widget.Mycontroller,
               keyboardType: TextInputType.number,
               decoration: InputDecoration(
-                labelText: "المبلغ المدفوع",
+                labelText: widget.lableText,
                 filled: true,
                 fillColor: Colors.grey[100],
                 border: OutlineInputBorder(
@@ -106,11 +108,15 @@ class _AddInvoiceDialogState extends State<CustemEditInvoiceDialog> {
       actions: [
         TextButton(
           onPressed: widget.onback,
-          child: Text("إلغاء"),
+          child: Text("إلغاء".tr),
         ),
         ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColor.backgroundcolor,
+            foregroundColor: AppColor.white,
+          ),
           onPressed: widget.onPressed,
-          child: Text("إضافة"),
+          child: Text("Add".tr),
         ),
       ],
     );

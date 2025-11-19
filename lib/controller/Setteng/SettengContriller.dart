@@ -27,8 +27,16 @@ class Settengcontriller extends GetxController {
     Get.toNamed(Approutes.Informationapp);
   }
 
-  GotoZakat() {
-    Get.toNamed(Approutes.Zakat);
+  // GotoZakat() {
+  //   Get.toNamed(Approutes.Zakat);
+  // }
+
+  gotoProfail() {
+    Get.toNamed(Approutes.profail);
+  }
+
+  ChangePassword() {
+    Get.toNamed(Approutes.reset);
   }
 
   LoginData loginData = LoginData(Get.find());
@@ -44,7 +52,7 @@ class Settengcontriller extends GetxController {
 
     var response = await loginData.logout();
     print("==================================================$response");
-          if (response == Statusrequest.serverfailure) {
+    if (response == Statusrequest.serverfailure) {
       showSnackbar("error".tr, "noInternet".tr, Colors.red);
     }
     statusrequest = handlingData(response);
@@ -70,7 +78,7 @@ class Settengcontriller extends GetxController {
       ),
       builder: (context) {
         return Padding(
-          padding:const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [

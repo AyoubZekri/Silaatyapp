@@ -3,9 +3,7 @@ import 'package:Silaaty/core/services/Services.dart';
 import 'package:get/get.dart';
 
 class Profailecontroller extends GetxController {
-  GotoProfaile() {
-    Get.toNamed(Approutes.settengPrivacy);
-  }
+
 
   GotoSetting() {
     Get.toNamed(Approutes.Setteng);
@@ -19,9 +17,9 @@ class Profailecontroller extends GetxController {
     Get.toNamed(Approutes.notification);
   }
 
-  GotoZakat() {
-    Get.toNamed(Approutes.Zakat);
-  }
+  // GotoZakat() {
+  //   Get.toNamed(Approutes.Zakat);
+  // }
 
   GotoDealer() {
     Get.toNamed(Approutes.Dealer, arguments: {
@@ -31,6 +29,10 @@ class Profailecontroller extends GetxController {
 
   GotoNecessary() {
     Get.toNamed(Approutes.necessary);
+  }
+
+  GotoStok() {
+    Get.toNamed(Approutes.item);
   }
 
   GotoReport() {

@@ -18,6 +18,7 @@ class Resetpasswordsetting extends StatelessWidget {
     Get.put(ResetpasswordcontrolerImp());
 
     return Scaffold(
+        backgroundColor: AppColor.white,
         appBar: AppBar(
           backgroundColor: AppColor.white,
           title: Text(
@@ -35,8 +36,8 @@ class Resetpasswordsetting extends StatelessWidget {
                   statusrequest: controller.statusrequest,
                   widget: Container(
                     color: Colors.white,
-                    padding:
-                        const EdgeInsets.symmetric(vertical: 15, horizontal: 35),
+                    padding: const EdgeInsets.symmetric(
+                        vertical: 15, horizontal: 35),
                     child: Form(
                       key: controller.formstate,
                       child: ListView(
@@ -102,6 +103,6 @@ class Resetpasswordsetting extends StatelessWidget {
                       ),
                     ),
                   ),
-            )));
+                )));
   }
 }

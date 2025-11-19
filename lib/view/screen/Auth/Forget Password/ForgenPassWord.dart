@@ -17,6 +17,7 @@ class ForgenPassword extends StatelessWidget {
   Widget build(BuildContext context) {
     Get.put(ForgenControllerImp());
     return Scaffold(
+        backgroundColor: AppColor.white,
         appBar: AppBar(
           backgroundColor: AppColor.white,
           title: Text(

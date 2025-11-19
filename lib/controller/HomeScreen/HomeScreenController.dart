@@ -1,8 +1,9 @@
 import 'package:Silaaty/view/screen/Home.dart';
-import 'package:Silaaty/view/screen/Prodact/Additem.dart';
-import 'package:Silaaty/view/screen/profailedata.dart';
+import 'package:Silaaty/view/screen/Setteng.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+
+import '../../view/screen/Statistics.dart';
 
 abstract class Homescreencontroller extends GetxController {
   // ignore: non_constant_identifier_names
@@ -14,14 +15,14 @@ class HomescreencontrollerImp extends Homescreencontroller {
 
   List<Widget> Screen = [
     const Home(),
-    const Additem(),
-    const Profailedata(),
+    const Statistics(),
+    const Setteng(),
   ];
 
   List IconsScreen = [
     {'icon': Icons.home},
-    {'icon': Icons.add_box_outlined},
-    {'icon': Icons.person_2_sharp},
+    {'icon': Icons.bar_chart_sharp},
+    {'icon': Icons.settings},
   ];
 
   @override

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Silaaty/LinkApi.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/constant/imageassets.DART';
@@ -90,8 +92,8 @@ class _CustemcartcatState extends State<Custemcartcat> {
                     Column(
                       children: [
                         Container(
-                          height:widget.image == true ? 100 : 50,
-                          width:widget.image == true ? 100 : 50,
+                          height: widget.image == true ? 100 : 50,
+                          width: widget.image == true ? 100 : 50,
                           margin: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(10),
@@ -99,8 +101,8 @@ class _CustemcartcatState extends State<Custemcartcat> {
                                 Border.all(width: 0.4, color: AppColor.grey),
                             image: DecorationImage(
                               image: (widget.imgitems?.isNotEmpty ?? false)
-                                  ? NetworkImage(
-                                      Applink.image + "/storage/${widget.imgitems!}")
+                                  ? FileImage(File(widget.imgitems!))
+                                      as ImageProvider
                                   : const AssetImage(Appimageassets.test2),
                               fit: BoxFit.cover,
                             ),
@@ -116,7 +118,7 @@ class _CustemcartcatState extends State<Custemcartcat> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(widget.name,
-                              style:widget.image == true
+                              style: widget.image == true
                                   ? Theme.of(context).textTheme.headlineSmall
                                   : Theme.of(context)
                                       .textTheme

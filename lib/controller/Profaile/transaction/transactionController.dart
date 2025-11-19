@@ -1,7 +1,6 @@
 import 'package:Silaaty/controller/Profaile/transaction/Edittransactioncontroller.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/constant/routes.dart';
-import 'package:Silaaty/core/functions/handlingdatacontroller.dart';
 import 'package:Silaaty/data/datasource/Remote/transactiondata.dart';
 import 'package:Silaaty/data/model/transaction_Model.dart';
 import 'package:flutter/material.dart';
@@ -9,51 +8,41 @@ import 'package:get/get.dart';
 
 class Transactioncontroller extends GetxController {
   final Transactiondata transactiondata = Transactiondata(Get.find());
-  String query = "" ;
+  String query = "";
 
   List<Data> transaction = [];
   Statusrequest statusrequest = Statusrequest.none;
   int? type;
 
   getTransactions() async {
-    statusrequest = Statusrequest.loadeng;
     update();
 
-    Map data = {
+    Map<String, Object?> data = {
       'transactions': type.toString(),
-       "query":query,
-      };
-    var response = await transactiondata.Shwotransaction(data);
-    print("============================================== $response");
+      "query": query,
+    };
+    var result = await transactiondata.showTransactions(data);
+    print("============================================== $result");
 
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success) {
-      if (response["status"] == 1) {
-        final model = transaction_Model.fromJson(response);
-        transaction = model.data ?? [];
-        if (transaction.isEmpty) {
-          statusrequest = Statusrequest.failure;
-        }
-      } else {
-        statusrequest = Statusrequest.failure;
-      }
+    if (result.isNotEmpty) {
+      transaction =
+          result.map((e) => Data.fromJson(e as Map<String, dynamic>)).toList();
+      statusrequest = Statusrequest.success;
+    } else {
+      statusrequest = Statusrequest.failure;
     }
+
     update();
   }
 
-  deletetransaction(int id) async {
-    statusrequest = Statusrequest.loadeng;
-    update();
+  deletetransaction(String uuid) async {
 
-    Map data = {'id': id};
-    var response = await transactiondata.deletetransaction(data);
-    if (response == Statusrequest.serverfailure) {
-      showSnackbar("error".tr, "noInternet".tr, Colors.red);
-    }
-    print("============================================== $response");
+    Map<String, Object?> data = {'uuid': uuid};
+    var result = await transactiondata.deletetransaction(data);
 
-    statusrequest = handlingData(response);
-    if (statusrequest == Statusrequest.success && response["status"] == 1) {
+    print("============================================== $result");
+
+    if (result == true) {
       Get.back();
       getTransactions();
       showSnackbar("success".tr, "delete_success".tr, Colors.green);
@@ -80,8 +69,11 @@ class Transactioncontroller extends GetxController {
     }
   }
 
-  Future<void> GotoEditDealer() async {
-    final trans = transaction[0];
+  Future<void> GotoEditDealer(String uuid) async {
+    final trans = transaction.firstWhere(
+      (t) => t.transaction!.uuid! == uuid,
+      orElse: () => throw Exception("Transaction not found"),
+    );
     final controller = Get.put(EditTransactionController());
     controller.initData(trans);
     final result = await Get.toNamed(Approutes.EditDealer);
@@ -90,8 +82,11 @@ class Transactioncontroller extends GetxController {
     }
   }
 
-  Future<void> GotoEditConvist() async {
-    final trans = transaction[0];
+  Future<void> GotoEditConvist(String uuid) async {
+    final trans = transaction.firstWhere(
+      (t) => t.transaction!.uuid! == uuid,
+      orElse: () => throw Exception("Transaction not found"),
+    );
     final controller = Get.put(EditTransactionController());
     controller.initData(trans);
     final result = await Get.toNamed(Approutes.EditConvict);
@@ -100,16 +95,22 @@ class Transactioncontroller extends GetxController {
     }
   }
 
-  GotoinvoiceDealer(int id) {
-    Get.toNamed(Approutes.invoicesdealer, arguments: {"id": id});
+  Future<void> Gotoinvoiceconvist(String uuid) async {
+    final result =
+        await Get.toNamed(Approutes.invoice, arguments: {"uuid": uuid});
+    if (result == true) {
+      getTransactions();
+    }
   }
 
-  Gotoinvoiceconvist(int id) {
-    Get.toNamed(Approutes.invoice, arguments: {"id": id});
+  GotoBacksale(String uuid, String name, String famlyname) {
+    print("Returning customer: $name $famlyname");
+    Get.back(result: {"uuid": uuid, "name": name, "famlyname": famlyname});
   }
 
   @override
   void onInit() {
+    type = 0;
     type = Get.arguments["type"];
     getTransactions();
     super.onInit();

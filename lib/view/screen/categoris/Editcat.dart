@@ -35,7 +35,7 @@ class _EditcatState extends State<Editcat> {
       ),
       body: GetBuilder<Editcatcontroller>(builder: (controler) {
         return Container(
-          padding:const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
           child: Form(
             key: controller.formstate,
             child: HandlingviewAuth(
@@ -66,7 +66,8 @@ class _EditcatState extends State<Editcat> {
                                     child: SizedBox(
                                       height: 120,
                                       child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(10),
+                                          borderRadius:
+                                              BorderRadius.circular(10),
                                           child: controller.imageUrl != null
                                               ? Image.network(
                                                   "${Applink.image}/storage/${controller.imageUrl}",
@@ -98,12 +99,14 @@ class _EditcatState extends State<Editcat> {
                         hintText: "Name Categoris Ar".tr,
                         label: "Name Categoris".tr,
                         iconData: Icons.shopping_bag,
+                        enabled: true,
                       ),
                       Custemtextfromfild(
                         MyController: controller.nameFrController,
                         keyboardType: TextInputType.name,
                         hintText: "Name Categoris fr".tr,
                         label: "Name Categoris".tr,
+                        enabled: true,
                         iconData: Icons.description,
                       ),
                       Custembutton(
@@ -113,7 +116,7 @@ class _EditcatState extends State<Editcat> {
                               20, "Name Categoris".tr)) return;
                           if (!validInputsnak(controler.nameController.text, 1,
                               20, "Name Categoris fr".tr)) return;
-              
+
                           controller.Editcat();
                         },
                         vertical: 10,

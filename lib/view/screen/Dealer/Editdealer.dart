@@ -34,7 +34,7 @@ class _EditDealerState extends State<EditDealer> {
         ),
       ),
       body: Container(
-        padding:const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
+        padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
         child: Form(
             key: controller.formKey,
             child: GetBuilder<EditTransactionController>(builder: (controller) {
@@ -50,6 +50,7 @@ class _EditDealerState extends State<EditDealer> {
                           hintText: "Name".tr,
                           label: "Name".tr,
                           iconData: Icons.person_outline,
+                          enabled: true,
                         ),
                         Custemtextfromfild(
                           MyController: controller.familyNameController,
@@ -57,6 +58,7 @@ class _EditDealerState extends State<EditDealer> {
                           hintText: "FrsetName".tr,
                           label: "FrsetName".tr,
                           iconData: Icons.family_restroom,
+                          enabled: true,
                         ),
                         Custemtextfromfild(
                           MyController: controller.phoneController,
@@ -64,12 +66,13 @@ class _EditDealerState extends State<EditDealer> {
                           hintText: "Phone Numper".tr,
                           label: "Phone Numper".tr,
                           iconData: Icons.phone_outlined,
+                          enabled: true,
                         ),
                         Custembutton(
                           text: "Edit".tr,
                           onPressed: () {
-                            if (!validInputsnak(
-                                controller.nameController.text, 1, 10, "Name".tr)) {
+                            if (!validInputsnak(controller.nameController.text,
+                                1, 10, "Name".tr)) {
                               return;
                             }
                             if (!validInputsnak(
@@ -82,7 +85,8 @@ class _EditDealerState extends State<EditDealer> {
                             if (!validInputsnak(controller.phoneController.text,
                                 10, 12, "Phone Numper".tr)) {
                               return;
-                            }                          controller.editTransaction();
+                            }
+                            controller.editTransaction();
                           },
                           vertical: 10,
                           horizontal: 10,

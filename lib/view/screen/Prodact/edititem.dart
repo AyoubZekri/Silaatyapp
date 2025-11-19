@@ -104,24 +104,33 @@ class _EdititemState extends State<Edititem> {
                       CustemDropDownField(
                         hintText: "Category".tr,
                         items: controller.categories
-                            .map((cat) => DropdownMenuItem<int>(
-                                  value: cat.id,
+                            .map((cat) => DropdownMenuItem<String>(
+                                  value: cat.uuid,
                                   child: Text(cat.categorisName ?? ''),
                                 ))
                             .toList(),
-                        value: controller.selectedtypeId,
+                        value: controller.selectedtypeuuId,
                         onChanged: (val) {
                           setState(() {
                             if (val == null) {
-                              showSnackbar(
-                                  "خطا", "يجب إختيار الفئة أولا", Colors.red);
+                              showSnackbar("error".tr,
+                                  "يجب إختيار الفئة أولا".tr, Colors.red);
                               return;
                             }
 
-                            controller.selectedtypeId = val;
+                            controller.selectedtypeuuId = val;
                           });
                         },
                       ),
+                      Custemtextfromfild(
+                        MyController: controller.barcodeController,
+                        keyboardType: TextInputType.number,
+                        hintText: "Barcode".tr,
+                        label: "Barcode".tr,
+                        iconData: Icons.qr_code,
+                        enabled: true, // يمنع التعديل لما يكون Auto
+                      ),
+
                       // CustemDropDownField(
                       //   hintText: "Category".tr,
                       //   items: [
@@ -157,6 +166,7 @@ class _EdititemState extends State<Edititem> {
                         hintText: "Name Prodact".tr,
                         label: "Name Prodact".tr,
                         iconData: Icons.shopping_bag,
+                        enabled: true,
                       ),
                       // Custemtextfromfild(
                       //     MyController: controller.descriptionController,
@@ -183,22 +193,25 @@ class _EdititemState extends State<Edititem> {
                         hintText: "Selling Price".tr,
                         label: "Selling Prise".tr,
                         iconData: Icons.attach_money,
+                        enabled: true,
                       ),
                       Custemtextfromfild(
                         MyController: controller.pricePurchaseController,
                         keyboardType: TextInputType.number,
-                        hintText: "Purchase Price".tr,
-                        label: "Purchase Prise".tr,
+                        hintText: "سعر التكلفة".tr,
+                        label: "سعر التكلفة".tr,
                         iconData: Icons.attach_money,
+                        enabled: true,
                       ),
                       Custemtextfromfild(
                         MyController: TextEditingController(
                             text: controller.priceTotalPurchase
                                 .toStringAsFixed(2)),
                         keyboardType: TextInputType.number,
-                        hintText: "Purchase Price Total".tr,
-                        label: "Purchase Prise Total".tr,
+                        hintText: "إجمالي سعر التكلفة".tr,
+                        label: "إجمالي سعر التكلفة".tr,
                         iconData: Icons.attach_money,
+                        enabled: true,
                       ),
                       Custemtextfromfild(
                         MyController: TextEditingController(
@@ -207,12 +220,18 @@ class _EdititemState extends State<Edititem> {
                         hintText: "Selling Prise Total".tr,
                         label: "Selling Prise Total".tr,
                         iconData: Icons.attach_money,
+                        enabled: true,
                       ),
                       Custembutton(
                         text: "Edit".tr,
                         onPressed: () {
                           if (!validInputsnak(controller.nameController.text, 1,
                               20, "Name".tr)) {
+                            return;
+                          }
+
+                          if (!validInputsnak(controller.barcodeController.text,
+                              1, 8, "Barcode".tr)) {
                             return;
                           }
 

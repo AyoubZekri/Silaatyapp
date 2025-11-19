@@ -14,7 +14,9 @@ Future<bool> alertExitApp() {
     onConfirm: () {
       exit(0);
     },
-    onCancel: () {},
+    onCancel: () {
+      Get.back();
+    },
     buttonColor: AppColor.backgroundcolor,
     confirmTextColor: AppColor.primarycolor,
     cancelTextColor: AppColor.backgroundcolor,

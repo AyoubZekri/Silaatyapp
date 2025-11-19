@@ -18,7 +18,7 @@ class Zakat_Model {
   }
 
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
+    final Map<String, dynamic> data = {};
     if (this.data != null) {
       data['data'] = this.data!.map((v) => v.toJson()).toList();
     }
@@ -29,56 +29,85 @@ class Zakat_Model {
 class Data_model {
   int? id;
   int? userId;
-  String? zakatNisab;
-  String? zakatTotalAssetValue;
-  String? zakattotaldebtsvalue;
-  String? zakattotaldebortsvalue;
-  String? zakatDueAmount;
-  String? zakatCashliquidity;
-  String? zakatDue;
+  String? uuid;
+  double? zakatNisab;
+  double? zakatTotalAssetValue;
+  double? zakatTotalDebtsValue;
+  double? zakatTotalDebortsValue;
+  double? zakatDueAmount;
+  double? zakatCashLiquidity;
+  double? zakatDue;
   String? createdAt;
   String? updatedAt;
 
-  Data_model(
-      {this.id,
-      this.userId,
-      this.zakatNisab,
-      this.zakatTotalAssetValue,
-      this.zakattotaldebtsvalue,
-      this.zakattotaldebortsvalue,
-      this.zakatDueAmount,
-      this.zakatCashliquidity,
-      this.zakatDue,
-      this.createdAt,
-      this.updatedAt});
+  Data_model({
+    this.id,
+    this.userId,
+    this.uuid,
+    this.zakatNisab,
+    this.zakatTotalAssetValue,
+    this.zakatTotalDebtsValue,
+    this.zakatTotalDebortsValue,
+    this.zakatDueAmount,
+    this.zakatCashLiquidity,
+    this.zakatDue,
+    this.createdAt,
+    this.updatedAt,
+  });
 
   Data_model.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     userId = json['user_id'];
-    zakatNisab = json['zakat_nisab'];
-    zakatTotalAssetValue = json['zakat_total_asset_value'];
-    zakattotaldebtsvalue = json['zakat_total_debts_value'];
-    zakattotaldebortsvalue = json['zakat_total_deborts_value'];
-    zakatDueAmount = json['zakat_due_amount'];
-    zakatCashliquidity = json['zakat_Cash_liquidity'];
-    zakatDue = json['zakat_due'];
+    uuid = json['uuid'];
+
+    zakatNisab = (json['zakat_nisab'] is String)
+        ? double.tryParse(json['zakat_nisab'])
+        : (json['zakat_nisab']?.toDouble());
+
+    zakatTotalAssetValue = (json['zakat_total_asset_value'] is String)
+        ? double.tryParse(json['zakat_total_asset_value'])
+        : (json['zakat_total_asset_value']?.toDouble());
+
+    zakatTotalDebtsValue = (json['zakat_total_debts_value'] is String)
+        ? double.tryParse(json['zakat_total_debts_value'])
+        : (json['zakat_total_debts_value']?.toDouble());
+
+    zakatTotalDebortsValue = (json['zakat_total_deborts_value'] is String)
+        ? double.tryParse(json['zakat_total_deborts_value'])
+        : (json['zakat_total_deborts_value']?.toDouble());
+
+    zakatDueAmount = (json['zakat_due_amount'] is String)
+        ? double.tryParse(json['zakat_due_amount'])
+        : (json['zakat_due_amount']?.toDouble());
+
+    zakatCashLiquidity = (json['zakat_Cash_liquidity'] is String)
+        ? double.tryParse(json['zakat_Cash_liquidity'])
+        : (json['zakat_Cash_liquidity']?.toDouble());
+
+    zakatDue = (json['zakat_due'] is String)
+        ? double.tryParse(json['zakat_due'])
+        : (json['zakat_due']?.toDouble());
+
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
 
+  get zakattotaldebortsvalue => null;
+
   Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['user_id'] = this.userId;
-    data['zakat_nisab'] = this.zakatNisab;
-    data['zakat_total_asset_value'] = this.zakatTotalAssetValue;
-    data['zakat_total_debts_value'] = this.zakattotaldebtsvalue;
-    data['zakat_total_deborts_value'] = this.zakattotaldebortsvalue;
-    data['zakat_due_amount'] = this.zakatDueAmount;
-    data['zakat_Cash_liquidity'] = this.zakatCashliquidity;
-    data['zakat_due'] = this.zakatDue;
-    data['created_at'] = this.createdAt;
-    data['updated_at'] = this.updatedAt;
-    return data;
+    return {
+      'id': id,
+      'user_id': userId,
+      'uuid': uuid,
+      'zakat_nisab': zakatNisab,
+      'zakat_total_asset_value': zakatTotalAssetValue,
+      'zakat_total_debts_value': zakatTotalDebtsValue,
+      'zakat_total_deborts_value': zakatTotalDebortsValue,
+      'zakat_due_amount': zakatDueAmount,
+      'zakat_Cash_liquidity': zakatCashLiquidity,
+      'zakat_due': zakatDue,
+      'created_at': createdAt,
+      'updated_at': updatedAt,
+    };
   }
 }

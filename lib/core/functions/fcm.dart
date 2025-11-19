@@ -48,6 +48,38 @@ class FcmHelper {
     if (initialMsg != null) {
       _showLocalNotification(initialMsg);
     }
+    FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
+  }
+
+  static Future<void> _firebaseMessagingBackgroundHandler(
+      RemoteMessage message) async {
+    // تهيئة Firebase في الخلفية
+    await Firebase.initializeApp();
+
+    print("🔔 إشعار في الخلفية أو عند الإغلاق: ${message.data}");
+
+    // تشغيل صوت الإشعار
+    FlutterRingtonePlayer().playNotification();
+
+    // عرض الإشعار المحلي (تأكد أن create channel و initialize تمت في main isolate)
+    final flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+
+    const androidDetails = AndroidNotificationDetails(
+      'channel_id',
+      'channel_name',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+
+    const notificationDetails = NotificationDetails(android: androidDetails);
+
+    await flutterLocalNotificationsPlugin.show(
+      message.hashCode,
+      message.notification?.title ?? '',
+      message.notification?.body ?? '',
+      notificationDetails,
+      payload: message.data['pagename'] ?? 'notifications',
+    );
   }
 
   /// معالجة الإشعار أثناء تشغيل التطبيق
@@ -88,7 +120,7 @@ class FcmHelper {
         notification.title,
         notification.body,
         details,
-        payload: pageName, 
+        payload: pageName,
       );
     }
   }

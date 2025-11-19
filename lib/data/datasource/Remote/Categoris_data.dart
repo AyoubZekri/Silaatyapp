@@ -1,40 +1,144 @@
 import 'dart:io';
-
-import 'package:Silaaty/LinkApi.dart';
 import 'package:Silaaty/core/class/Crud.dart';
+import 'package:get/get.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:uuid/uuid.dart';
+
+import '../../../core/class/Sqldb.dart';
+import '../../../core/class/SyncServer.dart';
+import '../../../core/services/Services.dart';
 
 class CategorisData {
   Crud crud;
+  final SQLDB _db = SQLDB();
+  final SyncService _syncService = SyncService();
+
+  int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
 
   CategorisData(this.crud);
 
+  /// ✅ عرض البيانات من SQLite
   viewdata() async {
-    var response = await crud.getData(Applink.CategoriesGet);
-    return response.fold((l) => l, (r) => r);
-  }
+    try {
+      if (id == null) {
+        print("❌ user_id not found in local storage");
+        return [];
+      }
 
-  Adddata(Map data, [File? file])async {
-    var response = await crud.addRequestWithImageOne(Applink.Addcat,data,file);
-    return response.fold((l) => l, (r) => r);
-  }
+      final result = await _db.readData(
+        "SELECT * FROM categoris WHERE user_id = ? AND is_delete = 0 ORDER BY created_at ASC",
+        [id],
+      );
 
-
-  Updatecat(Map data, [File? file]) async {
-    var response;
-    if (file == null) {
-      response = await crud.postDataheaders(Applink.EditCat, data);
-    } else {
-      response =
-          await crud.addRequestWithImageOne(Applink.EditCat, data, file);
+      return result;
+    } catch (e) {
+      print("❌ viewdata error: $e");
+      return [];
     }
-    ;
-    return response.fold((l) => l, (r) => r);
   }
 
+  /// ✅ إضافة فئة جديدة
+  Future<bool> Adddata(String nameAr, String nameFr, [File? file]) async {
+    String? savedImagePath;
+    final String uuid = Uuid().v4();
 
-  deletecat(Map data) async {
-    var response = await crud.postDataheaders(Applink.Deletecat, data);
-    return response.fold((l) => l, (r) => r);
+    try {
+      if (file != null) {
+        final dir = await getApplicationDocumentsDirectory();
+        final imagePath =
+            "${dir.path}/${DateTime.now().millisecondsSinceEpoch}.png";
+        await file.copy(imagePath);
+        savedImagePath = imagePath;
+      }
+
+      final data = {
+        "uuid": uuid,
+        "user_id": id,
+        "categoris_name": nameAr,
+        "categoris_name_fr": nameFr,
+        "categoris_image": savedImagePath,
+        "created_at": DateTime.now().toIso8601String(),
+        "updated_at": DateTime.now().toIso8601String(),
+      };
+
+      final result = await _db.insert("categoris", data);
+
+      if (result > 0) {
+        await _syncService.addToQueue("categoris", uuid, "insert", data);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("❌ Adddata error: $e");
+      return false;
+    }
   }
 
+  /// ✅ تعديل فئة
+  Future<bool> Updatecat(
+    String uuid,
+    String nameAr,
+    String nameFr, [
+    File? file,
+  ]) async {
+    try {
+      String? savedImagePath;
+
+      if (file != null) {
+        final dir = await getApplicationDocumentsDirectory();
+        final imagePath =
+            "${dir.path}/${DateTime.now().millisecondsSinceEpoch}.png";
+        await file.copy(imagePath);
+        savedImagePath = imagePath;
+      }
+
+      final data = {
+        "categoris_name": nameAr,
+        "categoris_name_fr": nameFr,
+        "updated_at": DateTime.now().toIso8601String(),
+        if (savedImagePath != null) "categoris_image": savedImagePath,
+      };
+
+      final result = await _db.update("categoris", data, "uuid = ?", [uuid]);
+
+      if (result > 0) {
+        await _syncService.addToQueue("categoris", uuid, "update", {
+          "uuid": uuid,
+          ...data,
+        });
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("❌ Updatecat error: $e");
+      return false;
+    }
+  }
+
+  /// ✅ حذف فئة
+  Future<bool> deletecat(String uuid) async {
+    try {
+      final result = await _db.update(
+          "categoris",
+          {
+            'is_delete': 1,
+            'updated_at': DateTime.now().toIso8601String(),
+          },
+          "uuid = ?",
+          [uuid]);
+
+      if (result > 0) {
+        await _syncService.addToQueue("categoris", uuid, "update", {
+          "uuid": uuid,
+          'is_delete': 1,
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+        return true;
+      }
+      return false;
+    } catch (e) {
+      print("❌ deletecat error: $e");
+      return false;
+    }
+  }
 }

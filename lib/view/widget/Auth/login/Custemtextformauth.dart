@@ -16,7 +16,7 @@ class Custemtextformauth extends StatelessWidget {
       required this.hintText,
       required this.label,
       required this.iconData,
-      required this.MyController,
+       this.MyController,
       required this.valid,
       required this.keyboardType,
       this.obscureText});

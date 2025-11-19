@@ -85,10 +85,14 @@ showbottom(imageuploadcamera(), fileuploadGallery()) {
           )));
 }
 
+showfile() {
+  fileuploadGallery(false);
+}
+
 showBottomAddProductOrScanner(
   int catid,
-  int id,
-  void Function(int catid, int id) onAddProduct,
+  String uuid,
+  void Function(int catid, String uuid) onAddProduct,
   VoidCallback onOpenScanner,
   VoidCallback onOpenScannerfile,
 ) {
@@ -114,7 +118,7 @@ showBottomAddProductOrScanner(
             ListTile(
               onTap: () {
                 Get.back();
-                onAddProduct(catid, id);
+                onAddProduct(catid, uuid);
                 // Future.delayed(Duration(milliseconds: 200), onAddProduct);
               },
               leading: const Icon(Icons.add_box_outlined, size: 40),

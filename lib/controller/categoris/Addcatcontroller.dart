@@ -24,19 +24,17 @@ class Addcatcontroller extends GetxController {
     if (formstate.currentState!.validate()) {
       statusrequest = Statusrequest.loadeng;
       update();
-      Map data = {
-        'categorie_name': nameController.text,
-        'categorie_name_fr': nameFrController.text,
-      };
-      var response = await categorisData.Adddata(data, file);
-      if (response == Statusrequest.serverfailure) {
-        showSnackbar("error".tr, "noInternet".tr, Colors.red);
-      }
+      // Map data = {
+      //   'categorie_name': nameController.text,
+      //   'categorie_name_fr': nameFrController.text,
+      // };
+      var response = await categorisData.Adddata(nameController.text,nameFrController.text, file);
+
 
       // ignore: avoid_print
       print("==================================================$response");
       statusrequest = handlingData(response);
-      if (statusrequest == Statusrequest.success && response["status"] == 1) {
+      if (response != false) {
         Get.back(result: true);
 
         showSnackbar("success".tr, "operationSuccess".tr, Colors.green);

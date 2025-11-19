@@ -8,6 +8,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../core/class/SyncServer.dart';
 import '../../data/datasource/Remote/Auth/Forgetpassword/checkemail.dart';
 
 class Logincontroller extends GetxController {
@@ -44,7 +45,8 @@ class Logincontroller extends GetxController {
         if (response["status"] == 1) {
           print(response["data"]["user"]["token"]);
 
-          // myServices.sharedPreferences!.setInt("id", response['data']['id']);
+          myServices.sharedPreferences!
+              .setInt("id", response['data']["user"]["user"]['id']);
           myServices.sharedPreferences!
               .setString("email", response['data']["user"]["user"]['email']);
           myServices.sharedPreferences!
@@ -55,6 +57,22 @@ class Logincontroller extends GetxController {
               "family_name", response["data"]["user"]["user"]["family_name"]);
           myServices.sharedPreferences!.setInt("user_notify_status",
               response["data"]["user"]["user"]["user_notify_status"]);
+          if (response["data"]["user"]["user"]["adresse"] != null) {
+            myServices.sharedPreferences!.setString(
+                "adresse", response["data"]["user"]["user"]["adresse"]);
+          }
+
+          if (response["data"]["user"]["user"]["logo_stor"] != null) {
+            myServices.sharedPreferences!.setString(
+                "logo_stor", response["data"]["user"]["user"]["logo_stor"]);
+          }
+
+          myServices.sharedPreferences!
+              .setInt("Status", response["data"]["user"]["user"]["Status"]);
+          if (response["data"]["user"]["user"]["date_experiment"] != null) {
+            myServices.sharedPreferences!.setString("date_experiment",
+                response["data"]["user"]["user"]["date_experiment"]);
+          }
           myServices.sharedPreferences!
               .setString("token", response["data"]["user"]["token"]);
           myServices.sharedPreferences!.setString("step", "2");
@@ -64,6 +82,8 @@ class Logincontroller extends GetxController {
             });
             reset();
           } else if (response['data']["user"]["user"]['Status'] >= 2) {
+            final syncService = SyncService();
+            syncService.initSyncListener();
             Get.offNamed(
               Approutes.HomeScreen,
             );
@@ -105,24 +125,24 @@ class Logincontroller extends GetxController {
     update();
   }
 
-  getUser() async {
-    statusrequest = Statusrequest.loadeng;
-    update();
-    var response = await logenData.getUser();
-    print("==============================$response");
-    statusrequest = handlingData(response);
-    // if (statusrequest == Statusrequest.success) {
-    //   if (response["status"] == 1) {
-    //     final model = Categoris_Model.fromJson(response);
-    //     Categoris = model.data?.catdata ?? [];
-    //     if (Categoris.isEmpty) {
-    //       statusrequest = Statusrequest.failure;
-    //     }
-    //   }
-    // }
+  // getUser() async {
+  //   statusrequest = Statusrequest.loadeng;
+  //   update();
+  //   var response = await logenData.getUser();
+  //   print("==============================$response");
+  //   statusrequest = handlingData(response);
+  //   // if (statusrequest == Statusrequest.success) {
+  //   //   if (response["status"] == 1) {
+  //   //     final model = Categoris_Model.fromJson(response);
+  //   //     Categoris = model.data?.catdata ?? [];
+  //   //     if (Categoris.isEmpty) {
+  //   //       statusrequest = Statusrequest.failure;
+  //   //     }
+  //   //   }
+  //   // }
 
-    update();
-  }
+  //   update();
+  // }
 
   @override
   void onInit() {
@@ -133,7 +153,7 @@ class Logincontroller extends GetxController {
 
     Email = TextEditingController();
     Password = TextEditingController();
-    getUser();
+    // getUser();
     super.onInit();
   }
 

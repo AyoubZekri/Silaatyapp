@@ -93,6 +93,8 @@ class _AddcatState extends State<Addcat> {
                         hintText: "Name Categoris Ar".tr,
                         label: "Name Categoris".tr,
                         iconData: Icons.shopping_bag,
+                                                enabled: true,
+
                       ),
                       Custemtextfromfild(
                         MyController: controller.nameFrController,
@@ -100,6 +102,8 @@ class _AddcatState extends State<Addcat> {
                         hintText: "Name Categoris fr".tr,
                         label: "Name Categoris".tr,
                         iconData: Icons.description,
+                                                enabled: true,
+
                       ),
                       Custembutton(
                         text: "Add".tr,

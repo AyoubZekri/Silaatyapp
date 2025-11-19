@@ -23,6 +23,7 @@ class _SignupState extends State<Signup> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        backgroundColor: AppColor.white,
         appBar: AppBar(
           backgroundColor: AppColor.white,
           title: Text(
@@ -64,8 +65,8 @@ class _SignupState extends State<Signup> {
                         Custemtextformauth(
                           keyboardType: TextInputType.name,
                           MyController: controller.Username,
-                          hintText: "Enter Your Username".tr,
-                          label: "Username".tr,
+                          hintText: "إسم التاجر".tr,
+                          label: "إسم التاجر".tr,
                           iconData: Icons.person_2_outlined,
                           valid: (Val) {
                             return validInput(Val!, 20, 1, "username");
@@ -74,8 +75,8 @@ class _SignupState extends State<Signup> {
                         Custemtextformauth(
                           keyboardType: TextInputType.name,
                           MyController: controller.familyname,
-                          hintText: "Enter Your Familyname".tr,
-                          label: "Familyname".tr,
+                          hintText: "إسم المتجر".tr,
+                          label: "إسم المتجر".tr,
                           iconData: Icons.person_2_outlined,
                           valid: (Val) {
                             return validInput(Val!, 20, 1, "username");

@@ -1,4 +1,5 @@
-import 'package:Silaaty/LinkApi.dart';
+import 'dart:io';
+
 import 'package:Silaaty/controller/items/informationItemController.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/constant/imageassets.DART';
@@ -7,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/class/handlingview.dart';
+import '../../widget/addItem/CustomAddquntetyproductdialog.dart';
 
 class Informationitem extends StatefulWidget {
   const Informationitem({super.key});
@@ -49,21 +51,20 @@ class _InformationitemState extends State<Informationitem> {
                 shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(16)),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.circular(16),
-                  child: (product.productImage?.isNotEmpty ?? false)
-                      ? Image.network(
-                          "${Applink.image}/storage/${product.productImage}",
-                          height: 320,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        )
-                      : Image.asset(
-                          Appimageassets.test2,
-                          height: 320,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                        ),
-                ),
+                    borderRadius: BorderRadius.circular(16),
+                    child: (product.productImage?.isNotEmpty ?? false)
+                        ? Image.file(
+                            File(product.productImage!),
+                            height: 320,
+                            width: double.infinity,
+                            fit: BoxFit.fill,
+                          )
+                        : Image.asset(
+                            Appimageassets.test2,
+                            height: 320,
+                            width: double.infinity,
+                            fit: BoxFit.cover,
+                          )),
               ),
               const SizedBox(height: 20),
               Card(
@@ -87,11 +88,16 @@ class _InformationitemState extends State<Informationitem> {
                                   color: AppColor.backgroundcolor),
                             ),
                           ),
+                          const SizedBox(
+                            width: 10,
+                          ),
                           Iconbutton(
-                              iconData: Icons.transform,
+                              iconData: Icons.print,
                               onTap: () async {
-                                await controller.SwitchProduct(product.id!);
-                                Get.back(result: true);
+                                await controller.printProductTicket(
+                                    name: product.productName.toString(),
+                                    barcode: product.codepar.toString(),
+                                    price: product.productPrice ?? 0);
                               }),
                           const SizedBox(
                             width: 10,
@@ -101,6 +107,34 @@ class _InformationitemState extends State<Informationitem> {
                               onTap: () async {
                                 await controller.GotoEdititem();
                                 controller.getProdact();
+                              }),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Iconbutton(
+                              iconData: Icons.playlist_add,
+                              onTap: () async {
+                                showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return Customaddquntetyproductdialog(
+                                        Mycontroller:
+                                            controller.quantityController,
+                                        value: int.tryParse(controller
+                                                .quantityController.text) ??
+                                            1,
+                                        onPressed: () {
+                                          controller.editquantityProduct();
+                                        },
+                                        onback: () {
+                                          Get.back();
+                                        },
+                                        title: 'إضافة كمية جديدة'.tr,
+                                        onChanged: (int p1) {
+                                          controller.onQuantityChanged(p1);
+                                        },
+                                      );
+                                    });
                               }),
                           const SizedBox(
                             width: 10,
@@ -116,10 +150,12 @@ class _InformationitemState extends State<Informationitem> {
                                       color: AppColor.backgroundcolor),
                                   middleText: "هل تريد حذف المنتج؟".tr,
                                   onConfirm: () {
-                                    controller.deleteProdact(product.id!);
+                                    controller.deleteProdact(product.uuid!);
                                     Get.back(result: true);
                                   },
-                                  onCancel: () {},
+                                  onCancel: () {
+                                    Get.back();
+                                  },
                                   buttonColor: AppColor.backgroundcolor,
                                   confirmTextColor: AppColor.primarycolor,
                                   cancelTextColor: AppColor.backgroundcolor,
@@ -128,16 +164,18 @@ class _InformationitemState extends State<Informationitem> {
                         ],
                       ),
                       const Divider(height: 30),
-                      _infoRow("سعر البيع",
-                          "${product.productPrice ?? "0.00"} دينار"),
-                      _infoRow("سعر الشراء",
-                          "${product.productPricePurchase ?? "0.00"} دينار"),
-                      _infoRow("الكمية", "${product.productQuantity}"),
-                      _infoRow("الإجمالي بيع", "${product.productPriceTotal}"),
-                      _infoRow("الإجمالي شراء",
+                      _infoRow("سعر البيع".tr,
+                          "${product.productPrice ?? "0.00"} ${'دينار'.tr}"),
+                      _infoRow("سعر الشراء".tr,
+                          "${product.productPricePurchase ?? "0.00"} ${'دينار'.tr}"),
+                      _infoRow("الكمية".tr, "${product.productQuantity}"),
+                      _infoRow(
+                          "الإجمالي بيع".tr, "${product.productPriceTotal}"),
+                      _infoRow("الإجمالي شراء".tr,
                           "${product.productPriceTotalPurchase}"),
-                      _infoRow("تاريخ الإضافة",
+                      _infoRow("تاريخ الإضافة".tr,
                           product.createdAt?.substring(0, 10) ?? ''),
+                      _infoRow("Barcode".tr, product.codepar.toString()),
                     ],
                   ),
                 ),

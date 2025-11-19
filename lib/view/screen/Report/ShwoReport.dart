@@ -57,7 +57,7 @@ class _ShworeportState extends State<Shworeport> {
                 ),
                 Custembody(
                     body:
-                        "Date :${controller.report[0].createdAt?.substring(0, 10) ?? ""}")
+                        "${'Date'.tr} :${controller.report[0].createdAt?.substring(0, 10) ?? ""}")
               ],
             ),
           )
