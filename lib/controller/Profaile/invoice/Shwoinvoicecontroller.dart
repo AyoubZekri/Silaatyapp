@@ -18,6 +18,7 @@ import '../../../data/model/InvoiceSalesModel.dart';
 
 class Shwoinvoicecontroller extends GetxController {
   String? uuid;
+
   List<Map<String, dynamic>> products = [];
 
   Invoicedata invoicedata = Invoicedata(Get.find());
@@ -209,9 +210,12 @@ class Shwoinvoicecontroller extends GetxController {
 
   Future<void> generateArabicPdf() async {
     final pdf = pw.Document();
-    final font = await PdfGoogleFonts.cairoRegular();
+    final arabicFont = await PdfGoogleFonts.amiriRegular();
+    final englishFont = await PdfGoogleFonts.robotoRegular();
     final productsList = productSale?.products ?? [];
     final address = myServices.sharedPreferences!.getString("adresse");
+    final phoneNumber = myServices.sharedPreferences!.getString("phone");
+    final nameSaler = myServices.sharedPreferences!.getString("family_name");
     final logoPath = myServices.sharedPreferences!.getString("logo_stor");
     final logoFile = File(logoPath ?? "");
     pw.MemoryImage? logo;
@@ -220,6 +224,19 @@ class Shwoinvoicecontroller extends GetxController {
       final imageBytes = await logoFile.readAsBytes();
       logo = pw.MemoryImage(imageBytes);
     }
+    final customerName = [
+      invoices?.familyName,
+      invoices?.name,
+    ].where((e) => e != null && e.trim().isNotEmpty).join(" ");
+    final safeCustomerName =
+        customerName.isEmpty ? "غير معروف".tr : customerName;
+
+    bool isArabicText(String text) {
+      final arabicRegex = RegExp(r'[\u0600-\u06FF]');
+      return arabicRegex.hasMatch(text);
+    }
+
+    final isArabicName = isArabicText(safeCustomerName);
 
     final List<List<String>> tableData = [
       [
@@ -240,10 +257,11 @@ class Shwoinvoicecontroller extends GetxController {
         ];
       }),
     ];
-
     pdf.addPage(
       pw.Page(
-        textDirection: pw.TextDirection.rtl,
+        textDirection: Get.locale?.languageCode == "ar"
+            ? pw.TextDirection.rtl
+            : pw.TextDirection.ltr,
         pageFormat: PdfPageFormat.a4,
         margin: const pw.EdgeInsets.all(24),
         build: (context) {
@@ -263,16 +281,40 @@ class Shwoinvoicecontroller extends GetxController {
                   children: [
                     pw.Column(
                       crossAxisAlignment: pw.CrossAxisAlignment.start,
+                      mainAxisAlignment: pw.MainAxisAlignment.center,
                       children: [
-                        pw.Text("${invoices?.familyName} ${invoices?.name}",
+                        pw.Directionality(
+                          textDirection:
+                              nameSaler != null && isArabicText(nameSaler)
+                                  ? pw.TextDirection.rtl
+                                  : pw.TextDirection.ltr,
+                          child: pw.Text(
+                            nameSaler ?? "",
                             style: pw.TextStyle(
-                                font: font,
-                                fontSize: 16,
-                                fontWeight: pw.FontWeight.bold)),
-                        pw.Text(address.toString(),
-                            style: pw.TextStyle(font: font, fontSize: 12)),
-                        pw.Text(invoices?.phoneNumber ?? "",
-                            style: pw.TextStyle(font: font, fontSize: 12)),
+                              font: nameSaler != null && isArabicText(nameSaler)
+                                  ? arabicFont
+                                  : englishFont,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                        pw.SizedBox(height: 10),
+                        pw.Directionality(
+                          textDirection:
+                              address != null && isArabicText(address)
+                                  ? pw.TextDirection.rtl
+                                  : pw.TextDirection.ltr,
+                          child: pw.Text("${address ?? ""}",
+                              style: pw.TextStyle(
+                                fontSize: 12,
+                                font: address != null && isArabicText(address)
+                                    ? arabicFont
+                                    : englishFont,
+                              )),
+                        ),
+                        pw.SizedBox(height: 10),
+                        pw.Text(phoneNumber ?? "",
+                            style: pw.TextStyle(fontSize: 12)),
                       ],
                     ),
                     if (logo != null) pw.Image(logo, width: 80, height: 80),
@@ -286,7 +328,11 @@ class Shwoinvoicecontroller extends GetxController {
                 child: pw.Text(
                   "فاتورة بيع".tr,
                   style: pw.TextStyle(
-                      font: font, fontSize: 18, fontWeight: pw.FontWeight.bold),
+                      font: Get.locale?.languageCode == "ar"
+                          ? arabicFont
+                          : englishFont,
+                      fontSize: 18,
+                      fontWeight: pw.FontWeight.bold),
                 ),
               ),
               pw.SizedBox(height: 10),
@@ -297,38 +343,85 @@ class Shwoinvoicecontroller extends GetxController {
                 children: [
                   pw.Text(
                       "${'التاريخ'.tr}: ${invoices!.date!.substring(0, 10)}",
-                      style: pw.TextStyle(font: font, fontSize: 12)),
+                      style: pw.TextStyle(
+                          font: Get.locale?.languageCode == "ar"
+                              ? arabicFont
+                              : englishFont,
+                          fontSize: 12)),
                   pw.Text("${'رقم الفتورة'.tr}: ${invoices!.number ?? ''}",
-                      style: pw.TextStyle(font: font, fontSize: 12)),
+                      style: pw.TextStyle(
+                          font: Get.locale?.languageCode == "ar"
+                              ? arabicFont
+                              : englishFont,
+                          fontSize: 12)),
                 ],
               ),
               pw.SizedBox(height: 5),
-              pw.Text(
-                  "${'الزبون'.tr}: ${invoices!.familyName} ${invoices!.name}",
-                  style: pw.TextStyle(font: font, fontSize: 12)),
+              pw.Directionality(
+                textDirection:
+                    isArabicName ? pw.TextDirection.rtl : pw.TextDirection.ltr,
+                child: pw.Text(
+                  "${'الزبون'.tr}: $safeCustomerName",
+                  style: pw.TextStyle(
+                    font: isArabicName ? arabicFont : englishFont,
+                    fontSize: 12,
+                  ),
+                ),
+              ),
               pw.SizedBox(height: 15),
 
               // ====== Table ======
-              pw.Table.fromTextArray(
-                data: tableData,
-                headerDecoration: pw.BoxDecoration(
-                  color: PdfColor.fromHex("#C7C4F9"),
-                ),
-                headerStyle: pw.TextStyle(
-                    font: font, fontWeight: pw.FontWeight.bold, fontSize: 12),
-                cellStyle: pw.TextStyle(font: font, fontSize: 11),
-                cellAlignment: pw.Alignment.center,
+              pw.Table(
                 border: pw.TableBorder.all(
-                    color: PdfColor.fromHex("#4F46E5"), width: 0.7),
-                headerAlignments: {
-                  0: pw.Alignment.center,
-                  1: pw.Alignment.centerRight,
-                  2: pw.Alignment.center,
-                  3: pw.Alignment.center,
-                  4: pw.Alignment.center,
-                },
-              ),
+                  color: PdfColor.fromHex("#4F46E5"),
+                  width: 0.7,
+                ),
+                children: [
+                  // Header
+                  pw.TableRow(
+                    decoration:
+                        pw.BoxDecoration(color: PdfColor.fromHex("#C7C4F9")),
+                    children: tableData.first.map((text) {
+                      final font =
+                          isArabicText(text) ? arabicFont : englishFont;
+                      return pw.Padding(
+                        padding: pw.EdgeInsets.all(6),
+                        child: pw.Text(
+                          text,
+                          textAlign: pw.TextAlign.center,
+                          style: pw.TextStyle(
+                            font: font,
+                            fontWeight: pw.FontWeight.bold,
+                            fontSize: 12,
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
 
+                  // Rows
+                  ...tableData.skip(1).map((row) {
+                    return pw.TableRow(
+                      children: row.map((cell) {
+                        final font =
+                            isArabicText(cell) ? arabicFont : englishFont;
+                        return pw.Padding(
+                            padding: pw.EdgeInsets.all(5),
+                            child: pw.Directionality(
+                              textDirection: isArabicText(cell)
+                                  ? pw.TextDirection.rtl
+                                  : pw.TextDirection.ltr,
+                              child: pw.Text(
+                                cell,
+                                textAlign: pw.TextAlign.center,
+                                style: pw.TextStyle(font: font, fontSize: 11),
+                              ),
+                            ));
+                      }).toList(),
+                    );
+                  }),
+                ],
+              ),
               pw.SizedBox(height: 10),
 
               // ====== Total ======
@@ -337,7 +430,11 @@ class Shwoinvoicecontroller extends GetxController {
                 child: pw.Text(
                   "${'الإجمالي'.tr}: ${invoices!.totalSales} ${'DA'.tr} ",
                   style: pw.TextStyle(
-                      font: font, fontSize: 14, fontWeight: pw.FontWeight.bold),
+                      font: isArabicText('الإجمالي'.tr) && isArabicText('DA'.tr)
+                          ? arabicFont
+                          : englishFont,
+                      fontSize: 14,
+                      fontWeight: pw.FontWeight.bold),
                 ),
               ),
               pw.SizedBox(height: 20),
@@ -348,7 +445,11 @@ class Shwoinvoicecontroller extends GetxController {
                 children: [
                   pw.Text(
                       "نشكركم على التعامل معنا، ونتطلع إلى خدمتكم مجددًا.".tr,
-                      style: pw.TextStyle(font: font, fontSize: 12)),
+                      style: pw.TextStyle(
+                          font: Get.locale?.languageCode == "ar"
+                              ? arabicFont
+                              : englishFont,
+                          fontSize: 12)),
                 ],
               ),
             ],

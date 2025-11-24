@@ -209,10 +209,18 @@ class SyncService {
           }
 
           final List<dynamic> serverData = jsonDecode(res.body);
-          final serverUuids =
-              serverData.map((e) => e["uuid"].toString()).toList();
+          if (table != "zakats") {
+            final deletedUuids = serverData
+                .where((e) => e["is_delete"] == 1 || e["is_delete"] == "1")
+                .map((e) => e["uuid"].toString())
+                .toList();
+            if (deletedUuids.isNotEmpty) {
+              await _syncDeletedLocalRows(table, deletedUuids);
+            }
+            serverData.removeWhere(
+                (e) => e["is_delete"] == 1 || e["is_delete"] == "1");
+          }
 
-          await _syncDeletedLocalRows(table, serverUuids);
           await _syncServerRecords(table, serverData);
 
           print("📥 دفعة ${page + 1}: ${serverData.length} سجل");
@@ -239,17 +247,26 @@ class SyncService {
     }
   }
 
-  Future<void> _syncDeletedLocalRows(
-      String table, List<String> serverUuids) async {
-    final localData = await _db.readData("SELECT uuid FROM $table");
+  Future<List<String>> _syncDeletedLocalRows(
+    String table,
+    List<String> deletedUuids,
+  ) async {
+    if (deletedUuids.isEmpty) return [];
 
-    for (var local in localData) {
-      final localUuid = local["uuid"].toString();
-      if (!serverUuids.contains(localUuid)) {
-        await _db.delete(table, "uuid='$localUuid'");
-        print("🗑️ حذف محلي => $localUuid");
+    List<String> foundLocally = [];
+
+    for (final uuid in deletedUuids) {
+      final row =
+          await _db.readData("SELECT uuid FROM $table WHERE uuid = ?", [uuid]);
+
+      if (row.isNotEmpty) {
+        await _db.delete(table, "uuid = ?", [uuid]);
+        print("🗑️ حذف محلي => $uuid");
+        foundLocally.add(uuid);
       }
     }
+
+    return foundLocally;
   }
 
   Future<void> _syncServerRecords(

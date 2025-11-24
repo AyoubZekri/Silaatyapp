@@ -1,7 +1,6 @@
 import 'package:Silaaty/controller/items/PaymentController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 
 import '../../../core/constant/Colorapp.dart';
 import '../../../core/functions/valiedinput.dart';
@@ -70,7 +69,7 @@ class _PaymentState extends State<Payment> {
                   valid: (Val) {
                     return validInput(Val!, 100, 5, "Email");
                   },
-                  enabled: controller.selectedCustomer == "virtualCustomer".tr ? true:false,
+                  enabled: controller.selectedCustomer == "virtualCustomer".tr ? false:true,
                   keyboardType: TextInputType.number,
                 ),
                 Costumtextfildpatment(
@@ -84,7 +83,7 @@ class _PaymentState extends State<Payment> {
                   valid: (Val) {
                     return validInput(Val!, 100, 5, "Email");
                   },
-                  enabled: false,
+                  enabled: true,
                   keyboardType: TextInputType.number,
                 ),
                 SizedBox(

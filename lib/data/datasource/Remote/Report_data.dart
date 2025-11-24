@@ -48,12 +48,8 @@ class ReportData {
   Future<Map<String, Object?>> deleteReport(Map<String, Object?> data) async {
     final uuid = data["uuid"] as String;
     try {
-      final result = await db.update(
+      final result = await db.delete(
           "reports",
-          {
-            'is_delete': 1,
-            'updated_at': DateTime.now().toIso8601String(),
-          },
           "uuid = ?",
           [uuid]);
 
@@ -71,7 +67,7 @@ class ReportData {
   Future<Map<String, Object?>> ShwoReport() async {
     try {
       final result = await db.readData(
-          "SELECT * FROM reports Where report_id = ? AND is_delete = 0", [id]);
+          "SELECT * FROM reports Where report_id = ?", [id]);
       return {
         "status": 1,
         "data": {"Report": result}
@@ -86,7 +82,7 @@ class ReportData {
     final uuid = data["uuid"];
     try {
       final result = await db.readData(
-          "SELECT * FROM reports Where report_id = ? AND uuid = ? AND is_delete = 0 LIMIT 1",
+          "SELECT * FROM reports Where report_id = ? AND uuid = ? LIMIT 1",
           [id, uuid]);
       return {
         "status": 1,

@@ -65,6 +65,12 @@ class Transactiondata {
         [uuid],
       );
 
+      await _db.delete(
+        "transactions",
+        "uuid = ?",
+        [uuid],
+      );
+
       if (result > 0) {
         await _syncService.addToQueue("transactions", uuid, "update", {
           "uuid": uuid,

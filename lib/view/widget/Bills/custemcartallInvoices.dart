@@ -70,7 +70,7 @@ class _CustemcartallinvoiceState extends State<Custemcartallinvoice> {
                     children: [
                       IconButton(
                           icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: (){
+                          onPressed: () {
                             widget.onDelete?.call();
                             if (mounted) {
                               setState(() {
@@ -138,7 +138,7 @@ class _CustemcartallinvoiceState extends State<Custemcartallinvoice> {
                                   Text(widget.Title,
                                       style: TextStyle(fontSize: 18)),
                                   Text(widget.nameclient,
-                                      style: TextStyle(fontSize: 18)),
+                                      style: TextStyle(fontSize: 15)),
                                   const SizedBox(height: 6),
                                   Row(
                                     children: [

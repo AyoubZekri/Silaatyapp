@@ -4,7 +4,6 @@ import 'package:get/get.dart';
 import 'dart:async';
 
 import '../../controller/StartpageContrller.dart';
-import '../../core/class/Statusrequest.dart';
 import '../../core/constant/imageassets.DART';
 import '../../core/services/Services.dart';
 
@@ -63,9 +62,24 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 0));
 
     if (token != null && token.isNotEmpty) {
-      if (contrller.statusrequest == Statusrequest.success &&
-          (contrller.Status == 0 || contrller.Status == 1)) {
-        Get.offAllNamed(Approutes.Login);
+      String? experimentDateString =
+          myServices.sharedPreferences!.getString("date_experiment") ?? "";
+      print("=========================$experimentDateString");
+      int? status = myServices.sharedPreferences!.getInt("Status");
+      if (experimentDateString.isNotEmpty) {
+        DateTime experimentDate = DateTime.parse(experimentDateString);
+
+        DateTime currentDate = DateTime.now();
+        DateTime today =
+            DateTime(currentDate.year, currentDate.month, currentDate.day);
+
+        if ((today.isAfter(experimentDate) ||
+            today.isAtSameMomentAs(experimentDate) && status! <= 2)) {
+          await myServices.sharedPreferences!.clear();
+          Get.offAllNamed(Approutes.Login);
+        } else {
+          Get.offAllNamed(Approutes.HomeScreen);
+        }
       } else {
         Get.offAllNamed(Approutes.HomeScreen);
       }

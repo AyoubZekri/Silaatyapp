@@ -15,6 +15,8 @@ class Startpagecontrller extends GetxController {
   late int Status;
   Myservices myServices = Get.find();
 
+  String date_experiment = "";
+
   Statusrequest statusrequest = Statusrequest.none;
 
   getUser() async {
@@ -53,6 +55,7 @@ class Startpagecontrller extends GetxController {
         if (user["date_experiment"] != null) {
           myServices.sharedPreferences!
               .setString("date_experiment", user["date_experiment"]);
+          date_experiment = user["date_experiment"];
         }
       }
     }

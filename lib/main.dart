@@ -24,8 +24,8 @@ void main() async {
   }
   await FcmHelper.initFCM();
 
-  final syncService = SyncService();
-  syncService.initSyncListener();
+  // final syncService = SyncService();
+  // syncService.initSyncListener();
 
   final syncForeground = SyncForegroundService();
   syncForeground.start();

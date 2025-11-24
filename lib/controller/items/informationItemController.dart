@@ -112,34 +112,55 @@ class Informationitemcontroller extends GetxController {
     required double price,
   }) async {
     try {
-      // ✅ تحقق من الاتصال بشكل صحيح
       bool? status = await PrintBluetoothThermal.connectionStatus;
       if (status != true) {
-        print("❌ لم يتم الاتصال بالطابعة");
         showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
         return;
       }
 
-      // تحضير النص للطباعة
-      List<String> lines = [
-        "-----------------------------",
-        "           $name             ",
-        "                             ",
-        "          $barcode           ",
-        "                             ",
-        " ${price.toStringAsFixed(2)} دج",
-        "-----------------------------",
-        "\n\n",
-      ];
-
+      // 🔹 اسم المنتج
       await PrintBluetoothThermal.writeString(
         printText: PrintTextSize(
           size: 2,
-          text: lines.join("\n"),
+          text: "$name\n",
         ),
       );
 
-      print("✅ تم إرسال الطباعة بنجاح");
+      // ==========================================================
+      // ⬇️ طباعة الباركود (Code128) مع النص في الأعلى
+      // ==========================================================
+
+      // أوامر ESC/POS:
+      List<int> barcodeSetup = [
+        29, 72, 2, // GS H 1 (تحديد موضع النص فوق الباركود)
+        29, 119, 3, // GS w 3 (تحديد عرض الباركود)
+        29, 107, 73, // GS k 73 (اختيار نوع الباركود Code128)
+        barcode.length, // إرسال طول الباركود
+      ];
+
+      // تحويل الباركود النصي إلى قائمة بايتات
+      List<int> barcodeBytes = barcode.codeUnits;
+      List<int> finalBarcodeCommand = [...barcodeSetup, ...barcodeBytes];
+
+      await PrintBluetoothThermal.writeBytes(finalBarcodeCommand);
+
+      // إضافة سطر جديد بعد الباركود
+      await PrintBluetoothThermal.writeString(
+          printText: PrintTextSize(text: "\n", size: 2));
+
+      // ==========================================================
+      // ⬆️ نهاية طباعة الباركود
+      // ==========================================================
+
+      // 🔹 السعر
+      await PrintBluetoothThermal.writeString(
+        printText: PrintTextSize(
+          size: 2,
+          text: "\n${price.toStringAsFixed(2)} دج\n",
+        ),
+      );
+
+      print("✅ تم إرسال الطباعة");
     } catch (e) {
       showSnackbar("error".tr, "حدث خطأ".tr, Colors.red);
     }

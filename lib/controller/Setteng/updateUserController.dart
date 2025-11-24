@@ -73,5 +73,6 @@ class Updateusercontroller extends GetxController {
     FamlynameController.text = prefs.getString("family_name") ?? "";
     PhoneController.text = prefs.getString("phone") ?? "";
     emailController.text = prefs.getString("email") ?? "";
+    adresseController.text = prefs.getString("adresse") ?? "";
   }
 }

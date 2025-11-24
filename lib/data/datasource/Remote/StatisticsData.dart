@@ -14,23 +14,21 @@ class Statisticsdata {
     final today = DateTime.now().toIso8601String().substring(0, 10);
 
     // عدد فواتير الزبائن فقط
-    final invoicesCount = await db.readData('''
-    SELECT COUNT(*) as count 
-    FROM invoies i
-    JOIN transactions t ON t.uuid = i.Transaction_uuid
-    WHERE i.user_id = ?
-    AND t.transactions = 2
-    AND i.is_delete = 0
-    AND i.invoies_date LIKE '$today%'
-  ''', [id]);
+        final invoicesCount = await db.readData('''
+          SELECT COUNT(*) as count 
+          FROM invoies i
+          LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
+          WHERE i.user_id = ?
+            AND (i.Transaction_uuid IS NULL OR t.transactions = 2)
+            AND i.invoies_date LIKE ?
+    ''', [id, '$today%']);
 
     final totalIncome = await db.readData('''
     SELECT IFNULL(SUM(i.Payment_price), 0) as totalIncome
     FROM invoies i
-    JOIN transactions t ON t.uuid = i.Transaction_uuid
+    LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
     WHERE i.user_id = ?
-    AND t.transactions = 2
-    AND i.is_delete = 0
+    AND (i.Transaction_uuid IS NULL OR t.transactions = 2)    
     AND i.invoies_date LIKE '$today%'
   ''', [id]);
 
@@ -91,7 +89,7 @@ class Statisticsdata {
     FROM invoies i
     JOIN transactions t ON t.uuid = i.Transaction_uuid
     JOIN sales s ON s.invoie_uuid = i.uuid
-    WHERE i.user_id = ? AND t.transactions = 2 AND i.is_delete = 0
+    WHERE i.user_id = ? AND t.transactions = 2 
     AND $dateCondition 
     GROUP BY x ORDER BY x
   """;
@@ -104,7 +102,7 @@ class Statisticsdata {
       SUM(CASE WHEN i.type_sales = 3 THEN i.subtotal ELSE 0 END) AS total_expenses
     FROM sales i
     LEFT JOIN products p ON p.uuid = i.product_uuid
-    WHERE i.user_id = ? AND $dateCondition AND i.is_delete = 0
+    WHERE i.user_id = ? AND $dateCondition 
   """;
 
     final resultGraph = await db.readData(queryGraph, [id]);
@@ -176,7 +174,7 @@ class Statisticsdata {
     SELECT IFNULL(SUM(Payment_price - discount), 0) as total_expenses
     FROM invoies i
     JOIN transactions t ON i.Transaction_uuid = t.uuid
-    WHERE i.user_id = ? AND t.transactions = 1 $whereClause AND i.is_delete = 0
+    WHERE i.user_id = ? AND t.transactions = 1 $whereClause 
   ''', args);
 
     // 🔹 عدد الفواتير
@@ -184,7 +182,7 @@ class Statisticsdata {
     SELECT COUNT(*) as total_invoices
     FROM invoies i
     JOIN transactions t ON i.Transaction_uuid = t.uuid
-    WHERE i.user_id = ? AND t.transactions = 2 $whereClause AND i.is_delete = 0
+    WHERE i.user_id = ? AND t.transactions = 2 $whereClause 
 
   ''', args);
 
@@ -758,7 +756,6 @@ class Statisticsdata {
         WHERE i.user_id = ?
           AND s.type_sales = $type
           $whereClause;
-          AND i.is_delete = 0
   ''';
 
     final CustomerDitails = '''

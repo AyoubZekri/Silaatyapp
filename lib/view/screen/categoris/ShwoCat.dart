@@ -83,7 +83,7 @@ class _ShwocatState extends State<Shwocat> {
                                       fontWeight: FontWeight.bold,
                                       color: AppColor.backgroundcolor),
                                   middleText:
-                                      "Do you want to delete the categoris?".tr,
+                                      "delete_category_warning".tr,
                                   onConfirm: () {
                                     controller.deletecat(cat.uuid!);
                                   },

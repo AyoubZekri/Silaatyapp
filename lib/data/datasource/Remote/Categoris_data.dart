@@ -26,7 +26,7 @@ class CategorisData {
       }
 
       final result = await _db.readData(
-        "SELECT * FROM categoris WHERE user_id = ? AND is_delete = 0 ORDER BY created_at ASC",
+        "SELECT * FROM categoris WHERE user_id = ? ORDER BY created_at ASC",
         [id],
       );
 
@@ -118,14 +118,12 @@ class CategorisData {
   /// ✅ حذف فئة
   Future<bool> deletecat(String uuid) async {
     try {
-      final result = await _db.update(
-          "categoris",
-          {
-            'is_delete': 1,
-            'updated_at': DateTime.now().toIso8601String(),
-          },
-          "uuid = ?",
-          [uuid]);
+      final cat =
+          await _db.readData("SELECT id FROM categoris WHERE uuid = ?", [uuid]);
+
+      if (cat.isEmpty) return false;
+
+      final result = await _db.delete("categoris", "uuid = ?", [uuid]);
 
       if (result > 0) {
         await _syncService.addToQueue("categoris", uuid, "update", {
@@ -133,8 +131,24 @@ class CategorisData {
           'is_delete': 1,
           'updated_at': DateTime.now().toIso8601String(),
         });
+
+        final products = await _db.readData(
+            "SELECT uuid FROM products WHERE categoris_uuid = ?", [uuid]);
+
+        for (var p in products) {
+          await _syncService
+              .addToQueue("products", p["uuid"] as String, "update", {
+            "uuid": p["uuid"] as String,
+            'is_delete': 1,
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+        }
+
+        await _db.delete("products", "categoris_uuid = ?", [uuid]);
+
         return true;
       }
+
       return false;
     } catch (e) {
       print("❌ deletecat error: $e");

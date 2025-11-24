@@ -1,5 +1,4 @@
 import 'package:Silaaty/controller/items/ItemsController.dart';
-import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/class/handlingview.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/view/widget/Home/CustemType.dart';
@@ -102,36 +101,35 @@ class _AddProductSaleState extends State<AddProductSale> {
                             child: Wrap(
                               spacing: 10,
                               runSpacing: 10,
-                              children: controller.statusrequestcat ==
-                                      Statusrequest.loadeng
-                                  ? List.generate(
-                                      4,
-                                      (index) => const Custemtype(
-                                        NameItems: '',
-                                        isActive: false,
-                                        isLoading: true,
-                                      ),
-                                    )
-                                  : List.generate(
-                                      controller.categories.length,
-                                      (index) {
-                                        final cat =
-                                            controller.categories[index];
-                                        return Custemtype(
-                                          onPressed: () {
-                                            controller
-                                                .selectCategory(cat.uuid!);
-                                          },
-                                          NameItems:
-                                              Get.locale?.languageCode == "ar"
-                                                  ? cat.categorisName!
-                                                  : cat.categorisNameFr!,
-                                          isActive:
-                                              controller.selectedCategoryId ==
-                                                  cat.uuid,
-                                        );
+                              children: List.generate(
+                                controller.categories.length + 1,
+                                (index) {
+                                  if (index == 0) {
+                                    return Custemtype(
+                                      onPressed: () {
+                                        controller.selectCategory("");
                                       },
-                                    ),
+                                      NameItems: "الكل".tr,
+                                      isActive:
+                                          controller.selectedCategoryId == "",
+                                    );
+                                  } else {
+                                    final cat =
+                                        controller.categories[index - 1];
+                                    return Custemtype(
+                                      onPressed: () {
+                                        controller.selectCategory(cat.uuid!);
+                                      },
+                                      NameItems:
+                                          Get.locale?.languageCode == "ar"
+                                              ? cat.categorisName!
+                                              : cat.categorisNameFr!,
+                                      isActive: controller.selectedCategoryId ==
+                                          cat.uuid,
+                                    );
+                                  }
+                                },
+                              ),
                             ),
                           ),
                         ),

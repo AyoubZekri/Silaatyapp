@@ -23,8 +23,6 @@ class Invoicesallcontroller extends GetxController {
   }
 
   showInvoice() async {
-
-
     var result = await invoicedata.allinvoise();
     print("==================================================$result");
 
@@ -50,14 +48,17 @@ class Invoicesallcontroller extends GetxController {
       filteredInvoices = invoices.where((invoiceData) {
         final name = invoiceData.name?.toLowerCase() ?? '';
         final family = invoiceData.familyName?.toLowerCase() ?? '';
-        return name.contains(lowerQuery) || family.contains(lowerQuery);
+        final data = invoiceData.date?.toLowerCase() ?? '';
+
+        return name.contains(lowerQuery) ||
+            family.contains(lowerQuery) ||
+            data.contains(lowerQuery);
       }).toList();
     }
     update();
   }
 
   deleteInvoice(String invuuid) async {
-
     Map<String, Object?> data = {
       "uuid": invuuid,
     };
@@ -67,7 +68,7 @@ class Invoicesallcontroller extends GetxController {
     if (result["status"] == 1) {
       showSnackbar("✅ ${"success".tr}", "delete_success".tr, Colors.green);
       Get.find<RefreshService>().fire();
-      showInvoice(); 
+      showInvoice();
     } else {
       showSnackbar("❌ ${"error".tr}", "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;

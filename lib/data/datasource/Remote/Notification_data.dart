@@ -18,12 +18,8 @@ class NotificationData {
       Map<String, Object?> data) async {
     final uuid = data["uuid"] as String;
     try {
-      final result = await db.update(
+      final result = await db.delete(
           "notifications",
-          {
-            'is_delete': 1,
-            'updated_at': DateTime.now().toIso8601String(),
-          },
           "uuid = ?",
           [uuid]);
 
@@ -41,7 +37,7 @@ class NotificationData {
   Future<Map<String, Object?>> ShwoNotification() async {
     try {
       final result = await db.readData(
-          "SELECT * FROM notifications Where user_id = ? AND is_delete = 0",
+          "SELECT * FROM notifications Where user_id = ? ",
           [id]);
       return {
         "status": 1,
@@ -58,7 +54,7 @@ class NotificationData {
     final uuid = data["uuid"];
     try {
       final result = await db.readData(
-          "SELECT * FROM notifications Where user_id = ? AND uuid = ? AND is_delete = 0 LIMIT 1",
+          "SELECT * FROM notifications Where user_id = ? AND uuid = ? LIMIT 1",
           [id, uuid]);
       return {
         "status": 1,

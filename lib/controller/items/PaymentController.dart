@@ -95,14 +95,16 @@ class PaymentController extends GetxController {
     if (args['type'] != null) type = args['type'];
 
     currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    
+    discountController = TextEditingController(text: "0");
+    paymentController = TextEditingController(text: "0");
 
     recalculateFinalAmount();
 
     discountController.addListener(recalculateFinalAmount);
     paymentController.addListener(recalculateFinalAmount);
 
-    discountController = TextEditingController(text: "0");
-    paymentController = TextEditingController(text: "0");
+
 
     if (selectedCustomer == "virtualCustomer".tr) {
       paymentController =

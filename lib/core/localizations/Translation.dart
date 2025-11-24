@@ -449,7 +449,9 @@ class MyTranslation extends Translations {
               "لا يمكن أن يكون الخصم أكبر من المبلغ الإجمالي",
           "لا يمكن أن يكون الخصم أقل من 0": "لا يمكن أن يكون الخصم أقل من 0",
           "deleteInvoiceWarning": "عند حذف هذه الفاتورة سيتم حذف كل المنتجات التابعة لعملية البيع. هل تريد المتابعة؟",
-           "virtualCustomer": "عميل افتراضي"
+           "virtualCustomer": "عميل افتراضي",
+           "delete_category_warning": "هل أنت متأكد أنك تريد حذف هذه الفئة؟ سيتم أيضًا حذف جميع المنتجات التابعة لها."
+
 
         },
         "en": {
@@ -901,7 +903,9 @@ class MyTranslation extends Translations {
           "تعديل الخصم": "Edit Discount",
           "لا يمكن أن يكون الخصم أكبر من المبلغ الإجمالي":
               "The discount cannot be greater than the total amount",
-          "لا يمكن أن يكون الخصم أقل من 0": "The discount cannot be less than 0"
+          "لا يمكن أن يكون الخصم أقل من 0": "The discount cannot be less than 0",
+          "delete_category_warning": "Are you sure you want to delete this category? All related products will also be deleted."
+
         },
       };
 }

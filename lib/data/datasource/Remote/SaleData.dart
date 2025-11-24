@@ -263,12 +263,8 @@ class Saledata {
       print("===================quan$currentQty");
       print("===================quan$newQty");
 
-      await db.update(
+      await db.delete(
         'products',
-        {
-          'product_quantity': newQty,
-          'updated_at': DateTime.now().toIso8601String(),
-        },
         'uuid = ?',
         [productuuId],
       );
@@ -285,14 +281,8 @@ class Saledata {
 
       if (paymentPrice < 0) paymentPrice = 0;
 
-      final resultup = await db.update(
-          "sales",
-          {
-            'is_delete': 1,
-            'updated_at': DateTime.now().toIso8601String(),
-          },
-          "uuid = ?",
-          [uuid]);
+      final resultup = await db.delete("sales", "uuid = ?", [uuid]);
+
       await db.update(
         "invoies",
         {
@@ -311,14 +301,7 @@ class Saledata {
       final int count = remainingSalesForInvoice.first['cnt'] as int;
 
       if (count == 0) {
-        await db.update(
-            "invoies",
-            {
-              'is_delete': 1,
-              'updated_at': DateTime.now().toIso8601String(),
-            },
-            "uuid = ?",
-            [invoiceUuid]);
+        await db.delete("invoies", "uuid = ?", [invoiceUuid]);
 
         await _syncService.addToQueue(
           "invoies",

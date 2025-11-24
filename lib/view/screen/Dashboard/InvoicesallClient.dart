@@ -184,7 +184,7 @@ class _InvoicesallState extends State<Invoicesall> with RouteAware {
                                   color: AppColor.backgroundcolor,
                                 ),
                                 middleText:
-                                    "Do you want to delete the invoice?".tr,
+                                    "deleteInvoiceWarning".tr,
                                 onConfirm: () {
                                   controller.invoices.removeWhere(
                                     (element) => element.uuid == inv.uuid,

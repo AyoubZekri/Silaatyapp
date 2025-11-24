@@ -2,13 +2,12 @@ import 'dart:async';
 import 'package:Silaaty/core/class/SyncServer.dart';
 import 'package:Silaaty/core/functions/CheckInternat.dart';
 
-
 class SyncForegroundService {
   final SyncService syncService = SyncService();
   Timer? _timer;
 
   void start() {
-    syncService.syncAll();
+    syncService.initSyncListener();
 
     _timer?.cancel();
     _timer = Timer.periodic(const Duration(minutes: 15), (_) async {
@@ -17,8 +16,6 @@ class SyncForegroundService {
         await syncService.syncAll();
       }
     });
-
-    syncService.initSyncListener();
   }
 
   void stop() {

@@ -146,7 +146,7 @@ class ProdactData {
     final query = data["query"];
 
     final result = await sqldb.readData(
-      "SELECT * FROM products WHERE  user_id = ? AND product_name LIKE ? AND categorie_id = ? AND is_delete = 1 ",
+      "SELECT * FROM products WHERE  user_id = ? AND product_name LIKE ? AND categorie_id = ? ",
       [id, '%$query%', categorieId],
     );
     return result;
@@ -158,12 +158,12 @@ class ProdactData {
     final List<Map<String, Object?>> result;
     if (categorieId == 2) {
       result = await sqldb.readData(
-        "SELECT * FROM products WHERE product_quantity <= 0 AND user_id = ? AND is_delete = 0 ",
+        "SELECT * FROM products WHERE product_quantity <= 0 AND user_id = ? ",
         [id],
       );
     } else {
       result = await sqldb.readData(
-        "SELECT * FROM products WHERE categorie_id = ? AND user_id = ? AND is_delete = 0 ",
+        "SELECT * FROM products WHERE categorie_id = ? AND user_id = ?",
         [categorieId, id],
       );
     }
@@ -180,12 +180,12 @@ class ProdactData {
     if (categorieId == 2) {
       print("======n");
       result = await sqldb.readData(
-        "SELECT * FROM products WHERE product_quantity <= 0 AND categoris_uuid = ? AND user_id = ? AND is_delete = 0",
+        "SELECT * FROM products WHERE product_quantity <= 0 AND categoris_uuid = ? AND user_id = ?",
         [categorisuuId, id],
       );
     } else {
       result = await sqldb.readData(
-        "SELECT * FROM products WHERE categorie_id = ? AND categoris_uuid = ? AND user_id = ? AND is_delete = 0 ",
+        "SELECT * FROM products WHERE categorie_id = ? AND categoris_uuid = ? AND user_id = ?  ",
         [categorieId, categorisuuId, id],
       );
     }
@@ -197,7 +197,7 @@ class ProdactData {
     final uuid = data['uuid'];
 
     final result = await sqldb.readData(
-      "SELECT * FROM products WHERE user_id = ? AND uuid = ? AND is_delete = 0 ",
+      "SELECT * FROM products WHERE user_id = ? AND uuid = ?",
       [id, uuid],
     );
 
@@ -236,12 +236,8 @@ class ProdactData {
           final difference = now.difference(lastDate).inHours;
 
           if (difference < 24) {
-            final result = await sqldb.update(
+            final result = await sqldb.delete(
               "sales",
-              {
-                'is_delete': 1,
-                'updated_at': DateTime.now().toIso8601String(),
-              },
               "product_uuid = ? AND user_id = ? AND type_sales = 3",
               [uuid, id],
             );
@@ -258,17 +254,14 @@ class ProdactData {
         }
       }
 
-      final resultup = await sqldb.update(
-          "products",
-          {
-            'is_delete': 1,
-          },
-          "uuid = ? AND user_id = ?",
-          [uuid, id]);
+      final resultup = await sqldb
+          .delete("products", "uuid = ? AND user_id = ?", [uuid, id]);
 
       if (resultup > 0) {
         await _syncService.addToQueue("products", uuid!, "update", {
           "uuid": uuid,
+          'is_delete': 1,
+          'updated_at': DateTime.now().toIso8601String(),
         });
         print("✅ تم حذف المنتج بنجاح");
         return true;
