@@ -48,7 +48,6 @@ class VeriFyCodeControllerImp extends VeriFyCodeController {
       }
     } else {
       showSnackbar("warning".tr, "verifyCodeIncorrect".tr, Colors.orange);
-
       statusrequest = Statusrequest.failure;
     }
 
@@ -65,7 +64,7 @@ class VeriFyCodeControllerImp extends VeriFyCodeController {
 
     statusrequest = handlingData(response);
     if (Statusrequest.success == statusrequest && response["status"] == 1) {
-        showSnackbar("success".tr, "code_sent".tr, Colors.green);
+      showSnackbar("success".tr, "code_sent".tr, Colors.green);
     } else {
       showSnackbar("warning".tr, "Email Not Found".tr, Colors.orange);
       statusrequest = Statusrequest.failure;

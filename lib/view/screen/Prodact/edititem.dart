@@ -122,13 +122,30 @@ class _EdititemState extends State<Edititem> {
                           });
                         },
                       ),
+
+                      CustemDropDownField(
+                        hintText: "Barcode Type".tr,
+                        items: [
+                          DropdownMenuItem(
+                              value: false, child: Text("Auto".tr)),
+                          DropdownMenuItem(
+                              value: true, child: Text("Manual".tr)),
+                        ],
+                        value: controller.isManualBarcode,
+                        onChanged: (val) {
+                          if (val != null) {
+                            controller.toggleBarcodeMode(val);
+                          }
+                        },
+                      ),
+
                       Custemtextfromfild(
                         MyController: controller.barcodeController,
                         keyboardType: TextInputType.number,
                         hintText: "Barcode".tr,
                         label: "Barcode".tr,
                         iconData: Icons.qr_code,
-                        enabled: true, // يمنع التعديل لما يكون Auto
+                        enabled: controller.isManualBarcode ?? true,
                       ),
 
                       // CustemDropDownField(
@@ -231,7 +248,7 @@ class _EdititemState extends State<Edititem> {
                           }
 
                           if (!validInputsnak(controller.barcodeController.text,
-                              1, 8, "Barcode".tr)) {
+                              1, 10, "Barcode".tr)) {
                             return;
                           }
 

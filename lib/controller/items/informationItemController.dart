@@ -1,19 +1,29 @@
+import 'dart:typed_data';
+import 'dart:ui' as ui;
+
 import 'package:Silaaty/controller/items/Edititemcontroller.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/constant/routes.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 import 'package:Silaaty/data/model/Product_Model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/functions/Snacpar.dart';
 import '../../core/services/Services.dart';
+import 'package:image/image.dart' as img;
+
+import '../../view/screen/Prodact/informationItem.dart';
 
 class Informationitemcontroller extends GetxController {
   late String uuid;
   final quantityController = TextEditingController();
   Myservices myservices = Get.find();
+  final GlobalKey ticketKey = GlobalKey();
+  OverlayEntry? ticketOverlay;
+
   late int? id = myservices.sharedPreferences?.getInt("id");
 
   ProdactData prodactData = ProdactData(Get.find());
@@ -106,68 +116,148 @@ class Informationitemcontroller extends GetxController {
     update();
   }
 
-  Future<void> printProductTicket({
+  // Future<void> printProductTicket({
+  //   required String name,
+  //   required String barcode,
+  //   required double price,
+  // }) async {
+  //   try {
+  //     bool? status = await PrintBluetoothThermal.connectionStatus;
+  //     if (status != true) {
+  //       showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
+  //       return;
+  //     }
+
+  //     await PrintBluetoothThermal.writeBytes([27, 97, 1]);
+
+  //     await PrintBluetoothThermal.writeString(
+  //       printText: PrintTextSize(
+  //         size: 2,
+  //         text: "$name\n",
+  //       ),
+  //     );
+
+  //     List<int> barcodeSetup = [
+  //       29, 72, 2,
+  //       29, 119, 3,
+  //       29, 107, 73,
+  //       barcode.length,
+  //     ];
+
+  //     List<int> barcodeBytes = barcode.codeUnits;
+  //     await PrintBluetoothThermal.writeBytes(
+  //         [...barcodeSetup, ...barcodeBytes]);
+
+  //     await PrintBluetoothThermal.writeString(
+  //         printText: PrintTextSize(text: "\n", size: 1));
+
+  //     await PrintBluetoothThermal.writeString(
+  //       printText: PrintTextSize(
+  //         size: 2,
+  //         text: "${price.toStringAsFixed(2)} ${"DA".tr}\n\n",
+  //       ),
+  //     );
+
+  //     await PrintBluetoothThermal.writeBytes([10, 10, 10]);
+
+  //     print("✅ تم إرسال الطباعة بنجاح");
+  //   } catch (e) {
+  //     showSnackbar("error".tr, "حدث خطأ أثناء الطباعة".tr, Colors.red);
+  //   }
+  // }
+
+  Future<void> printUniversalTicket({
     required String name,
     required String barcode,
     required double price,
   }) async {
     try {
-      bool? status = await PrintBluetoothThermal.connectionStatus;
-      if (status != true) {
-        showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
-        return;
-      }
+      await showTicketOverlay(name, barcode, price);
 
-      // 🔹 اسم المنتج
-      await PrintBluetoothThermal.writeString(
-        printText: PrintTextSize(
-          size: 2,
-          text: "$name\n",
-        ),
-      );
+      final boundary =
+          ticketKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
 
-      // ==========================================================
-      // ⬇️ طباعة الباركود (Code128) مع النص في الأعلى
-      // ==========================================================
+      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
-      // أوامر ESC/POS:
-      List<int> barcodeSetup = [
-        29, 72, 2, // GS H 1 (تحديد موضع النص فوق الباركود)
-        29, 119, 3, // GS w 3 (تحديد عرض الباركود)
-        29, 107, 73, // GS k 73 (اختيار نوع الباركود Code128)
-        barcode.length, // إرسال طول الباركود
-      ];
+      final bytes = byteData!.buffer.asUint8List();
 
-      // تحويل الباركود النصي إلى قائمة بايتات
-      List<int> barcodeBytes = barcode.codeUnits;
-      List<int> finalBarcodeCommand = [...barcodeSetup, ...barcodeBytes];
+      ticketOverlay?.remove();
+      ticketOverlay = null;
 
-      await PrintBluetoothThermal.writeBytes(finalBarcodeCommand);
+      // نزيد نكبّر العرض لـ 384px
+      img.Image? decoded = img.decodeImage(bytes);
+      decoded = img.copyResize(decoded!, width: 384);
 
-      // إضافة سطر جديد بعد الباركود
-      await PrintBluetoothThermal.writeString(
-          printText: PrintTextSize(text: "\n", size: 2));
-
-      // ==========================================================
-      // ⬆️ نهاية طباعة الباركود
-      // ==========================================================
-
-      // 🔹 السعر
-      await PrintBluetoothThermal.writeString(
-        printText: PrintTextSize(
-          size: 2,
-          text: "\n${price.toStringAsFixed(2)} دج\n",
-        ),
-      );
-
-      print("✅ تم إرسال الطباعة");
+      // نرسل للطابعة
+      final rasterBytes = _convertImageToRaster(decoded);
+      await PrintBluetoothThermal.writeBytes(rasterBytes);
     } catch (e) {
-      showSnackbar("error".tr, "حدث خطأ".tr, Colors.red);
+      print("❌ ERROR PRINT: $e");
     }
+  }
+
+  List<int> _convertImageToRaster(img.Image image) {
+    List<int> bytes = [];
+    int width = image.width;
+    int height = image.height;
+    int widthBytes = (width + 7) ~/ 8;
+
+    bytes.addAll([
+      29,
+      118,
+      48,
+      0,
+      widthBytes % 256,
+      widthBytes ~/ 256,
+      height % 256,
+      height ~/ 256
+    ]);
+
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < widthBytes; x++) {
+        int byte = 0;
+        for (int bit = 0; bit < 8; bit++) {
+          int px = x * 8 + bit;
+          if (px < width) {
+            var pixel = image.getPixel(px, y);
+            if (pixel.luminance < 0.5 * 255) {
+              byte |= (128 >> bit);
+            }
+          }
+        }
+        bytes.add(byte);
+      }
+    }
+    return bytes;
   }
 
   void onQuantityChanged(int value) {
     quantityController.text = value.toString();
+  }
+
+  Future<void> showTicketOverlay(
+      String name, String barcode, double price) async {
+    ticketOverlay = OverlayEntry(
+      builder: (_) {
+        return Positioned(
+          top: -5000,
+          left: -5000,
+          child: Material(
+            color: Colors.transparent,
+            child: RepaintBoundary(
+              key: ticketKey,
+              child: buildPrintableTicket(name, barcode, price),
+            ),
+          ),
+        );
+      },
+    );
+
+    Overlay.of(Get.context!).insert(ticketOverlay!);
+
+    // ننتظر حتى Flutter يكمل الرسم
+    await Future.delayed(const Duration(milliseconds: 120));
   }
 
   @override

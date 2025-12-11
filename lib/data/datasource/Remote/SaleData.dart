@@ -71,7 +71,7 @@ class Saledata {
         await _syncService.addToQueue(
           "products",
           productUuid,
-          "update",
+          "insert",
           updatedProductData,
         );
       }
@@ -263,8 +263,12 @@ class Saledata {
       print("===================quan$currentQty");
       print("===================quan$newQty");
 
-      await db.delete(
+      await db.update(
         'products',
+        {
+          'product_quantity': newQty,
+          'updated_at': DateTime.now().toIso8601String(),
+        },
         'uuid = ?',
         [productuuId],
       );

@@ -73,7 +73,9 @@ dependencies:
   printing: ^5.11.0
   print_bluetooth_thermal: ^1.0.9
   workmanager: ^0.9.0+3
-
+  barcode_widget: ^2.0.4
+  screenshot: ^2.1.0
+  image: ^4.1.3
 
 
 
@@ -131,6 +133,11 @@ flutter:
         - asset: assets/fonts/static/Cairo-Regular.ttf
         - asset: assets/fonts/static/Cairo-Bold.ttf
           weight: 700
+    - family: Amiri
+      fonts:
+        - asset: assets/fonts/static/Amiri-Regular.ttf
+        - asset: assets/fonts/static/Amiri-Bold.ttf
+          weight: 700
     - family: Wittgenstein
       fonts:
         - asset: assets/fonts/static/Wittgenstein-Regular.ttf
@@ -139,3 +146,5 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+

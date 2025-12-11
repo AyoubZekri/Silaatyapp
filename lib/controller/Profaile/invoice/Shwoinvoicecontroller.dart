@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
@@ -137,7 +138,7 @@ class Shwoinvoicecontroller extends GetxController {
       Get.find<RefreshService>().fire();
       Shwoinvoice();
       getRemainingAmount();
-      showSnackbar("success".tr, "update_success".tr, Colors.green);
+      showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else if (result["status"] == 2) {
       showSnackbar("error".tr, "المخزون لا يكفي".tr, Colors.red);
     } else {
@@ -210,8 +211,10 @@ class Shwoinvoicecontroller extends GetxController {
 
   Future<void> generateArabicPdf() async {
     final pdf = pw.Document();
-    final arabicFont = await PdfGoogleFonts.amiriRegular();
-    final englishFont = await PdfGoogleFonts.robotoRegular();
+    final arabicFont = pw.Font.ttf(
+        await rootBundle.load("assets/fonts/static/Amiri-Regular.ttf"));
+    final englishFont = pw.Font.ttf(
+        await rootBundle.load("assets/fonts/static/Wittgenstein-Regular.ttf"));
     final productsList = productSale?.products ?? [];
     final address = myServices.sharedPreferences!.getString("adresse");
     final phoneNumber = myServices.sharedPreferences!.getString("phone");
@@ -461,90 +464,167 @@ class Shwoinvoicecontroller extends GetxController {
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 
-  Future<void> printInvoiceBluetooth() async {
-    try {
-      // تحقق من حالة الاتصال الحالية
-      bool isConnected = await PrintBluetoothThermal.connectionStatus;
+  // Future<void> printInvoiceBluetooth() async {
+  //   try {
+  //     // تحقق من حالة الاتصال الحالية
+  //     bool isConnected = await PrintBluetoothThermal.connectionStatus;
 
-      if (!isConnected) {
-        // جلب الأجهزة المقترنة
-        final devices = await PrintBluetoothThermal.pairedBluetooths;
+  //     if (!isConnected) {
+  //       // جلب الأجهزة المقترنة
+  //       final devices = await PrintBluetoothThermal.pairedBluetooths;
 
-        if (devices.isEmpty) {
-          Get.snackbar("error".tr, "لا يوجد أي طابعة بلوتوث مقترنة".tr,
-              backgroundColor: Colors.red, colorText: Colors.white);
-          return;
-        }
+  //       if (devices.isEmpty) {
+  //         Get.snackbar("error".tr, "لا يوجد أي طابعة بلوتوث مقترنة".tr,
+  //             backgroundColor: Colors.red, colorText: Colors.white);
+  //         return;
+  //       }
 
-        // عرض حوار لاختيار الطابعة
-        final selected = await Get.dialog(
-          AlertDialog(
-            backgroundColor: AppColor.white,
-            title: Center(child: Text("اختر الطابعة".tr)),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: devices.length,
-                itemBuilder: (context, index) {
-                  final device = devices[index];
-                  return ListTile(
-                    leading: const Icon(Icons.print),
-                    title: Text(device.name),
-                    subtitle: Text(device.macAdress),
-                    onTap: () {
-                      Get.back(result: device.macAdress);
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
-        );
+  //       // عرض حوار لاختيار الطابعة
+  //       final selected = await Get.dialog(
+  //         AlertDialog(
+  //           backgroundColor: AppColor.white,
+  //           title: Center(child: Text("اختر الطابعة".tr)),
+  //           content: SizedBox(
+  //             width: double.maxFinite,
+  //             child: ListView.builder(
+  //               shrinkWrap: true,
+  //               itemCount: devices.length,
+  //               itemBuilder: (context, index) {
+  //                 final device = devices[index];
+  //                 return ListTile(
+  //                   leading: const Icon(Icons.print),
+  //                   title: Text(device.name),
+  //                   subtitle: Text(device.macAdress),
+  //                   onTap: () {
+  //                     Get.back(result: device.macAdress);
+  //                   },
+  //                 );
+  //               },
+  //             ),
+  //           ),
+  //         ),
+  //       );
 
-        if (selected == null) {
-          Get.snackbar("إلغاء".tr, "لم يتم اختيار أي طابعة".tr);
-          return;
-        }
+  //       if (selected == null) {
+  //         Get.snackbar("إلغاء".tr, "لم يتم اختيار أي طابعة".tr);
+  //         return;
+  //       }
 
-        // الاتصال بالطابعة المختارة
-        await PrintBluetoothThermal.connect(macPrinterAddress: selected);
-      }
+  //       // الاتصال بالطابعة المختارة
+  //       await PrintBluetoothThermal.connect(macPrinterAddress: selected);
+  //     }
 
-      // بناء نص الفاتورة للطباعة
-      StringBuffer buffer = StringBuffer();
-      buffer.writeln("فاتورة مبيعات".tr);
-      buffer.writeln("===========================");
-      buffer.writeln("${'الزبون'.tr}: ${invoices!.familyName ?? ''}");
-      buffer.writeln(
-          "${'التاريخ'.tr}: ${invoices?.date?.substring(0, 10) ?? ''}");
-      buffer.writeln("---------------------------");
+  //     // بناء نص الفاتورة للطباعة
+  //     StringBuffer buffer = StringBuffer();
+  //     buffer.writeln("فاتورة مبيعات".tr);
+  //     buffer.writeln("===========================");
+  //     buffer.writeln("${'الزبون'.tr}: ${invoices!.familyName ?? ''}");
+  //     buffer.writeln(
+  //         "${'التاريخ'.tr}: ${invoices?.date?.substring(0, 10) ?? ''}");
+  //     buffer.writeln("---------------------------");
 
-      for (var p in productSale?.products ?? []) {
-        buffer.writeln(
-            "${p.productName}  x${p.quantity}  = ${p.subtotal.toStringAsFixed(2)}");
-      }
+  //     for (var p in productSale?.products ?? []) {
+  //       buffer.writeln(
+  //           "${p.productName}  x${p.quantity}  = ${p.subtotal.toStringAsFixed(2)}");
+  //     }
 
-      buffer.writeln("---------------------------");
-      buffer.writeln("الإجمالي: ${invoices?.totalSales ?? 0} دج");
-      buffer.writeln("المدفوع: ${invoices?.paymentPrice ?? 0} دج");
-      buffer.writeln("الباقي: ${getRemainingAmount().toStringAsFixed(2)} دج");
-      buffer.writeln("===========================");
-      buffer.writeln("شكراً لتعاملكم معنا ❤️");
+  //     buffer.writeln("---------------------------");
+  //     buffer.writeln("الإجمالي: ${invoices?.totalSales ?? 0} دج");
+  //     buffer.writeln("المدفوع: ${invoices?.paymentPrice ?? 0} دج");
+  //     buffer.writeln("الباقي: ${getRemainingAmount().toStringAsFixed(2)} دج");
+  //     buffer.writeln("===========================");
+  //     buffer.writeln("شكراً لتعاملكم معنا ❤️");
 
-      await PrintBluetoothThermal.writeString(
-        printText: PrintTextSize(
-          size: 2,
-          text: buffer.toString(),
-        ),
-      );
+  //     await PrintBluetoothThermal.writeString(
+  //       printText: PrintTextSize(
+  //         size: 2,
+  //         text: buffer.toString(),
+  //       ),
+  //     );
 
-      Get.snackbar("تم".tr, "تم إرسال الفاتورة للطابعة بنجاح".tr,
-          backgroundColor: Colors.green, colorText: Colors.white);
-    } catch (e) {
-      print("❌ خطأ أثناء الطباعة: $e");
-      Get.snackbar("error".tr, "${'حدث خطأ أثناء الطباعة'.tr}$e".tr,
-          backgroundColor: Colors.red, colorText: Colors.white);
-    }
-  }
+  //     Get.snackbar("تم".tr, "تم إرسال الفاتورة للطابعة بنجاح".tr,
+  //         backgroundColor: Colors.green, colorText: Colors.white);
+  //   } catch (e) {
+  //     print("❌ خطأ أثناء الطباعة: $e");
+  //     Get.snackbar("error".tr, "${'حدث خطأ أثناء الطباعة'.tr}$e".tr,
+  //         backgroundColor: Colors.red, colorText: Colors.white);
+  //   }
+  // }
+
+  // Future<pw.Document> buildInvoicePdf() async {
+  //   final pdf = pw.Document();
+
+  //   pdf.addPage(
+  //     pw.Page(
+  //       pageFormat: PdfPageFormat.a4,
+  //       build: (context) {
+  //         return pw.Column(
+  //           crossAxisAlignment: pw.CrossAxisAlignment.start,
+  //           children: [
+  //             pw.Text(
+  //               "فاتورة مبيعات",
+  //               style:
+  //                   pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold),
+  //             ),
+  //             pw.SizedBox(height: 10),
+  //             pw.Divider(),
+  //             pw.Text("الزبون: ${invoices?.familyName ?? ''}"),
+  //             pw.Text("التاريخ: ${invoices?.date?.substring(0, 10) ?? ''}"),
+  //             pw.SizedBox(height: 15),
+  //             pw.Divider(),
+  //             pw.Column(
+  //               children: [
+  //                 for (var p in productSale?.products ?? [])
+  //                   pw.Row(
+  //                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+  //                     children: [
+  //                       pw.Text(p.productName),
+  //                       pw.Text("x${p.quantity}"),
+  //                       pw.Text(p.subtotal.toStringAsFixed(2)),
+  //                     ],
+  //                   )
+  //               ],
+  //             ),
+  //             pw.Divider(),
+  //             pw.SizedBox(height: 10),
+  //             pw.Row(
+  //               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+  //               children: [
+  //                 pw.Text("الإجمالي"),
+  //                 pw.Text("${invoices?.totalSales ?? 0} دج"),
+  //               ],
+  //             ),
+  //             pw.Row(
+  //               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+  //               children: [
+  //                 pw.Text("المدفوع"),
+  //                 pw.Text("${invoices?.paymentPrice ?? 0} دج"),
+  //               ],
+  //             ),
+  //             pw.Row(
+  //               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+  //               children: [
+  //                 pw.Text("الباقي"),
+  //                 pw.Text("${getRemainingAmount().toStringAsFixed(2)} دج"),
+  //               ],
+  //             ),
+  //             pw.SizedBox(height: 20),
+  //             pw.Center(child: pw.Text("شكراً لتعاملكم معنا ❤️")),
+  //           ],
+  //         );
+  //       },
+  //     ),
+  //   );
+
+  //   return pdf;
+  // }
+
+  // Future<void> previewInvoicePdf() async {
+  //   final pdf = await buildInvoicePdf();
+
+  //   await Printing.layoutPdf(
+  //     onLayout: (PdfPageFormat format) async => pdf.save(),
+  //   );
+  // }
+
 }

@@ -53,15 +53,15 @@ class Additemscontroller extends GetxController {
 
   String generateBarcode() {
     final random = Random();
-    return List.generate(8, (_) => random.nextInt(10)).join();
+    return List.generate(10, (_) => random.nextInt(10)).join();
   }
 
   addProduct() async {
     if (formstate.currentState!.validate()) {
-    if (int.parse(quantityController.text) > 0) {
-      showSnackbar(
-          "error".tr, "لا يمكن أن تكون الكمية أقل من 1".tr, Colors.red);
-    }
+      if (int.parse(quantityController.text) > 0) {
+        showSnackbar(
+            "error".tr, "لا يمكن أن تكون الكمية أقل من 1".tr, Colors.red);
+      }
 
       Map<String, Object?> data = {
         "user_id": id,

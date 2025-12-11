@@ -38,6 +38,9 @@ class VerifiycodesignupControllerImp extends VerifiycodesignupController {
         showSnackbar("Warning".tr, "Verfiy code not Correct".tr, Colors.red);
         statusrequest = Statusrequest.failure;
       }
+    } else {
+      showSnackbar("Warning".tr, "Verfiy code not Correct".tr, Colors.red);
+      statusrequest = Statusrequest.failure;
     }
     update();
   }

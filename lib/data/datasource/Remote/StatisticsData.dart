@@ -14,7 +14,7 @@ class Statisticsdata {
     final today = DateTime.now().toIso8601String().substring(0, 10);
 
     // عدد فواتير الزبائن فقط
-        final invoicesCount = await db.readData('''
+    final invoicesCount = await db.readData('''
           SELECT COUNT(*) as count 
           FROM invoies i
           LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
@@ -87,9 +87,9 @@ class Statisticsdata {
     String queryGraph = """
     SELECT $groupBy AS x, SUM(s.subtotal) AS y
     FROM invoies i
-    JOIN transactions t ON t.uuid = i.Transaction_uuid
+    LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
     JOIN sales s ON s.invoie_uuid = i.uuid
-    WHERE i.user_id = ? AND t.transactions = 2 
+    WHERE i.user_id = ? AND (i.Transaction_uuid IS NULL OR t.transactions = 2)
     AND $dateCondition 
     GROUP BY x ORDER BY x
   """;
@@ -181,8 +181,8 @@ class Statisticsdata {
     final invoices = await db.readData('''
     SELECT COUNT(*) as total_invoices
     FROM invoies i
-    JOIN transactions t ON i.Transaction_uuid = t.uuid
-    WHERE i.user_id = ? AND t.transactions = 2 $whereClause 
+    LEFT JOIN transactions t ON i.Transaction_uuid = t.uuid
+    WHERE i.user_id = ? AND (i.Transaction_uuid IS NULL OR t.transactions = 2) $whereClause 
 
   ''', args);
 
@@ -244,13 +244,13 @@ class Statisticsdata {
           IFNULL(SUM(p.product_price_purchase * s.quantity), 0) AS total_cost,
           
           -- الخصومات
-          IFNULL(SUM(CASE WHEN t.transactions = 2 THEN i.discount ELSE 0 END), 0) AS total_discount,
+          IFNULL(SUM(CASE WHEN (i.Transaction_uuid IS NULL OR t.transactions = 2) THEN i.discount ELSE 0 END), 0) AS total_discount,
           
           -- المصروفات
           IFNULL(SUM(CASE WHEN t.transactions = 1 THEN i.Payment_price ELSE 0 END), 0) AS expenses,
           
           -- عدد الفواتير
-          COUNT(DISTINCT CASE WHEN t.transactions = 2 THEN i.uuid END) AS total_invoices,
+          COUNT(DISTINCT CASE WHEN (i.Transaction_uuid IS NULL OR t.transactions = 2) THEN i.uuid END) AS total_invoices,
           
           -- عدد العناصر المباعة
           IFNULL(SUM(CASE WHEN s.type_sales = 2 THEN s.quantity ELSE 0 END), 0) AS items_sold,
@@ -275,7 +275,7 @@ class Statisticsdata {
         FROM sales s
         JOIN products p ON s.product_uuid = p.uuid
         JOIN invoies i ON s.invoie_uuid = i.uuid
-        JOIN transactions t ON t.uuid = i.Transaction_uuid
+        LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
         WHERE s.user_id = ?
         $whereClause
         AND s.is_delete = 0
@@ -727,8 +727,16 @@ class Statisticsdata {
       from: from,
       to: to,
     );
+    final result2 = getDateRangeClause(
+      id,
+      filter: filter,
+      t: "i",
+      from: from,
+      to: to,
+    );
 
     final whereClause = result['where'];
+    final whereClause2 = result2['where'];
 
     final args = result['args'];
 
@@ -745,18 +753,29 @@ class Statisticsdata {
   ''';
 
     final SqlTotalDebts = '''
-        SELECT 
-            IFNULL(SUM(
-                IFNULL(s.subtotal, 0) 
-                - IFNULL(i.Payment_price, 0)
-                - IFNULL(i.discount, 0)
-            ), 0) AS total_debts
-        FROM invoies i
-        LEFT JOIN sales s ON s.invoie_uuid = i.uuid
-        WHERE i.user_id = ?
-          AND s.type_sales = $type
-          $whereClause;
-  ''';
+    SELECT 
+      IFNULL(SUM(
+        invoice_total - invoice_paid
+      ), 0) AS total_debts
+    FROM (
+      SELECT 
+        i.uuid,
+        -- مجموع subtotal للفاتورة
+        IFNULL((
+          SELECT SUM(s.subtotal)
+          FROM sales s
+          WHERE s.invoie_uuid = i.uuid
+            AND s.type_sales = $type
+        ), 0) AS invoice_total,
+
+        -- مجموع المدفوع
+        (IFNULL(i.Payment_price, 0) + IFNULL(i.discount, 0)) AS invoice_paid
+
+      FROM invoies i
+      WHERE i.user_id = ?
+        $whereClause2
+    );
+    ''';
 
     final CustomerDitails = '''
       SELECT 

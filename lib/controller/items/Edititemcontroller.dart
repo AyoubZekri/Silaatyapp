@@ -15,6 +15,7 @@ import '../../core/functions/Snacpar.dart';
 class Edititemcontroller extends GetxController {
   File? file;
   String? imageUrl;
+  bool? isManualBarcode = false;
   int? selectedCategoryId = 1;
   String? oldquantity;
   String? selectedCategory;
@@ -42,6 +43,11 @@ class Edititemcontroller extends GetxController {
 
   Myservices myservices = Get.find();
   late int? id = myservices.sharedPreferences?.getInt("id");
+
+  void toggleBarcodeMode(bool manual) {
+    isManualBarcode = manual;
+    update();
+  }
 
   getCategoris() async {
     try {
@@ -71,9 +77,10 @@ class Edititemcontroller extends GetxController {
       final quantity =
           int.parse(quantityController.text) - int.parse(oldquantity!);
 
-    if (quantity > 0) {
-      showSnackbar("error".tr, "لا يمكن أن تكون الكميةأقل من الموجودة".tr, Colors.red);
-    }
+      if (quantity > 0) {
+        showSnackbar(
+            "error".tr, "لا يمكن أن تكون الكميةأقل من الموجودة".tr, Colors.red);
+      }
 
       Map<String, Object?> data = {
         "uuid": uuid,
@@ -89,7 +96,6 @@ class Edititemcontroller extends GetxController {
         "codepar": barcodeController.text,
         'updated_at': DateTime.now().toIso8601String(),
       };
-
 
       Map<String, Object?> dataSale = {
         "uuid": Uuid().v4(),
