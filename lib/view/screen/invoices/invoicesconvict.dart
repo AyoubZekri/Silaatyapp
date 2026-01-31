@@ -421,22 +421,22 @@ class _InvoicesState extends State<Invoices> with RouteAware {
 
                           controller.gotoShowInvoice(selectedInvoiceData);
                         },
-                        onEdit: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => CustemInvoiceDialog(
-                              title: "Edit invoices".tr,
-                              onPressed: () {
-                                controller.EditInvoice(inv.uuid!);
-                              },
-                              onback: () {
-                                Get.back();
-                              },
-                              Mycontroller: controller.dateController,
-                              form: controller.formstate,
-                            ),
-                          );
-                        },
+                        // onEdit: () {
+                        //   showDialog(
+                        //     context: context,
+                        //     builder: (context) => CustemInvoiceDialog(
+                        //       title: "Edit invoices".tr,
+                        //       onPressed: () {
+                        //         controller.EditInvoice(inv.uuid!);
+                        //       },
+                        //       onback: () {
+                        //         Get.back();
+                        //       },
+                        //       Mycontroller: controller.dateController,
+                        //       form: controller.formstate,
+                        //     ),
+                        //   );
+                        // },
                         onDelete: () {
                           Get.defaultDialog(
                             backgroundColor: AppColor.white,
@@ -449,7 +449,6 @@ class _InvoicesState extends State<Invoices> with RouteAware {
                               controller.deleteInvoice(inv.uuid!);
                             },
                             onCancel: () {
-                              Get.back();
                             },
                             buttonColor: AppColor.backgroundcolor,
                             confirmTextColor: AppColor.primarycolor,

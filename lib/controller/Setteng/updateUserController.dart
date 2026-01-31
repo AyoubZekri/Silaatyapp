@@ -47,7 +47,7 @@ class Updateusercontroller extends GetxController {
 
       if (statusrequest == Statusrequest.success) {
         if (response["status"] == 1) {
-          showSnackbar("success".tr, "updateSuccess".tr, Colors.green);
+          // showSnackbar("success".tr, "updateSuccess".tr, Colors.green);
           final startController = Get.find<Startpagecontrller>();
           await startController.getUser();
           Get.offAllNamed(Approutes.HomeScreen);

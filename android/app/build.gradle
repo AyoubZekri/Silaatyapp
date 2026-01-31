@@ -6,7 +6,8 @@ plugins {
 }
 
 def keyProperties = new Properties()
-def keyPropertiesFile = rootProject.file("key.properties")
+def keyPropertiesFile = file("key.properties")
+
 if (keyPropertiesFile.exists()) {
     keyProperties.load(new FileInputStream(keyPropertiesFile))
 }
@@ -36,12 +37,10 @@ android {
 
     signingConfigs {
         release {
-            if (keyProperties["storeFile"]) {
-                storeFile file(keyProperties["storeFile"])
-                storePassword keyProperties["storePassword"]
-                keyAlias keyProperties["keyAlias"]
-                keyPassword keyProperties["keyPassword"]
-            }
+            storeFile file(keyProperties['storeFile'])
+            storePassword keyProperties['storePassword']
+            keyAlias keyProperties['keyAlias']
+            keyPassword keyProperties['keyPassword']
         }
     }
 

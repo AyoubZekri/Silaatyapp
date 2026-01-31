@@ -36,6 +36,7 @@ class Itemscontroller extends GetxController {
 
   void toggleSelect(String uuid, int maxQuantity) {
     if (selectedUuids.contains(uuid) || (maxQuantity == 0 && type != 1)) {
+      // showSnackbar("error".tr, "غير متوفر", Colors.red);
       selectedUuids.remove(uuid);
       quantities[uuid] = 0;
     } else {

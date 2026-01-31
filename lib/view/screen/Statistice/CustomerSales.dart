@@ -53,18 +53,20 @@ class _CustomersalesState extends State<Customersales> {
                         Custemcard(
                           color: Colors.green,
                           iconData: FontAwesomeIcons.moneyBillWave,
-                          Price:
-                              controller.data?.summary?.totalSold.toString() ??
-                                  "0.0",
+                          Price: controller.data?.summary?.totalSold
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "0.0",
                           Title: "المبيعات".tr,
                         ),
                         const SizedBox(width: 10),
                         Custemcard(
                           color: Colors.blue,
                           iconData: FontAwesomeIcons.coins,
-                          Price:
-                              controller.data?.summary?.totalDebts.toString() ??
-                                  "0.0",
+                          Price: controller.data?.summary?.totalDebts
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "0.0",
                           Title: "الديون".tr,
                         ),
                       ],
@@ -91,12 +93,21 @@ class _CustomersalesState extends State<Customersales> {
                         return FinanceDetailRow(
                           animated: true,
                           period: '${trn?.familyName} ${trn?.name}',
-                          revenue: trn?.totalSold.toString() ?? "0.0",
-                          profit: trn?.debts.toString() ?? "0.0",
+                          revenue:
+                              trn?.totalSold.toStringAsFixed(1).toString() ??
+                                  "0.0",
+                          profit:
+                              trn?.debts.toStringAsFixed(1).toString() ?? "0.0",
                           profit2: "",
                           totalSales: trn?.totalInvoices.toString() ?? "0",
-                          expenses: trn?.averageOrderValue.toString() ?? "0.0",
-                          itemsSold: trn?.totalDiscount.toString() ?? "0.0",
+                          expenses: trn?.averageOrderValue
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "0.0",
+                          itemsSold: trn?.totalDiscount
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "0.0",
                           profitRate: "",
                           labelTotalSales: "إجمالي الفواتير".tr,
                           labelExpenses: "متوسط الطلب".tr,

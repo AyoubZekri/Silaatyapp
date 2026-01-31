@@ -21,14 +21,14 @@ class Custemtitleorbody extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         if (title != null)
-        Text(
-          title!,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: AppColor.black,
+          Text(
+            title!,
+            style: const TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: AppColor.black,
+            ),
           ),
-        ),
         const SizedBox(
           height: 5,
         ),
@@ -54,14 +54,16 @@ class Custemtitleorbody extends StatelessWidget {
                             scheme: 'mailto',
                             path: email,
                           );
-                          if (await canLaunchUrl(emailUri)) {
-                            await launchUrl(emailUri,
-                                mode: LaunchMode.externalApplication);
-                          } else {
+
+                          try {
+                            await launchUrl(
+                              emailUri,
+                              mode: LaunchMode.externalApplication,
+                            );
+                          } catch (e) {
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                content:
-                                    Text("لا يوجد تطبيق بريد مثبت على الجهاز"),
+                                content: Text("تعذر فتح تطبيق البريد"),
                                 backgroundColor: Colors.redAccent,
                                 behavior: SnackBarBehavior.floating,
                                 duration: Duration(seconds: 3),

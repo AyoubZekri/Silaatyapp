@@ -37,32 +37,70 @@ class SyncService {
     });
   }
 
-  Future<void> pushQueue() async {
-    final unsynced =
-        await _db.readData("SELECT * FROM sync_queue WHERE synced = 0");
+  Future<void> pushQueue(String table) async {
+    final unsynced = await _db.readData(
+      "SELECT * FROM sync_queue WHERE synced = 0 AND table_name = ?",
+      [table],
+    );
+
     if (unsynced.isEmpty) {
-      print("ℹ️ لا توجد بيانات لرفعها");
+      print( " $tableℹ️ لا توجد بيانات لرفعها");
       return;
     }
 
     const int batchSize = 50;
     print("🚀 بدء الرفع: ${unsynced.length} عنصر");
-    int index = 0;
 
     for (int i = 0; i < unsynced.length; i += batchSize) {
-      final batch = unsynced.sublist(i,
-          (i + batchSize > unsynced.length) ? unsynced.length : i + batchSize);
+      final batch = unsynced.sublist(
+        i,
+        (i + batchSize > unsynced.length) ? unsynced.length : i + batchSize,
+      );
 
-      for (var row in batch) {
-        index++;
-        await _processQueueRow(row, index, unsynced.length);
+      final List<Map<String, dynamic>> payload = batch.map((row) {
+        final decoded = (row["data"] != null && row["data"] is String)
+            ? Map<String, dynamic>.from(jsonDecode(row["data"] as String))
+            : <String, dynamic>{};
+
+        decoded["uuid"] = row["row_id"];
+        return decoded;
+      }).toList();
+
+      final token =
+          Get.find<Myservices>().sharedPreferences?.getString("token");
+      final headers = {
+        "Accept": "application/json",
+        if (token != null) "Authorization": "Bearer $token",
+        "Content-Type": "application/json",
+      };
+
+      try {
+        final res = await http.post(
+          Uri.parse("$baseUrl/$table"),
+          body: jsonEncode(payload),
+          headers: headers,
+        );
+
+        if (res.statusCode == 200) {
+          final ids = batch.map((row) => row["id"]).join(',');
+          await _db.update(
+            "sync_queue",
+            {"synced": 1},
+            "id IN ($ids)",
+          );
+          print("$table نجاح رفع دفعة ${i ~/ batchSize + 1} (${batch.length}  سجل)");
+        } else {
+          print("❌ HTTP ${res.statusCode}: ${res.body}");
+        }
+      } catch (e) {
+        print("❌ استثناء: $e");
       }
     }
 
     print("🏁 انتهى الرفع.");
   }
 
-  Future<void> _processQueueRow(Map row, int index, int total) async {
+  Future<void> _processQueueRow(Map row) async {
     final table = row["table_name"];
     final operation = row["operation"];
     final data = row["data"] != null ? jsonDecode(row["data"]) : {};
@@ -73,8 +111,6 @@ class SyncService {
       "Accept": "application/json",
       if (token != null) "Authorization": "Bearer $token",
     };
-
-    print("[$index/$total] ⏳ معالجة $operation على جدول $table");
 
     try {
       http.Response res;
@@ -87,12 +123,12 @@ class SyncService {
 
       if (res.statusCode == 200) {
         await _db.update("sync_queue", {"synced": 1}, "id=${row["id"]}");
-        print("[$index/$total] ✅ نجاح رفع ${data["uuid"]}");
+        print("✅ نجاح رفع ${data["uuid"]}");
       } else {
-        print("[$index/$total] ❌ HTTP ${res.statusCode}: ${res.body}");
+        print("❌ HTTP ${res.statusCode}: ${res.body}");
       }
     } catch (e) {
-      print("[$index/$total] ❌ استثناء: $e");
+      print("❌ استثناء: $e");
     }
   }
 
@@ -178,70 +214,70 @@ class SyncService {
   Future<void> pullFromServer(String table) async {
     try {
       final id = Get.find<Myservices>().sharedPreferences?.getInt("id");
-      print("======================$id");
-      if (id != null) {
-        final lastSyncRow = await _db.readData(
-            "SELECT last_sync FROM sync_metadata WHERE table_name='$table' AND user_id = $id");
-        final lastSync = lastSyncRow.isNotEmpty
-            ? lastSyncRow.first["last_sync"]
-            : "1970-01-01T00:00:00Z";
-        print("=========================$lastSync");
+      if (id == null) return;
 
-        final token =
-            Get.find<Myservices>().sharedPreferences?.getString("token");
+      final lastSyncRow = await _db.readData(
+          "SELECT last_sync FROM sync_metadata WHERE table_name='$table' AND user_id = $id");
+      final lastSync = lastSyncRow.isNotEmpty
+          ? lastSyncRow.first["last_sync"]
+          : "1970-01-01T00:00:00Z";
 
-        int limit = 50;
-        int page = 0;
-        bool hasMore = true;
-        while (hasMore) {
-          final res = await http.get(
-            Uri.parse(
-                "$baseUrl/$table?since=$lastSync&limit=$limit&offset=${page * limit}"),
-            headers: {
-              "Accept": "application/json",
-              if (token != null) "Authorization": "Bearer $token",
-            },
-          );
+      final token =
+          Get.find<Myservices>().sharedPreferences?.getString("token");
 
-          if (res.statusCode != 200) {
-            print("⚠️ HTTP ${res.statusCode}");
-            break;
-          }
+      int limit = 50;
+      int page = 0;
+      bool hasMore = true;
 
-          final List<dynamic> serverData = jsonDecode(res.body);
-          if (table != "zakats") {
-            final deletedUuids = serverData
-                .where((e) => e["is_delete"] == 1 || e["is_delete"] == "1")
-                .map((e) => e["uuid"].toString())
-                .toList();
-            if (deletedUuids.isNotEmpty) {
-              await _syncDeletedLocalRows(table, deletedUuids);
-            }
-            serverData.removeWhere(
-                (e) => e["is_delete"] == 1 || e["is_delete"] == "1");
-          }
+      while (hasMore) {
+        final res = await http.get(
+          Uri.parse(
+              "$baseUrl/$table?since=$lastSync&limit=$limit&offset=${page * limit}"),
+          headers: {
+            "Accept": "application/json",
+            if (token != null) "Authorization": "Bearer $token",
+          },
+        );
 
-          await _syncServerRecords(table, serverData);
-
-          print("📥 دفعة ${page + 1}: ${serverData.length} سجل");
-
-          if (serverData.length < limit) {
-            hasMore = false;
-          } else {
-            page++;
-          }
+        if (res.statusCode != 200) {
+          print("⚠️ HTTP ${res.statusCode}");
+          break;
         }
 
-        final now = DateTime.now().toIso8601String();
+        final List<dynamic> serverData = jsonDecode(res.body);
 
-        await _db.delete(
-            "sync_metadata", "table_name = '$table' AND user_id = $id");
+        if (serverData.isEmpty) {
+          hasMore = false;
+          break;
+        }
+        final serverCount = serverData.length;
+        if (table != "zakats") {
+          final deletedUuids = serverData
+              .where((e) => e["is_delete"] == 1 || e["is_delete"] == "1")
+              .map((e) => e["uuid"].toString())
+              .toList();
+          if (deletedUuids.isNotEmpty) {
+            await _syncDeletedLocalRows(table, deletedUuids);
+          }
+          serverData
+              .removeWhere((e) => e["is_delete"] == 1 || e["is_delete"] == "1");
+        }
 
-        await _db.insert("sync_metadata",
-            {"table_name": table, "user_id": id, "last_sync": now});
+        await _syncServerRecords(table, serverData);
 
-        print("✅ اكتملت مزامنة جدول $table");
+        print("📥 دفعة ${page + 1}: ${serverData.length} سجل");
+
+        hasMore = serverCount == limit;
+        page++;
       }
+
+      final now = DateTime.now().toIso8601String();
+      await _db.delete(
+          "sync_metadata", "table_name = '$table' AND user_id = $id");
+      await _db.insert("sync_metadata",
+          {"table_name": table, "user_id": id, "last_sync": now});
+
+      print("✅ اكتملت مزامنة جدول $table");
     } catch (e) {
       print("❌ pullFromServer failed: $e");
     }
@@ -323,7 +359,14 @@ class SyncService {
 
     print("🌐 بدء المزامنة…");
 
-    await pushQueue();
+    await pushQueue("categoris");
+    await pushQueue("transactions");
+    await pushQueue("invoies");
+    await pushQueue("products");
+    await pushQueue("sales");
+    await pushQueue("notifications");
+    await pushQueue("reports");
+    await pushQueue("zakats");
 
     await pullFromServer("categoris");
     await pullFromServer("transactions");
@@ -335,6 +378,8 @@ class SyncService {
     await pullFromServer("zakats");
 
     print("✅ كل المزامنة كملت بنجاح");
+
+    Get.find<RefreshService>().fire();
   }
 
   // ---------------------------------------------------------

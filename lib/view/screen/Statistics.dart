@@ -20,9 +20,9 @@ class _StatisticsState extends State<Statistics> {
   Widget build(BuildContext context) {
     Statisticecontroller controller = Get.put(Statisticecontroller());
     final spots = (controller.chartData.isNotEmpty &&
-               controller.chartData.first.chart.isNotEmpty)
-    ? controller.chartData.first.chart.map((e) => e.toFlSpot()).toList()
-    : [FlSpot(0, 0)];
+            controller.chartData.first.chart.isNotEmpty)
+        ? controller.chartData.first.chart.map((e) => e.toFlSpot()).toList()
+        : [FlSpot(0, 0)];
 
     return Scaffold(
       backgroundColor: AppColor.white,
@@ -119,7 +119,7 @@ class _StatisticsState extends State<Statistics> {
                           : controller.StatisticeType == 3
                               ? 'month'
                               : 'year',
-                  spots: controller.chartData.isNotEmpty 
+                  spots: controller.chartData.isNotEmpty
                       ? controller.chartData.first.chart
                           .map((e) => e.toFlSpot())
                           .toList()
@@ -138,8 +138,12 @@ class _StatisticsState extends State<Statistics> {
                         children: [
                           Text("إجمالي المبيعات".tr),
                           Text(
-                            controller.currentStats?.totalSales.toString() ??
-                                "0.0",
+                            truncateWithDots(
+                                controller.currentStats?.totalSales
+                                        .toStringAsFixed(2)
+                                        .toString() ??
+                                    "0.0",
+                                13),
                             style: TextStyle(color: Colors.green),
                           ),
                         ],
@@ -148,8 +152,12 @@ class _StatisticsState extends State<Statistics> {
                         children: [
                           Text("الأرباح".tr),
                           Text(
-                            controller.currentStats?.totalProfit.toString() ??
-                                "0.0",
+                            truncateWithDots(
+                                controller.currentStats?.totalProfit
+                                        .toStringAsFixed(2)
+                                        .toString() ??
+                                    "0.0",
+                                13),
                           ),
                         ],
                       ),
@@ -157,8 +165,12 @@ class _StatisticsState extends State<Statistics> {
                         children: [
                           Text("المصروفات".tr),
                           Text(
-                            controller.currentStats?.totalExpenses.toString() ??
-                                "0.0",
+                            truncateWithDots(
+                                controller.currentStats?.totalExpenses
+                                        .toStringAsFixed(2)
+                                        .toString() ??
+                                    "0.0",
+                                13),
                             style: TextStyle(color: Colors.red),
                           ),
                         ],
@@ -186,4 +198,9 @@ class _StatisticsState extends State<Statistics> {
           })),
     );
   }
+}
+
+String truncateWithDots(String text, int maxChars) {
+  if (text.length <= maxChars) return text;
+  return text.substring(0, maxChars) + '...';
 }

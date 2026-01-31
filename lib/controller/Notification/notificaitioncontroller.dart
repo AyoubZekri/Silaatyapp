@@ -42,7 +42,7 @@ class Notificaitioncontroller extends GetxController {
       statusrequest = Statusrequest.success;
       Get.back();
       getNotification();
-      showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operationFailed".tr, Colors.orange);
     }

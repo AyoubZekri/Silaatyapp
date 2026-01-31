@@ -98,18 +98,12 @@ class _InformationitemState extends State<Informationitem> {
                             Iconbutton(
                               iconData: Icons.print,
                               onTap: () {
-                                controller.printUniversalTicket(
-                                  name: product.productName.toString(),
-                                  barcode: product.codepar.toString(),
-                                  price: product.productPrice ?? 0.0,
-                                );
-
-                                // showPrintPreview(
-                                //   context,
-                                //   product.productName.toString(),
-                                //   product.codepar.toString(),
-                                //   product.productPrice ?? 0.0,
-                                // );
+                                showPrintPreview(
+                                    context,
+                                    product.productName.toString(),
+                                    product.codepar.toString(),
+                                    product.productPrice ?? 0.0,
+                                    controller);
                               },
                             ),
                             const SizedBox(width: 10),
@@ -165,9 +159,7 @@ class _InformationitemState extends State<Informationitem> {
                                     controller.deleteProdact(product.uuid!);
                                     Get.back(result: true);
                                   },
-                                  onCancel: () {
-                                    Get.back();
-                                  },
+                                  onCancel: () {},
                                   buttonColor: AppColor.backgroundcolor,
                                   confirmTextColor: AppColor.primarycolor,
                                   cancelTextColor: AppColor.backgroundcolor,
@@ -203,17 +195,6 @@ class _InformationitemState extends State<Informationitem> {
                     ),
                   ),
                 ),
-                Offstage(
-                  offstage: true,
-                  child: RepaintBoundary(
-                    key: controller.ticketKey,
-                    child: buildPrintableTicket(
-                      product.productName.toString(),
-                      product.codepar.toString(),
-                      product.productPrice ?? 0.0,
-                    ),
-                  ),
-                ),
               ],
             ),
           );
@@ -234,39 +215,62 @@ class _InformationitemState extends State<Informationitem> {
     );
   }
 
-  // void showPrintPreview(
-  //   BuildContext context,
-  //   String name,
-  //   String barcode,
-  //   double price,
-  // ) {
-  //   showDialog(
-  //     context: context,
-  //     builder: (context) => AlertDialog(
-  //       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-  //       title: const Text("معاينة التذكرة", textAlign: TextAlign.center),
-  //       content: buildPrintableTicket(name, barcode, price),
-  //       actions: [
-  //         TextButton(
-  //           onPressed: () => Navigator.pop(context),
-  //           child: const Text("إلغاء", style: TextStyle(color: Colors.red)),
-  //         ),
-  //         ElevatedButton(
-  //           onPressed: () {},
-  //           child: const Text("تأكيد الطباعة"),
-  //         ),
-  //       ],
-  //     ),
-  //   );
-  // }
+  void showPrintPreview(BuildContext context, String name, String barcode,
+      double price, controller) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColor.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        title: const Text("معاينة التذكرة", textAlign: TextAlign.center),
+        content: RepaintBoundary(
+          key: controller.ticketKey,
+          child: buildPrintableTicket(
+            name,
+            barcode,
+            price,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            style: TextButton.styleFrom(
+              backgroundColor: Colors.white, // خلفية بيضاء
+              side: const BorderSide(
+                  width: 2, color: AppColor.backgroundcolor), // إطار بنفسجي
+            ),
+            child: Text(
+              "Cansel".tr,
+              style: TextStyle(color: AppColor.backgroundcolor), // نص بنفسجي
+            ),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              controller.printUniversalTicket(
+                name: name,
+                barcode: barcode,
+                price: price,
+              );
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColor.backgroundcolor,
+              foregroundColor: AppColor.white,
+            ),
+            child: Text("طباعة".tr),
+          ),
+        ],
+      ),
+    );
+  }
 
-
-  
-}
   Widget buildPrintableTicket(String name, String barcode, double price) {
     return Container(
-      width: 384, // عرض الورق الحراري القياسي (80mm) بكسل
-      color: Colors.white,
+      width: 384,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(15),
+        border: Border.all(color: AppColor.backgroundcolor, width: 2),
+      ),
       padding: const EdgeInsets.all(20),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -292,3 +296,4 @@ class _InformationitemState extends State<Informationitem> {
       ),
     );
   }
+}

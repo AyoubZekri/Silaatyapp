@@ -48,7 +48,7 @@ class AddTransactionController extends GetxController {
 
     if (result == true) {
       Get.back(result: true);
-      showSnackbar("success".tr, "add_success".tr, Colors.green);
+      // showSnackbar("success".tr, "add_success".tr, Colors.green);
     } else {
       statusRequest = Statusrequest.failure;
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);

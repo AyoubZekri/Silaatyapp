@@ -7,6 +7,7 @@ import 'package:Silaaty/view/widget/Auth/login/Custemtextformauth.dart';
 import 'package:Silaaty/view/widget/Auth/login/custemtitle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/class/handlingview.dart';
 import '../../../core/constant/imageassets.DART';
@@ -111,6 +112,35 @@ class Login extends StatelessWidget {
                                 },
                                 TextoTwo: "Signup".tr,
                                 Textoen: "5".tr,
+                              ),
+                              const SizedBox(
+                                height: 30,
+                              ),
+                              custemTextsignup(
+                                onTap: () async {
+                                  final Uri emailUri = Uri(
+                                    scheme: 'mailto',
+                                    path: "codedev39@gmail.com",
+                                  );
+
+                                  try {
+                                    await launchUrl(
+                                      emailUri,
+                                      mode: LaunchMode.externalApplication,
+                                    );
+                                  } catch (e) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(
+                                        content: Text("تعذر فتح تطبيق البريد"),
+                                        backgroundColor: Colors.redAccent,
+                                        behavior: SnackBarBehavior.floating,
+                                        duration: Duration(seconds: 3),
+                                      ),
+                                    );
+                                  }
+                                },
+                                TextoTwo: "ClickHere".tr,
+                                Textoen: "Conect".tr,
                               ),
                             ],
                           ),

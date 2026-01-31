@@ -58,7 +58,7 @@ class Shwocatcontroller extends GetxController {
     if (success) {
       statusrequest = Statusrequest.success;
       Get.back();
-      showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
       getcat();
     } else {
       showSnackbar("error".tr, "operationFailed".tr, Colors.red);

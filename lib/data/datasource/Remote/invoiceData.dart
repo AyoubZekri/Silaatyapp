@@ -71,7 +71,7 @@ class Invoicedata {
 
       for (var row in salesRows) {
         await _syncService
-            .addToQueue("sales", row["uuid"] as String, "update", {
+          .addToQueue("sales", row["uuid"] as String, "update", {
           "uuid": row["uuid"] as String,
           'is_delete': 1,
           'updated_at': DateTime.now().toIso8601String(),

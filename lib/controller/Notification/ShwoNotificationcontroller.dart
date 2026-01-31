@@ -42,7 +42,7 @@ class ShwoNotificationcontroller extends GetxController {
       statusrequest = Statusrequest.success;
       Get.back();
       Get.back(result: true);
-      showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operationFailed".tr, Colors.orange);
     }

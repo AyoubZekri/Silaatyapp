@@ -55,7 +55,7 @@ class Reportcontroller extends GetxController {
         reportController.clear();
         Get.back();
         getReport();
-        showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+        // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
       } else {
         showSnackbar("error".tr, "operationFailed".tr, Colors.red);
       }
@@ -76,7 +76,7 @@ class Reportcontroller extends GetxController {
         reportEditController.clear();
         Get.back();
         getReport();
-        showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+        // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
       } else {
         showSnackbar("error".tr, "operationFailed".tr, Colors.red);
       }
@@ -95,7 +95,7 @@ class Reportcontroller extends GetxController {
       statusrequest = Statusrequest.success;
       Get.back();
       getReport();
-      showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operationFailed".tr, Colors.red);
       statusrequest = Statusrequest.failure;

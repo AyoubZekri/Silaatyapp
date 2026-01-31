@@ -13,27 +13,25 @@ class Statisticsdata {
   Future<Map<String, Object?>> statisticsHome() async {
     final today = DateTime.now().toIso8601String().substring(0, 10);
 
-    // عدد فواتير الزبائن فقط
     final invoicesCount = await db.readData('''
           SELECT COUNT(*) as count 
           FROM invoies i
-          LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
+          LEFT JOIN transactions t 
+          ON t.uuid = i.Transaction_uuid AND t.transactions = 2
           WHERE i.user_id = ?
-            AND (i.Transaction_uuid IS NULL OR t.transactions = 2)
             AND i.invoies_date LIKE ?
     ''', [id, '$today%']);
 
     final totalIncome = await db.readData('''
     SELECT IFNULL(SUM(i.Payment_price), 0) as totalIncome
     FROM invoies i
-    LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
-    WHERE i.user_id = ?
-    AND (i.Transaction_uuid IS NULL OR t.transactions = 2)    
+    LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid AND t.transactions = 2
+    WHERE i.user_id = ?   
     AND i.invoies_date LIKE '$today%'
   ''', [id]);
 
     final netProfit = await db.readData('''
-    SELECT IFNULL(SUM((s.unit_price - p.product_price_purchase) * s.quantity), 0) as netProfit
+    SELECT IFNULL(SUM((s.unit_price - p.product_price_purchase) * s.quantity)-i.discount, 0) as netProfit
     FROM sales s
     JOIN products p ON s.product_uuid = p.uuid
     JOIN invoies i ON s.invoie_uuid = i.uuid
@@ -41,7 +39,7 @@ class Statisticsdata {
     AND s.type_sales = 2
     AND s.is_delete = 0
     AND i.invoies_date LIKE '$today%'
-  ''', [id]);
+    ''', [id]);
 
     final lowStock = await db.readData('''
     SELECT COUNT(*) as lowStock
@@ -87,9 +85,9 @@ class Statisticsdata {
     String queryGraph = """
     SELECT $groupBy AS x, SUM(s.subtotal) AS y
     FROM invoies i
-    LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
+    LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid AND t.transactions = 2
     JOIN sales s ON s.invoie_uuid = i.uuid
-    WHERE i.user_id = ? AND (i.Transaction_uuid IS NULL OR t.transactions = 2)
+    WHERE i.user_id = ? 
     AND $dateCondition 
     GROUP BY x ORDER BY x
   """;
@@ -181,8 +179,8 @@ class Statisticsdata {
     final invoices = await db.readData('''
     SELECT COUNT(*) as total_invoices
     FROM invoies i
-    LEFT JOIN transactions t ON i.Transaction_uuid = t.uuid
-    WHERE i.user_id = ? AND (i.Transaction_uuid IS NULL OR t.transactions = 2) $whereClause 
+    LEFT JOIN transactions t ON i.Transaction_uuid = t.uuid AND t.transactions = 2
+    WHERE i.user_id = ?  $whereClause 
 
   ''', args);
 
@@ -231,57 +229,57 @@ class Statisticsdata {
 
     // 🔹 البيانات المفصلة (Public Finance)
     final publicfinance = await db.readData('''
-        SELECT 
-          strftime('$groupByFormat', i.created_at) AS period, 
-          
-          -- المبيعات الإجمالية
-          IFNULL(SUM(CASE WHEN s.type_sales = 2 THEN s.unit_price * s.quantity ELSE 0 END), 0) AS total_sales,
-          
-          -- صافي الربح
-          IFNULL(SUM(CASE WHEN s.type_sales = 2 THEN (s.unit_price - p.product_price_purchase) * s.quantity ELSE 0 END), 0) AS net_profit,
-          
-          -- التكلفة الإجمالية
-          IFNULL(SUM(p.product_price_purchase * s.quantity), 0) AS total_cost,
-          
-          -- الخصومات
-          IFNULL(SUM(CASE WHEN (i.Transaction_uuid IS NULL OR t.transactions = 2) THEN i.discount ELSE 0 END), 0) AS total_discount,
-          
-          -- المصروفات
-          IFNULL(SUM(CASE WHEN t.transactions = 1 THEN i.Payment_price ELSE 0 END), 0) AS expenses,
-          
-          -- عدد الفواتير
-          COUNT(DISTINCT CASE WHEN (i.Transaction_uuid IS NULL OR t.transactions = 2) THEN i.uuid END) AS total_invoices,
-          
-          -- عدد العناصر المباعة
-          IFNULL(SUM(CASE WHEN s.type_sales = 2 THEN s.quantity ELSE 0 END), 0) AS items_sold,
-          
-          -- الإيرادات
-          IFNULL(SUM(CASE WHEN s.type_sales = 3 THEN s.unit_price * s.quantity ELSE 0 END), 0) AS revenue,
+  SELECT 
+    strftime('$groupByFormat', COALESCE(i.created_at, s.created_at)) AS period, 
+    
+    -- المبيعات الإجمالية
+    IFNULL(SUM(CASE WHEN s.type_sales = 2 THEN s.unit_price * s.quantity ELSE 0 END), 0) AS total_sales,
+    
+    -- صافي الربح
+    IFNULL(SUM(CASE WHEN s.type_sales = 2 THEN (s.unit_price - p.product_price_purchase) * s.quantity ELSE 0 END), 0) AS net_profit,
+    
+    -- التكلفة الإجمالية
+    IFNULL(SUM(p.product_price_purchase * s.quantity), 0) AS total_cost,
+    
+    -- الخصومات
+    IFNULL(SUM(CASE WHEN (i.Transaction_uuid IS NULL OR t.transactions = 2) THEN i.discount ELSE 0 END), 0) AS total_discount,
+    
+    -- المصروفات
+    IFNULL(SUM(CASE WHEN t.transactions = 1 THEN i.Payment_price ELSE 0 END), 0) AS expenses,
+    
+    -- عدد الفواتير
+    COUNT(DISTINCT CASE WHEN (i.Transaction_uuid IS NULL OR t.transactions = 2) THEN i.uuid END) AS total_invoices,
+    
+    -- عدد العناصر المباعة
+    IFNULL(SUM(CASE WHEN s.type_sales = 2 THEN s.quantity ELSE 0 END), 0) AS items_sold,
+    
+    -- الإيرادات
+    IFNULL(SUM(CASE WHEN s.type_sales = 3 THEN s.unit_price * s.quantity ELSE 0 END), 0) AS revenue,
 
-          -- نسبة الربح
-          CASE 
-            WHEN SUM(CASE WHEN s.type_sales = 2 THEN s.unit_price * s.quantity ELSE 0 END) > 0 THEN 
-              ROUND(
-                (
-                  SUM(CASE WHEN s.type_sales = 2 THEN (s.unit_price - p.product_price_purchase) * s.quantity ELSE 0 END) 
-                  * 100.0
-                ) / 
-                SUM(CASE WHEN s.type_sales = 2 THEN s.unit_price * s.quantity ELSE 0 END),
-                2
-              )
-            ELSE 0 
-          END AS profit_rate
+    -- نسبة الربح
+    CASE 
+      WHEN SUM(CASE WHEN s.type_sales = 2 THEN s.unit_price * s.quantity ELSE 0 END) > 0 THEN 
+        ROUND(
+          (
+            SUM(CASE WHEN s.type_sales = 2 THEN (s.unit_price - p.product_price_purchase) * s.quantity ELSE 0 END) 
+            * 100.0
+          ) / 
+          SUM(CASE WHEN s.type_sales = 2 THEN s.unit_price * s.quantity ELSE 0 END),
+          2
+        )
+      ELSE 0 
+    END AS profit_rate
 
-        FROM sales s
-        JOIN products p ON s.product_uuid = p.uuid
-        JOIN invoies i ON s.invoie_uuid = i.uuid
-        LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
-        WHERE s.user_id = ?
-        $whereClause
-        AND s.is_delete = 0
-        GROUP BY strftime('$groupByFormat', i.created_at)
-        ORDER BY period DESC;
-  ''', args);
+  FROM sales s
+  JOIN products p ON s.product_uuid = p.uuid
+  LEFT JOIN invoies i ON s.invoie_uuid = i.uuid
+  LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
+  WHERE s.user_id = ?
+    AND s.is_delete = 0
+    AND (COALESCE(i.created_at, s.created_at) BETWEEN ? AND ?)
+  GROUP BY strftime('$groupByFormat', COALESCE(i.created_at, s.created_at))
+  ORDER BY period DESC;
+''', [id, start.toIso8601String(), end.toIso8601String()]);
 
     // 🔹 إرجاع النتيجة كـ JSON منظم
     return {

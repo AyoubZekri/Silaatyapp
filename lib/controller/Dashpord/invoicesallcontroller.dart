@@ -66,7 +66,7 @@ class Invoicesallcontroller extends GetxController {
     print("==================================================$result");
 
     if (result["status"] == 1) {
-      showSnackbar("✅ ${"success".tr}", "delete_success".tr, Colors.green);
+      // showSnackbar("${"success".tr}", "delete_success".tr, Colors.green);
       Get.find<RefreshService>().fire();
       showInvoice();
     } else {

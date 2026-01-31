@@ -1,9 +1,11 @@
+import 'package:Silaaty/controller/StartpageContrller.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/constant/routes.dart';
 import 'package:Silaaty/data/datasource/Remote/StatisticsData.dart';
 import 'package:Silaaty/data/model/StatisticHomeModel.dart';
 import 'package:get/get.dart';
 
+import '../../core/class/SyncServer.dart';
 import '../../core/services/Services.dart';
 
 class Homecontroller extends GetxController {
@@ -62,6 +64,25 @@ class Homecontroller extends GetxController {
     update();
   }
 
+  Future<void> _handleLoginSync() async {
+    try {
+      final sync = SyncService();
+
+      final startController = Get.find<Startpagecontrller>();
+      await startController.getUser();
+
+      await sync.syncAll();
+
+      // print("=============");
+      // getstatistics();
+      // print("=============");
+    } catch (e, s) {
+      print("❌ خطأ أثناء المزامنة بعد تسجيل الدخول");
+      print(e);
+      print(s);
+    }
+  }
+
   Future<void> reloadStats() async {
     await getstatistics();
     update();
@@ -74,6 +95,13 @@ class Homecontroller extends GetxController {
       reloadStats();
     });
     Get.find<RefreshService>().fire();
+
+    final args = Get.arguments;
+    final fromLogin = args != null && args['fromlogin'] == 1;
+
+    if (fromLogin) {
+      _handleLoginSync();
+    }
 
     super.onInit();
   }

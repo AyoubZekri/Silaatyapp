@@ -39,7 +39,7 @@ class EditTransactionController extends GetxController {
 
     if (result == true) {
       Get.back(result: true);
-      showSnackbar("success".tr, "edit_success".tr, Colors.green);
+      // showSnackbar("success".tr, "edit_success".tr, Colors.green);
     } else {
       statusrequest = Statusrequest.failure;
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);

@@ -53,14 +53,15 @@ class Additemscontroller extends GetxController {
 
   String generateBarcode() {
     final random = Random();
-    return List.generate(10, (_) => random.nextInt(10)).join();
+    return List.generate(13, (_) => random.nextInt(10)).join();
   }
 
   addProduct() async {
     if (formstate.currentState!.validate()) {
-      if (int.parse(quantityController.text) > 0) {
+      if (int.parse(quantityController.text) < 0) {
         showSnackbar(
             "error".tr, "لا يمكن أن تكون الكمية أقل من 1".tr, Colors.red);
+        return;
       }
 
       Map<String, Object?> data = {
@@ -96,14 +97,14 @@ class Additemscontroller extends GetxController {
         final result = await prodactData.addProduct(data, dataSale, file);
 
         if (result == true) {
-          showSnackbar(
-              "success".tr, "product_added_successfully".tr, Colors.green);
+          Get.find<RefreshService>().fire();
 
           if (selectedCategoryId == 1) {
-            Get.toNamed(Approutes.item);
+            Get.back(result: true);
             Future.delayed(Duration(milliseconds: 300), () {
-              Get.find<Itemscontroller>().getCategoris();
-              Get.find<Itemscontroller>().getProdactnotcat();
+              Get.back(result: true);
+              // Get.find<Itemscontroller>().getCategoris();
+              // Get.find<Itemscontroller>().getProdactnotcat();
             });
           } else {
             Get.back(result: true);

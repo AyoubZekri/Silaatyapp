@@ -183,8 +183,7 @@ class _InvoicesallState extends State<Invoicesall> with RouteAware {
                                   fontWeight: FontWeight.bold,
                                   color: AppColor.backgroundcolor,
                                 ),
-                                middleText:
-                                    "deleteInvoiceWarning".tr,
+                                middleText: "deleteInvoiceWarning".tr,
                                 onConfirm: () {
                                   controller.invoices.removeWhere(
                                     (element) => element.uuid == inv.uuid,
@@ -193,9 +192,7 @@ class _InvoicesallState extends State<Invoicesall> with RouteAware {
                                   controller.update();
                                   controller.deleteInvoice(inv.uuid!);
                                 },
-                                onCancel: () {
-                                  Get.back();
-                                },
+                                onCancel: () {},
                                 buttonColor: AppColor.backgroundcolor,
                                 confirmTextColor: AppColor.primarycolor,
                                 cancelTextColor: AppColor.backgroundcolor,

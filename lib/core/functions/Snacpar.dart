@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:another_flushbar/flushbar.dart';
 import 'package:get/get.dart';
 
-void showSnackbar(String titleKey, String messageKey, Color color) {
-  IconData iconData;
+Flushbar? _currentFlushbar;
 
+void showSnackbar(String titleKey, String messageKey, Color color) {
+  final context = Get.context;
+  if (context == null) return;
+
+  // إزالة أي Flushbar حالية
+  _currentFlushbar?.dismiss();
+  _currentFlushbar = null;
+
+  IconData iconData;
   if (color == Colors.green) {
     iconData = Icons.check_circle;
   } else if (color == Colors.red) {
@@ -14,12 +23,28 @@ void showSnackbar(String titleKey, String messageKey, Color color) {
     iconData = Icons.info;
   }
 
-  Get.snackbar(
-    titleKey.tr,
-    messageKey.tr,
-    backgroundColor: color,
-    colorText: Colors.white,
-    icon: Icon(iconData, color: Colors.white),
-    snackPosition: SnackPosition.TOP,
-  );
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    _currentFlushbar = Flushbar(
+      margin: const EdgeInsets.all(12),
+      borderRadius: BorderRadius.circular(12),
+      backgroundColor: color,
+      icon: Icon(iconData, color: Colors.white),
+      titleText: Text(
+        titleKey.tr,
+        style: const TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,
+        ),
+      ),
+      messageText: Text(
+        messageKey.tr,
+        style: const TextStyle(color: Colors.white),
+      ),
+      duration: const Duration(seconds: 3),
+      flushbarPosition: FlushbarPosition.TOP,
+      isDismissible: true,
+    )..show(context).then((_) {
+        _currentFlushbar = null; // إعادة تعيين بعد الإغلاق
+      });
+  });
 }

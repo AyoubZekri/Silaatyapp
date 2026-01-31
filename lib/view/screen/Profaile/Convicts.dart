@@ -132,7 +132,6 @@ class _ConvictsState extends State<Convicts> with RouteAware {
                                         tran.transaction!.uuid!);
                                   },
                                   onCancel: () {
-                                    Get.back();
                                   },
                                   buttonColor: AppColor.backgroundcolor,
                                   confirmTextColor: AppColor.primarycolor,

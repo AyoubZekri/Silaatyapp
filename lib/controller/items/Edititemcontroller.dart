@@ -72,57 +72,43 @@ class Edititemcontroller extends GetxController {
     update();
   }
 
-  EditProduct() async {
-    if (formstate.currentState!.validate()) {
-      final quantity =
-          int.parse(quantityController.text) - int.parse(oldquantity!);
+ EditProduct() async {
+  if (!formstate.currentState!.validate()) return;
 
-      if (quantity > 0) {
-        showSnackbar(
-            "error".tr, "لا يمكن أن تكون الكميةأقل من الموجودة".tr, Colors.red);
-      }
+  final newQty = int.parse(quantityController.text);
+  final oldQty = int.parse(oldquantity!);
+  final diff = newQty - oldQty;
 
-      Map<String, Object?> data = {
-        "uuid": uuid,
-        'product_name': nameController.text,
-        'product_description': descriptionController.text,
-        'product_quantity': quantityController.text,
-        'product_price': priseController.text,
-        'categorie_id': selectedCategoryId.toString(),
-        'categoris_uuid': selectedtypeuuId.toString(),
-        'product_price_total': priceTotal.toString(),
-        'product_price_total_purchase': priceTotalPurchase.toString(),
-        'product_price_purchase': pricePurchaseController.text,
-        "codepar": barcodeController.text,
-        'updated_at': DateTime.now().toIso8601String(),
-      };
-
-      Map<String, Object?> dataSale = {
-        "uuid": Uuid().v4(),
-        "product_uuid": uuid,
-        "quantity": quantity,
-        "unit_price": pricePurchaseController.text,
-        "subtotal": quantity * double.parse(pricePurchaseController.text),
-        "type_sales": 3, // 1 = in 2 = out 3
-        "user_id": id,
-        "created_at": DateTime.now().toIso8601String(),
-      };
-
-      var result = await prodactData.updateProduct(data, dataSale, file);
-
-      print("==================================================$result");
-      if (result == true) {
-        Get.back(result: true);
-        showSnackbar(
-            "success".tr, "product_updated_successfully".tr, Colors.green);
-      } else {
-        print(result);
-        showSnackbar("error".tr, "error_updating_product".tr, Colors.red);
-        statusrequest = Statusrequest.failure;
-      }
-    }
+  if (newQty < 0) {
+    showSnackbar("error".tr, "كمية غير صالحة", Colors.red);
+    return;
   }
 
+  Map<String, Object?> data = {
+    "uuid": uuid,
+    'product_name': nameController.text,
+    'product_description': descriptionController.text,
+    'product_quantity': newQty,
+    'product_price': priseController.text,
+    'categorie_id': selectedCategoryId.toString(),
+    'categoris_uuid': selectedtypeuuId.toString(),
+    'product_price_total': priceTotal.toString(),
+    'product_price_total_purchase': priceTotalPurchase.toString(),
+    'product_price_purchase': pricePurchaseController.text,
+    "codepar": barcodeController.text,
+    'updated_at': DateTime.now().toIso8601String(),
+  };
+
+  final result =
+      await prodactData.updateProduct(data, diff, file);
+
+  if (result) {
+    Get.find<RefreshService>().fire();
+    Get.back(result: true);
+  } else {
+    showSnackbar("error".tr, "error_updating_product".tr, Colors.red);
+  }
+}
   @override
   void onInit() {
     WidgetsBinding.instance.addPostFrameCallback((_) {

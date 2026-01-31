@@ -8,7 +8,6 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import '../../core/class/SyncServer.dart';
 import '../../data/datasource/Remote/Auth/Forgetpassword/checkemail.dart';
 
 class Logincontroller extends GetxController {
@@ -76,17 +75,34 @@ class Logincontroller extends GetxController {
           myServices.sharedPreferences!
               .setString("token", response["data"]["user"]["token"]);
           myServices.sharedPreferences!.setString("step", "2");
-          if (response['data']["user"]["user"]['Status'] == 0) {
+          DateTime? experimentDate;
+
+          final experimentDateStr =
+              response["data"]["user"]["user"]["date_experiment"];
+
+          if (experimentDateStr != null &&
+              experimentDateStr.toString().isNotEmpty) {
+            try {
+              experimentDate = DateTime.parse(experimentDateStr);
+            } catch (e) {
+              experimentDate = null;
+            }
+          }
+
+          final today = DateTime.now();
+          final status = response['data']["user"]["user"]['Status'];
+
+          if (status == 0) {
             Get.offNamed(Approutes.VerifiycodeSignUp, arguments: {
               "email": Email.text,
             });
             reset();
-          } else if (response['data']["user"]["user"]['Status'] >= 2) {
-            final syncService = SyncService();
-            syncService.initSyncListener();
-            Get.offNamed(
-              Approutes.HomeScreen,
-            );
+          } else if (status > 2) {
+            Get.offNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
+          } else if (
+              experimentDate != null &&today.isBefore(experimentDate)&&
+              response['data']["user"]["user"]['Status'] >= 2) {
+            Get.offNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
           } else {
             showSnackbar("error".tr, "contact_admin".tr, Colors.red);
           }

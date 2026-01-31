@@ -18,7 +18,7 @@ class Profailedata extends StatelessWidget {
       backgroundColor: AppColor.primarycolor,
       appBar: AppBar(
         title: Text(
-          'Profaile'.tr,
+          "المزيد من الأدوات".tr,
           style: Theme.of(context)
               .textTheme
               .headlineMedium!
@@ -34,54 +34,70 @@ class Profailedata extends StatelessWidget {
             Expanded(
               child: Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(20),
                 decoration: const BoxDecoration(
                   color: AppColor.white,
                 ),
                 child: SingleChildScrollView(
-                  child: Column(
-                    children: [
-                      Custemcartbutton(
-                        ontap: () => controller.GotoStok(),
-                        Title: 'المخزون'.tr,
-                        iconData: Icons.inventory_2_outlined,
-                      ),
-                      Custemcartbutton(
-                        ontap: () => controller.GotoNecessary(),
-                        Title: 'Necessary'.tr,
-                        iconData: Icons.local_mall_outlined,
-                      ),
-                      Custemcartbutton(
-                        ontap: () => controller.GotoDealer(),
-                        Title: "Dealer".tr,
-                        iconData: Icons.business_center_outlined,
-                      ),
-                      Custemcartbutton(
-                        ontap: () => controller.GotoConvicts(),
-                        Title: "Convicts".tr,
-                        iconData: Icons.receipt_long_outlined,
-                      ),
-                      Custemcartbutton(
-                        Title: "Categoris".tr,
-                        iconData: Icons.category_outlined,
-                        ontap: () => controller.Gotocat(),
-                      ),
-                      Custemcartbutton(
-                        ontap: () => controller.GotoNotification(),
-                        Title: "Notification".tr,
-                        iconData: Icons.notifications_outlined,
-                      ),
-                      // Custemcartbutton(
-                      //   ontap: () => controller.GotoZakat(),
-                      //   Title: "Zakat".tr,
-                      //   iconData: Icons.account_balance_outlined,
-                      // ),
-                      Custemcartbutton(
-                        ontap: () => controller.GotoReport(),
-                        Title: "Report".tr,
-                        iconData: Icons.feedback_outlined,
-                      ),
-                    ],
+                  child: Container(
+                    margin: const EdgeInsets.only(top: 20, left: 20, right: 20),
+                    padding: const EdgeInsets.only(top: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          // ignore: deprecated_member_use
+                          color: Colors.black.withOpacity(0.1),
+                          spreadRadius: 2,
+                          blurRadius: 8,
+                          offset: const Offset(0, 0),
+                        ),
+                      ],
+                    ),
+                    child: Column(
+                      children: [
+                        Custemcartbutton(
+                          ontap: () => controller.GotoStok(),
+                          Title: 'المخزون'.tr,
+                          iconData: Icons.inventory_2_outlined,
+                        ),
+                        Custemcartbutton(
+                          ontap: () => controller.GotoNecessary(),
+                          Title: 'Necessary'.tr,
+                          iconData: Icons.local_mall_outlined,
+                        ),
+                        Custemcartbutton(
+                          ontap: () => controller.GotoDealer(),
+                          Title: "Dealer".tr,
+                          iconData: Icons.business_center_outlined,
+                        ),
+                        Custemcartbutton(
+                          ontap: () => controller.GotoConvicts(),
+                          Title: "Convicts".tr,
+                          iconData: Icons.receipt_long_outlined,
+                        ),
+                        Custemcartbutton(
+                          Title: "Categoris".tr,
+                          iconData: Icons.category_outlined,
+                          ontap: () => controller.Gotocat(),
+                        ),
+                        Custemcartbutton(
+                          ontap: () => controller.GotoNotification(),
+                          Title: "Notification".tr,
+                          iconData: Icons.notifications_outlined,
+                        ),
+                        // Custemcartbutton(
+                        //   ontap: () => controller.GotoZakat(),
+                        //   Title: "Zakat".tr,
+                        //   iconData: Icons.account_balance_outlined,
+                        // ),
+                        // Custemcartbutton(
+                        //   ontap: () => controller.GotoReport(),
+                        //   Title: "Report".tr,
+                        //   iconData: Icons.feedback_outlined,
+                        // ),
+                      ],
+                    ),
                   ),
                 ),
               ),

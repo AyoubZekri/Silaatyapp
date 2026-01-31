@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import 'CustemTextFromQuntety.dart';
 
 class Customaddquntetyproductdialog extends StatefulWidget {
   final TextEditingController? Mycontroller;

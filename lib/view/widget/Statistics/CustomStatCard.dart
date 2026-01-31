@@ -100,14 +100,14 @@ class _FinanceDetailRowState extends State<FinanceDetailRow>
                       if (widget.revenue.isNotEmpty)
                         Expanded(
                           flex: 2,
-                          child: Text(widget.revenue,
+                          child: Text(wrapEveryNWithDots(widget.revenue, 14,7),
                               textAlign: TextAlign.center,
                               style: const TextStyle(color: Colors.green)),
                         ),
                       if (widget.profit.isNotEmpty)
                         Expanded(
                           flex: 1,
-                          child: Text(widget.profit,
+                          child: Text(wrapEveryNWithDots(widget.profit, 14,7),
                               textAlign: TextAlign.center,
                               style: const TextStyle(color: Colors.blue)),
                         ),
@@ -143,14 +143,14 @@ class _FinanceDetailRowState extends State<FinanceDetailRow>
                     if (widget.revenue.isNotEmpty)
                       Expanded(
                         flex: 2,
-                        child: Text(widget.revenue,
+                        child: Text(wrapEveryNWithDots(widget.revenue, 14,7),
                             textAlign: TextAlign.center,
                             style: const TextStyle(color: Colors.green)),
                       ),
                     if (widget.profit.isNotEmpty)
                       Expanded(
                         flex: widget.revenue.isNotEmpty ? 1 : 2,
-                        child: Text(widget.profit,
+                        child: Text(wrapEveryNWithDots(widget.profit, 14,7),
                             textAlign: TextAlign.center,
                             style: const TextStyle(color: Colors.blue)),
                       ),
@@ -225,3 +225,28 @@ class _FinanceDetailRowState extends State<FinanceDetailRow>
     );
   }
 }
+
+String wrapEveryNWithDots(String text, int maxChars, int wrap) {
+  if (text.isEmpty || maxChars <= 0 || wrap <= 0) return '';
+
+  final truncated = text.length > maxChars
+      ? text.substring(0, maxChars)
+      : text;
+
+  final buffer = StringBuffer();
+
+  for (int i = 0; i < truncated.length; i++) {
+    buffer.write(truncated[i]);
+
+    if ((i + 1) % wrap == 0 && i + 1 < truncated.length) {
+      buffer.write('\n');
+    }
+  }
+
+  if (text.length > maxChars) {
+    buffer.write('...');
+  }
+
+  return buffer.toString();
+}
+

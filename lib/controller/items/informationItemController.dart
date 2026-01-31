@@ -15,14 +15,11 @@ import '../../core/functions/Snacpar.dart';
 import '../../core/services/Services.dart';
 import 'package:image/image.dart' as img;
 
-import '../../view/screen/Prodact/informationItem.dart';
-
 class Informationitemcontroller extends GetxController {
   late String uuid;
   final quantityController = TextEditingController();
   Myservices myservices = Get.find();
   final GlobalKey ticketKey = GlobalKey();
-  OverlayEntry? ticketOverlay;
 
   late int? id = myservices.sharedPreferences?.getInt("id");
 
@@ -66,8 +63,8 @@ class Informationitemcontroller extends GetxController {
     print("$uid");
     if (result == true) {
       Get.back(result: true);
-      showSnackbar(
-          "success".tr, "product_deleted_successfully".tr, Colors.green);
+      // showSnackbar(
+      //     "success".tr, "product_deleted_successfully".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "error_deleting_product".tr, Colors.red);
 
@@ -105,9 +102,11 @@ class Informationitemcontroller extends GetxController {
     final result = await prodactData.updateQuantityProduct(data, dataSale);
     print("========================================$result");
     if (result) {
+      Get.find<RefreshService>().fire();
       Get.back();
       quantityController.clear();
-      showSnackbar("success".tr, "updateSuccess".tr, Colors.green);
+      getProdact();
+      // showSnackbar("success".tr, "updateSuccess".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;
@@ -172,28 +171,39 @@ class Informationitemcontroller extends GetxController {
     required double price,
   }) async {
     try {
-      await showTicketOverlay(name, barcode, price);
+      bool? status = await PrintBluetoothThermal.connectionStatus;
+      if (status != true) {
+        showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
+        return;
+      }
+      await Future.delayed(
+          const Duration(milliseconds: 50)); // تأكد إن الـ widget مرسوم
 
-      final boundary =
-          ticketKey.currentContext!.findRenderObject() as RenderRepaintBoundary;
+      final boundary = ticketKey.currentContext?.findRenderObject()
+          as RenderRepaintBoundary?;
+      if (boundary == null) {
+        print("❌ خطأ: الـ RenderRepaintBoundary غير موجود");
+        return;
+      }
 
-      final ui.Image image = await boundary.toImage(pixelRatio: 3.0);
+      final image = await boundary.toImage(pixelRatio: 3.0);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
+      if (byteData == null) return;
 
-      final bytes = byteData!.buffer.asUint8List();
+      Uint8List imageBytes = byteData.buffer.asUint8List();
 
-      ticketOverlay?.remove();
-      ticketOverlay = null;
+      img.Image? decodedImage = img.decodeImage(imageBytes);
+      if (decodedImage == null) return;
 
-      // نزيد نكبّر العرض لـ 384px
-      img.Image? decoded = img.decodeImage(bytes);
-      decoded = img.copyResize(decoded!, width: 384);
+      decodedImage = img.copyResize(decodedImage, width: 384);
 
-      // نرسل للطابعة
-      final rasterBytes = _convertImageToRaster(decoded);
-      await PrintBluetoothThermal.writeBytes(rasterBytes);
+      final bytes = _convertImageToRaster(decodedImage);
+
+      await PrintBluetoothThermal.writeBytes(bytes);
+      await PrintBluetoothThermal.writeBytes([10, 10, 10]);
+      print("✅ تم الطباعة بنجاح");
     } catch (e) {
-      print("❌ ERROR PRINT: $e");
+      print("❌ خطأ أثناء الطباعة: $e");
     }
   }
 
@@ -234,30 +244,6 @@ class Informationitemcontroller extends GetxController {
 
   void onQuantityChanged(int value) {
     quantityController.text = value.toString();
-  }
-
-  Future<void> showTicketOverlay(
-      String name, String barcode, double price) async {
-    ticketOverlay = OverlayEntry(
-      builder: (_) {
-        return Positioned(
-          top: -5000,
-          left: -5000,
-          child: Material(
-            color: Colors.transparent,
-            child: RepaintBoundary(
-              key: ticketKey,
-              child: buildPrintableTicket(name, barcode, price),
-            ),
-          ),
-        );
-      },
-    );
-
-    Overlay.of(Get.context!).insert(ticketOverlay!);
-
-    // ننتظر حتى Flutter يكمل الرسم
-    await Future.delayed(const Duration(milliseconds: 120));
   }
 
   @override

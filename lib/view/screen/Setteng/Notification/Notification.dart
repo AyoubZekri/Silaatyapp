@@ -73,7 +73,6 @@ class _NotificationState extends State<Notification> {
                                     controller.deleteNotification(not.uuid);
                                   },
                                   onCancel: () {
-                                    Get.back();
                                   },
                                   buttonColor: AppColor.backgroundcolor,
                                   confirmTextColor: AppColor.primarycolor,

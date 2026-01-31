@@ -9,6 +9,7 @@ import '../../../core/functions/valiedinput.dart';
 import '../../widget/Bills/CostumCartdetails.dart';
 import '../../widget/Bills/CostumCartdetailsPayment.dart';
 import '../../widget/Bills/CostumtitlePayment.dart';
+import '../../widget/Bills/bottomSheet.dart';
 import '../../widget/Home/CustemTitle.dart';
 import '../../widget/Home/CustemcartAbbreviation.dart';
 import '../../widget/Zacat/CustemRowProdact.dart';
@@ -126,42 +127,72 @@ class _PaymentState extends State<Shwoinvoice> {
                                   controller.productSale?.products[index];
                               return Custemrowprodact(
                                 onTap: () {
-                                  controller.qtyController.text =
-                                      pro.quantity.toString();
-                                  Get.dialog(
-                                    CustemQuantityDialog(
-                                      controller: controller.qtyController,
-                                      title: "تعديل الكمية",
-                                      onCancel: () => Get.back(),
-                                      onConfirm: () {
-                                        if (!validInputsnak(
-                                            controller.qtyController.text,
-                                            1,
-                                            20,
-                                            "Name".tr)) {
-                                          return;
-                                        }
-                                        controller.editProduct(
-                                            pro.uuid, pro.quantity);
+                                  Get.bottomSheet(
+                                    ProductActionsBottomSheet(
+                                      onReturn: () {
+                                        Get.defaultDialog(
+                                          backgroundColor: AppColor.white,
+                                          title: "Alert".tr,
+                                          titleStyle: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColor.backgroundcolor),
+                                          middleText:
+                                              "هل تريد إرجاع المنتج؟".tr,
+                                          onConfirm: () {
+                                            controller.returnProduct(pro.uuid);
+                                          },
+                                          onCancel: () {},
+                                          buttonColor: AppColor.backgroundcolor,
+                                          confirmTextColor:
+                                              AppColor.primarycolor,
+                                          cancelTextColor:
+                                              AppColor.backgroundcolor,
+                                        );
+                                      },
+                                      onEdit: () {
+                                        controller.qtyController.text =
+                                            pro.quantity.toString();
+                                        Get.dialog(
+                                          CustemQuantityDialog(
+                                            controller:
+                                                controller.qtyController,
+                                            title: "تعديل الكمية",
+                                            onCancel: () => Get.back(),
+                                            onConfirm: () {
+                                              if (!validInputsnak(
+                                                  controller.qtyController.text,
+                                                  1,
+                                                  20,
+                                                  "Name".tr)) {
+                                                return;
+                                              }
+                                              controller.editProduct(
+                                                  pro.uuid, pro.quantity);
+                                            },
+                                          ),
+                                        );
+                                      },
+                                      onDelete: () {
+                                        Get.defaultDialog(
+                                          backgroundColor: AppColor.white,
+                                          title: "Alert".tr,
+                                          titleStyle: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColor.backgroundcolor),
+                                          middleText: "هل تريد حذف المنتج؟".tr,
+                                          onConfirm: () {
+                                            controller.deleteProduct(pro.uuid);
+                                          },
+                                          onCancel: () {},
+                                          buttonColor: AppColor.backgroundcolor,
+                                          confirmTextColor:
+                                              AppColor.primarycolor,
+                                          cancelTextColor:
+                                              AppColor.backgroundcolor,
+                                        );
                                       },
                                     ),
-                                  );
-                                },
-                                onLongPress: () {
-                                  Get.defaultDialog(
-                                    backgroundColor: AppColor.white,
-                                    title: "Alert".tr,
-                                    titleStyle: const TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        color: AppColor.backgroundcolor),
-                                    middleText: "هل تريد حذف المنتج؟".tr,
-                                    onConfirm: () {
-                                      controller.deleteProduct(pro.uuid);
-                                    },
-                                    onCancel: () {},
-                                    buttonColor: AppColor.backgroundcolor,
-                                    confirmTextColor: AppColor.primarycolor,
-                                    cancelTextColor: AppColor.backgroundcolor,
+                                    isScrollControlled: true,
                                   );
                                 },
                                 title: pro?.productName ?? "",
@@ -321,8 +352,17 @@ class _PaymentState extends State<Shwoinvoice> {
                             onTap: () {
                               controller.generateArabicPdf();
                             },
-                            iconData: Icons.picture_as_pdf,
+                            iconData: Icons.keyboard_return,
                             title: "عرض PDF".tr,
+                          ),
+                          const SizedBox(width: 15),
+                          Custemcartabbreviation(
+                            width: Get.width / 4,
+                            onTap: () {
+                              controller.returnFullInvoice(controller.uuid!);
+                            },
+                            iconData: Icons.picture_as_pdf,
+                            title: "ارجاع".tr,
                           ),
                           const SizedBox(width: 15),
                           Custemcartabbreviation(

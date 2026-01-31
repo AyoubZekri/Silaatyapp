@@ -10,7 +10,6 @@ class Custemcartinvoice extends StatefulWidget {
   final String Mon;
 
   final void Function()? onTap;
-  final void Function()? onEdit;
   final void Function()? onDelete;
 
   const Custemcartinvoice({
@@ -19,7 +18,6 @@ class Custemcartinvoice extends StatefulWidget {
     required this.Status,
     required this.Price,
     this.onTap,
-    this.onEdit,
     this.onDelete,
     required this.day,
     required this.Mon,
@@ -64,16 +62,16 @@ class _CustemcartinvoiceState extends State<Custemcartinvoice> {
               duration: const Duration(milliseconds: 300),
               child: Row(
                 children: [
-                  IconButton(
-                      icon: const Icon(Icons.edit, color: Colors.blue),
-                      onPressed: () {
-                        widget.onEdit?.call();
-                        if (mounted) {
-                          setState(() {
-                            showActions = false;
-                          });
-                        }
-                      }),
+                  // IconButton(
+                  //     icon: const Icon(Icons.edit, color: Colors.blue),
+                  //     onPressed: () {
+                  //       widget.onEdit?.call();
+                  //       if (mounted) {
+                  //         setState(() {
+                  //           showActions = false;
+                  //         });
+                  //       }
+                  //     }),
                   IconButton(
                       icon: const Icon(Icons.delete, color: Colors.red),
                       onPressed: () {
@@ -91,8 +89,8 @@ class _CustemcartinvoiceState extends State<Custemcartinvoice> {
           AnimatedPadding(
             duration: const Duration(milliseconds: 300),
             padding: isEn
-                ? EdgeInsets.only(right: showActions ? 100 : 0)
-                : EdgeInsets.only(left: showActions ? 100 : 0),
+                ? EdgeInsets.only(right: showActions ? 50 : 0)
+                : EdgeInsets.only(left: showActions ? 50 : 0),
             child: Stack(
               children: [
                 Container(

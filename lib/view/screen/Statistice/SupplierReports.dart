@@ -55,7 +55,7 @@ class _SupplierreportsState extends State<Supplierreports> {
                           color: Colors.blue,
                           iconData: FontAwesomeIcons.moneyBillWave,
                           Price:
-                              controller.data?.summary?.totalSold.toString() ??
+                              controller.data?.summary?.totalSold.toStringAsFixed(2).toString() ??
                                   "0.0",
                           Title: "الشراء".tr,
                         ),
@@ -64,7 +64,7 @@ class _SupplierreportsState extends State<Supplierreports> {
                           color: Colors.red,
                           iconData: FontAwesomeIcons.coins,
                           Price:
-                              controller.data?.summary?.totalDebts.toString() ??
+                              controller.data?.summary?.totalDebts.toStringAsFixed(2).toString() ??
                                   "0.0",
                           Title: "الديون".tr,
                         ),
@@ -93,8 +93,8 @@ class _SupplierreportsState extends State<Supplierreports> {
                         return FinanceDetailRow(
                           animated: true,
                           period: '${trn?.familyName} ${trn?.name}',
-                          revenue: trn?.totalSold.toString() ?? "0.0",
-                          profit: trn?.debts.toString() ?? "0.0",
+                          revenue: trn?.totalSold.toStringAsFixed(2).toString() ?? "0.0",
+                          profit: trn?.debts.toStringAsFixed(2).toString() ?? "0.0",
                           profit2: "",
                           totalSales: trn?.totalInvoices.toString() ?? "0",
                           expenses: trn?.averageOrderValue.toString() ?? "0.0",

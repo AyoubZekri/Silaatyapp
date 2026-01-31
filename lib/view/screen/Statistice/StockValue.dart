@@ -54,18 +54,20 @@ class _StockvalueState extends State<Stockvalue> {
                         Custemcard(
                           color: Colors.green,
                           iconData: FontAwesomeIcons.boxArchive,
-                          Price:
-                              controller.data?.summary?.totalStart.toString() ??
-                                  "0.0",
+                          Price: controller.data?.summary?.totalStart
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "0.0",
                           Title: "افتتاحي".tr,
                         ),
                         const SizedBox(width: 10),
                         Custemcard(
                           color: Colors.grey,
                           iconData: FontAwesomeIcons.box,
-                          Price:
-                              controller.data?.summary?.totalEnd.toString() ??
-                                "0.0",
+                          Price: controller.data?.summary?.totalEnd
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "0.0",
                           Title: "ختامي".tr,
                         ),
                       ],
@@ -76,16 +78,19 @@ class _StockvalueState extends State<Stockvalue> {
                         Custemcard(
                           color: Colors.red,
                           iconData: FontAwesomeIcons.cartShopping,
-                          Price:
-                              controller.data?.summary?.totalSold.toString() ??
-                                  "0.0",
+                          Price: controller.data?.summary?.totalSold
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "0.0",
                           Title: "المباعة".tr,
                         ),
                         const SizedBox(width: 10),
                         Custemcard(
                           color: Colors.blue,
                           iconData: FontAwesomeIcons.truckRampBox,
-                          Price: controller.data?.summary?.totalIn.toString() ??
+                          Price: controller.data?.summary?.totalIn
+                                  .toStringAsFixed(2)
+                                  .toString() ??
                               "0.0",
                           Title: "الواردة".tr,
                         ),
@@ -113,11 +118,21 @@ class _StockvalueState extends State<Stockvalue> {
                           animated: true,
                           period: item?.productName ?? "",
                           revenue: "",
-                          profit: item?.endsubtotal.toString() ?? "",
+                          profit:
+                              item?.endsubtotal.toStringAsFixed(2).toString() ??
+                                  "",
                           profit2: "",
-                          totalSales: item?.startsubtotal.toString() ?? "",
-                          expenses: item?.soldsubtotal.toString() ?? "",
-                          itemsSold: item?.insubtotal.toString() ?? "",
+                          totalSales: item?.startsubtotal
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "",
+                          expenses: item?.soldsubtotal
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "",
+                          itemsSold:
+                              item?.insubtotal.toStringAsFixed(2).toString() ??
+                                  "",
                           profitRate: "",
                           labelTotalSales: "إفتتاحي".tr,
                           labelExpenses: "المباعة".tr,

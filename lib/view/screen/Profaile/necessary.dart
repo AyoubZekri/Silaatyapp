@@ -36,14 +36,14 @@ class _HomeState extends State<Necessary> {
                 ),
           ),
         ),
-        floatingActionButton: FloatingActionButton(
-          onPressed: () {
-            controller.GotoAddaitems(2);
-          },
-          backgroundColor: AppColor.backgroundcolor,
-          child: const Icon(Icons.add, color: Colors.white),
-        ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
+        // floatingActionButton: FloatingActionButton(
+        //   onPressed: () {
+        //     controller.GotoAddaitems(2);
+        //   },
+        //   backgroundColor: AppColor.backgroundcolor,
+        //   child: const Icon(Icons.add, color: Colors.white),
+        // ),
+        // floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         body: RefreshIndicator(
           onRefresh: () async {
             await controller.refreshData();

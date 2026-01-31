@@ -9,7 +9,7 @@ import '../../data/datasource/Remote/transactiondata.dart';
 class SaleController extends GetxController {
   var selectedCustomer = 'العميل'.tr.obs;
 
-  final customers = ["virtualCustomer".tr,'اختر عميل'.tr, 'عميل جديد'.tr];
+  final customers = ["virtualCustomer".tr, 'اختر عميل'.tr, 'عميل جديد'.tr];
 
   var selectedUuid = ''.obs;
 
@@ -192,9 +192,8 @@ class SaleController extends GetxController {
   }
 
   void gotoPayment() {
-    if (selectedUuid.value.isEmpty &&
-        selectedCustomer.value == 'العميل'.tr &&
-        selectedCustomer.value == 'عميل جديد'.tr &&
+    if (selectedCustomer.value == 'العميل'.tr ||
+        selectedCustomer.value == 'عميل جديد'.tr ||
         selectedCustomer.value == 'اختر عميل'.tr) {
       showSnackbar("تنبيه".tr, "يرجى اختيار العميل أولاً".tr, Colors.orange);
       return;
@@ -213,7 +212,11 @@ class SaleController extends GetxController {
       "type": type,
       "famlyname": selectedFamilyName.value,
       "totalprice": totalallPrice,
-      "selectedCustomer":selectedCustomer.value
+      "selectedCustomer": selectedCustomer.value
+    })?.then((result) {
+      if (result == true) {
+        resetData();
+      }
     });
   }
 

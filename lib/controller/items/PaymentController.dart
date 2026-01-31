@@ -70,9 +70,9 @@ class PaymentController extends GetxController {
     print("==================================================$result");
 
     if (result["status"] == 1) {
-      Get.offNamed(Approutes.HomeScreen);
+      Get.back(result: true);
       Get.find<RefreshService>().fire();
-      showSnackbar("success".tr, "add_success".tr, Colors.green);
+      // showSnackbar("success".tr, "add_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;

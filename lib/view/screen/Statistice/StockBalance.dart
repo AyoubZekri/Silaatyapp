@@ -54,18 +54,20 @@ class _StockbalanceState extends State<Stockbalance> {
                         Custemcard(
                           color: Colors.green,
                           iconData: FontAwesomeIcons.boxArchive,
-                          Price:
-                              controller.data?.summary?.totalStart.toString() ??
-                                  "0.0",
+                          Price: controller.data?.summary?.totalStart
+                                  .toStringAsFixed(0)
+                                  .toString() ??
+                              "0.0",
                           Title: "كمية اول مدة".tr,
                         ),
                         const SizedBox(width: 10),
                         Custemcard(
                           color: Colors.grey,
                           iconData: FontAwesomeIcons.box,
-                          Price:
-                              controller.data?.summary?.totalEnd.toString() ??
-                                  "0.0",
+                          Price: controller.data?.summary?.totalEnd
+                                  .toStringAsFixed(0)
+                                  .toString() ??
+                              "0.0",
                           Title: "كمية اخر مدة".tr,
                         ),
                       ],
@@ -76,16 +78,19 @@ class _StockbalanceState extends State<Stockbalance> {
                         Custemcard(
                           color: Colors.red,
                           iconData: FontAwesomeIcons.cartShopping,
-                          Price:
-                              controller.data?.summary?.totalSold.toString() ??
-                                  "0.0",
+                          Price: controller.data?.summary?.totalSold
+                                  .toStringAsFixed(0)
+                                  .toString() ??
+                              "0.0",
                           Title: "الكمية المباعة".tr,
                         ),
                         const SizedBox(width: 10),
                         Custemcard(
                           color: Colors.blue,
                           iconData: FontAwesomeIcons.truckRampBox,
-                          Price: controller.data?.summary?.totalIn.toString() ??
+                          Price: controller.data?.summary?.totalIn
+                                  .toStringAsFixed(0)
+                                  .toString() ??
                               "0.0",
                           Title: "الكمية الواردة".tr,
                         ),

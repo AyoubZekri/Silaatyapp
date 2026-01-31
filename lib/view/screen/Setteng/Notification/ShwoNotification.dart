@@ -69,9 +69,7 @@ class _ShwonotificationState extends State<Shwonotification> {
                                 controller.deleteNotification(
                                     controller.notification[0].uuid);
                               },
-                              onCancel: () {
-                                Get.back();
-                              },
+                              onCancel: () {},
                               buttonColor: AppColor.backgroundcolor,
                               confirmTextColor: AppColor.primarycolor,
                               cancelTextColor: AppColor.backgroundcolor,

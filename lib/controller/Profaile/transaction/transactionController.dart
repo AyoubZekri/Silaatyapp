@@ -45,7 +45,7 @@ class Transactioncontroller extends GetxController {
     if (result == true) {
       Get.back();
       getTransactions();
-      showSnackbar("success".tr, "delete_success".tr, Colors.green);
+      // showSnackbar("success".tr, "delete_success".tr, Colors.green);
     } else {
       statusrequest = Statusrequest.failure;
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);

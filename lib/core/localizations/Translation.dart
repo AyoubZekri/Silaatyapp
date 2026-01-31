@@ -23,7 +23,7 @@ class MyTranslation extends Translations {
           "Search": "بحث",
           "Category": "الفئة",
           "Prodacts": "السلع",
-          "Necessary": "الضروريات",
+          "Necessary": "نفذ المخزون",
           "Account_clint": "معلومات العميل",
           "Account_Supplier": "معلومات المورد",
 
@@ -324,6 +324,7 @@ class MyTranslation extends Translations {
           "الإدارة والتحكم": "الإدارة والتحكم",
           "دفع مستحقات الفاتورة": "دفع مستحقات الفاتورة",
           "طباعة": "طباعة",
+          "المزيد من الأدوات": "المزيد من الأدوات",
           "عرض PDF": "عرض PDF",
           "حذف": "حذف",
           "يجب إختيار الفئة أولا": "يجب إختيار الفئة أولا",
@@ -409,6 +410,7 @@ class MyTranslation extends Translations {
           "مخزون منخفض": "منخفض",
           "اختصارات": "اختصارات",
           "المخزون لا يكفي": "المخزون لا يكفي",
+          "ClickHere": "إضغط هنا",
 
           "بيع جديد": "بيع جديد",
           "إضافة منتج": "إضافة منتج",
@@ -423,6 +425,7 @@ class MyTranslation extends Translations {
           "سنة": "سنة",
           "إجمالي المبيعات": "إجمالي المبيعات",
           "الأرباح": "الأرباح",
+          "Conect": "للتواصل عبر البريد الإلكتروني  ",
           "لا يوجد فئات مضافة": "لا يوجد فئات مضافة",
           "لم تتم إضافة أي منتجات": "لم تتم إضافة أي منتجات",
           "لم تتم إضافة عملاء": "لم تتم إضافة عملاء",
@@ -448,14 +451,15 @@ class MyTranslation extends Translations {
           "لا يمكن أن يكون الخصم أكبر من المبلغ الإجمالي":
               "لا يمكن أن يكون الخصم أكبر من المبلغ الإجمالي",
           "لا يمكن أن يكون الخصم أقل من 0": "لا يمكن أن يكون الخصم أقل من 0",
-          "deleteInvoiceWarning": "عند حذف هذه الفاتورة سيتم حذف كل المنتجات التابعة لعملية البيع. هل تريد المتابعة؟",
-           "virtualCustomer": "عميل افتراضي",
-           "delete_category_warning": "هل أنت متأكد أنك تريد حذف هذه الفئة؟ سيتم أيضًا حذف جميع المنتجات التابعة لها."
-
-
+          "deleteInvoiceWarning":
+              "عند حذف هذه الفاتورة سيتم حذف كل المنتجات التابعة لعملية البيع. هل تريد المتابعة؟",
+          "virtualCustomer": "عميل افتراضي",
+          "delete_category_warning":
+              "هل أنت متأكد أنك تريد حذف هذه الفئة؟ سيتم أيضًا حذف جميع المنتجات التابعة لها."
         },
         "en": {
-          "deleteInvoiceWarning": "Deleting this invoice will also remove all related sale products. Proceed?",
+          "deleteInvoiceWarning":
+              "Deleting this invoice will also remove all related sale products. Proceed?",
           "choose_image": "Choose Image",
           "virtualCustomer": "Virtual Customer",
           "from_camera": "From Camera",
@@ -495,7 +499,7 @@ class MyTranslation extends Translations {
               "Silaaty is a personal app designed to help you organize and manage your goods, and track debts and debtors in a simple and organized way.",
           "Search": "Search",
           "Prodacts": "Prodacts",
-          "Necessary": "Necessary",
+          "Necessary": "Out of stock",
           "Dettes": "Dettes",
           "Category": "Category",
           "Condamnes": "Condamnes",
@@ -520,6 +524,8 @@ class MyTranslation extends Translations {
           "Country": "Country",
           "address": "address",
           "email": "email",
+          "Conect": "Contact via email  ",
+          "ClickHere": "Click here",
           "Phone Namper": "Phone Number",
           "Conferm": "Confirm",
           "Arabic": "Arabic",
@@ -583,6 +589,8 @@ class MyTranslation extends Translations {
               "Do you want to delete the invoice?",
           "Alert": "Alert",
           "Edit invoices": "Edit invoices",
+          "المزيد من الأدوات": "More Tools",
+
           "The rest": "The rest",
           "Paid-for": "Paid-for",
           "Price Total": "Price Total",
@@ -903,9 +911,10 @@ class MyTranslation extends Translations {
           "تعديل الخصم": "Edit Discount",
           "لا يمكن أن يكون الخصم أكبر من المبلغ الإجمالي":
               "The discount cannot be greater than the total amount",
-          "لا يمكن أن يكون الخصم أقل من 0": "The discount cannot be less than 0",
-          "delete_category_warning": "Are you sure you want to delete this category? All related products will also be deleted."
-
+          "لا يمكن أن يكون الخصم أقل من 0":
+              "The discount cannot be less than 0",
+          "delete_category_warning":
+              "Are you sure you want to delete this category? All related products will also be deleted."
         },
       };
 }

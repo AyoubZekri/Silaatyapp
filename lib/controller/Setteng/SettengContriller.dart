@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 
 import '../../core/functions/Snacpar.dart';
 
+
 class Settengcontriller extends GetxController {
   GotoProfaile() {
     Get.toNamed(Approutes.profaile);
@@ -58,12 +59,12 @@ class Settengcontriller extends GetxController {
     statusrequest = handlingData(response);
     if (statusrequest == Statusrequest.success && response["status"] == 1) {
       myServices.sharedPreferences?.clear();
-      showSnackbar("success".tr, "logout_success".tr, Colors.green);
+      // showSnackbar("success".tr, "logout_success".tr, Colors.green);
 
       Get.offAllNamed(Approutes.Login);
     } else {
       print(response);
-      showSnackbar("error".tr, "error_occurred".tr, Colors.green);
+      // showSnackbar("error".tr, "error_occurred".tr, Colors.green);
       statusrequest = Statusrequest.failure;
     }
     update();
@@ -104,4 +105,5 @@ class Settengcontriller extends GetxController {
       },
     );
   }
+
 }

@@ -1,5 +1,6 @@
 import 'package:Silaaty/core/functions/callback.dart';
 import 'package:Silaaty/core/functions/fcm.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Silaaty/Bindings/Initialbindings.dart';
@@ -9,13 +10,13 @@ import 'package:Silaaty/core/services/Services.dart';
 import 'package:Silaaty/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-import 'core/class/SyncServer.dart';
 
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
 
   await initialServices();
 
@@ -26,6 +27,7 @@ void main() async {
 
   // final syncService = SyncService();
   // syncService.initSyncListener();
+  await AndroidAlarmManager.initialize();
 
   final syncForeground = SyncForegroundService();
   syncForeground.start();

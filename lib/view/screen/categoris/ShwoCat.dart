@@ -88,7 +88,6 @@ class _ShwocatState extends State<Shwocat> {
                                     controller.deletecat(cat.uuid!);
                                   },
                                   onCancel: () {
-                                    Get.back();
                                   },
                                   buttonColor: AppColor.backgroundcolor,
                                   confirmTextColor: AppColor.primarycolor,

@@ -66,6 +66,7 @@ class _PublicfinanceState extends State<Publicfinance> {
                           Price: (controller.data?.summary?.netProfit ?? 0) < 0
                               ? "0"
                               : controller.data?.summary?.netProfit
+                                      .toStringAsFixed(2)
                                       .toString() ??
                                   "0",
                           Title: "صافي الربح".tr,
@@ -79,6 +80,7 @@ class _PublicfinanceState extends State<Publicfinance> {
                           color: Colors.red,
                           iconData: FontAwesomeIcons.moneyBillWave,
                           Price: controller.data?.summary?.totalExpenses
+                                  .toStringAsFixed(2)
                                   .toString() ??
                               "0.0",
                           Title: "المصروفات".tr,
@@ -88,6 +90,7 @@ class _PublicfinanceState extends State<Publicfinance> {
                           color: Colors.blue,
                           iconData: FontAwesomeIcons.sackDollar,
                           Price: controller.data?.summary?.totalRevenue
+                                  .toStringAsFixed(2)
                                   .toString() ??
                               "0.0",
                           Title: "الإرادات".tr,
@@ -116,13 +119,23 @@ class _PublicfinanceState extends State<Publicfinance> {
                           animated: true,
                           period:
                               controller.formatSmartDate(detils?.period ?? ""),
-                          revenue: detils?.revenue.toString() ?? "",
-                          profit: (detils?.netProfit ?? 0) < 0
+                          revenue:
+                              detils?.netProfit.toStringAsFixed(2).toString() ??
+                                  "",
+                          profit: (detils?.revenue ?? 0) < 0
                               ? "0"
-                              : detils?.netProfit.toString() ?? "",
-                          profit2: detils?.netProfit.toString() ?? "",
-                          totalSales: detils?.totalSales.toString() ?? "",
-                          expenses: detils?.expenses.toString() ?? "",
+                              : detils?.revenue.toStringAsFixed(2).toString() ??
+                                  "",
+                          profit2:
+                              detils?.netProfit.toStringAsFixed(2).toString() ??
+                                  "",
+                          totalSales: detils?.totalSales
+                                  .toStringAsFixed(2)
+                                  .toString() ??
+                              "",
+                          expenses:
+                              detils?.expenses.toStringAsFixed(2).toString() ??
+                                  "",
                           itemsSold: detils?.itemsSold.toString() ?? "",
                           profitRate: "${detils?.profitRate.toString() ?? ""}%",
                           labelTotalSales: "Total Sales".tr,

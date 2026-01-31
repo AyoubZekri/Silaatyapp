@@ -147,7 +147,6 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                       Get.back();
                                     },
                                     onCancel: () {
-                                      Get.back();
                                     },
                                     buttonColor: AppColor.backgroundcolor,
                                     confirmTextColor: AppColor.primarycolor,

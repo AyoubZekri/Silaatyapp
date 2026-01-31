@@ -44,7 +44,7 @@ class InvoicesController extends GetxController {
         Get.back();
         showInvoice();
         Get.find<RefreshService>().fire();
-        showSnackbar("success".tr, "add_success".tr, Colors.green);
+        // showSnackbar("success".tr, "add_success".tr, Colors.green);
       } else {
         showSnackbar("error".tr, "operation_failed".tr, Colors.red);
         statusrequest = Statusrequest.failure;
@@ -68,7 +68,7 @@ class InvoicesController extends GetxController {
         Get.back();
         Get.find<RefreshService>().fire();
         showInvoice();
-        showSnackbar("success".tr, "edit_success".tr, Colors.green);
+        // showSnackbar("success".tr, "edit_success".tr, Colors.green);
       } else {
         showSnackbar("error".tr, "operation_failed".tr, Colors.red);
         statusrequest = Statusrequest.failure;
@@ -88,7 +88,7 @@ class InvoicesController extends GetxController {
       Get.back();
       showInvoice();
       Get.find<RefreshService>().fire();
-      showSnackbar("success".tr, "delete_success".tr, Colors.green);
+      // showSnackbar("success".tr, "delete_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;
@@ -119,7 +119,7 @@ class InvoicesController extends GetxController {
     print("==================================================$result");
 
     if (result["status"] == 1) {
-      showSnackbar("success".tr, "switchSuccess".tr, Colors.green);
+      // showSnackbar("success".tr, "switchSuccess".tr, Colors.green);
       showInvoice();
     } else {
       showSnackbar("error".tr, "switchFailed".tr, Colors.red);

@@ -106,7 +106,9 @@ class _EdititemState extends State<Edititem> {
                         items: controller.categories
                             .map((cat) => DropdownMenuItem<String>(
                                   value: cat.uuid,
-                                  child: Text(cat.categorisName ?? ''),
+                                  child: Text(Get.locale?.languageCode == "ar"
+                                      ? cat.categorisName ?? ''
+                                      : cat.categorisNameFr ?? ''),
                                 ))
                             .toList(),
                         value: controller.selectedtypeuuId,
@@ -248,7 +250,7 @@ class _EdititemState extends State<Edititem> {
                           }
 
                           if (!validInputsnak(controller.barcodeController.text,
-                              1, 10, "Barcode".tr)) {
+                              1, 13, "Barcode".tr)) {
                             return;
                           }
 

@@ -48,7 +48,7 @@ class _HomeState extends State<Home> {
                         color: Colors.green,
                         iconData: FontAwesomeIcons.sackDollar,
                         Price:
-                            controller.statisticsHome?.todayIncome.toString() ??
+                            controller.statisticsHome?.todayIncome.toStringAsFixed(2).toString() ??
                                 "0,0",
                         Title: "المبيعات".tr,
                       ),
@@ -70,6 +70,7 @@ class _HomeState extends State<Home> {
                         color: Colors.grey,
                         iconData: FontAwesomeIcons.moneyBillWave,
                         Price: controller.statisticsHome?.todayNetProfit
+                                .toStringAsFixed(2)
                                 .toString() ??
                             "0,0",
                         Title: "صافي الربح".tr,

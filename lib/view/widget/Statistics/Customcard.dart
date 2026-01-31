@@ -41,7 +41,7 @@ class Custemcard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                Price,
+                truncateWithDots(Price, 14),
                 textAlign: TextAlign.start,
               ),
               Text(Title),
@@ -51,4 +51,9 @@ class Custemcard extends StatelessWidget {
       ),
     );
   }
+}
+
+String truncateWithDots(String text, int maxChars) {
+  if (text.length <= maxChars) return text;
+  return text.substring(0, maxChars) + '...';
 }

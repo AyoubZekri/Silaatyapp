@@ -97,7 +97,6 @@ class ResetpasswordcontrolerImp extends Resetpasswordcontroler {
       if (Statusrequest.success == statusrequest) {
         if (response["status"] == 1) {
           Get.offNamed(Approutes.HomeScreen);
-          showSnackbar("success".tr, "passwordResetSuccess".tr, Colors.green);
         } else {
           showSnackbar("warning".tr, "tryAgain".tr, Colors.orange);
           statusrequest = Statusrequest.failure;

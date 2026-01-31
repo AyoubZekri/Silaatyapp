@@ -37,7 +37,7 @@ class Addcatcontroller extends GetxController {
       if (response != false) {
         Get.back(result: true);
 
-        showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+        // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
       } else {
         showSnackbar("error".tr, "operationFailed".tr, Colors.red);
       }

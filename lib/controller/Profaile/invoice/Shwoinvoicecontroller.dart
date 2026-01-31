@@ -76,7 +76,7 @@ class Shwoinvoicecontroller extends GetxController {
         update();
       });
       Shwoinvoice();
-      showSnackbar("success".tr, "operation_success".tr, Colors.green);
+      // showSnackbar("success".tr, "operation_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "error_editing_product".tr, Colors.red);
     }
@@ -104,7 +104,7 @@ class Shwoinvoicecontroller extends GetxController {
       Get.back();
       Get.find<RefreshService>().fire();
       Shwoinvoice();
-      showSnackbar("success".tr, "operation_success".tr, Colors.green);
+      // showSnackbar("success".tr, "operation_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "error_editing_product".tr, Colors.red);
     }
@@ -122,7 +122,7 @@ class Shwoinvoicecontroller extends GetxController {
       Get.back();
       Get.find<RefreshService>().fire();
       Get.back();
-      showSnackbar("success".tr, "delete_success".tr, Colors.green);
+      // showSnackbar("success".tr, "delete_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
     }
@@ -138,9 +138,43 @@ class Shwoinvoicecontroller extends GetxController {
       Get.find<RefreshService>().fire();
       Shwoinvoice();
       getRemainingAmount();
-      showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else if (result["status"] == 2) {
       showSnackbar("error".tr, "المخزون لا يكفي".tr, Colors.red);
+    } else {
+      showSnackbar("error".tr, "operation_failed".tr, Colors.red);
+      statusrequest = Statusrequest.failure;
+    }
+
+    update();
+  }
+
+  Future<void> returnProduct(String uuidSale) async {
+    final result = await saledata.returnSaleProduct(uuidSale);
+
+    if (result["status"] == 1) {
+      Get.back(result: true);
+      Get.find<RefreshService>().fire();
+      Shwoinvoice();
+      getRemainingAmount();
+      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+    } else {
+      showSnackbar("error".tr, "operation_failed".tr, Colors.red);
+      statusrequest = Statusrequest.failure;
+    }
+
+    update();
+  }
+
+  Future<void> returnFullInvoice(String uuidinvois) async {
+    final result = await saledata.returnFullInvoice(uuidinvois);
+
+    if (result["status"] == 1) {
+      Get.back(result: true);
+      Get.find<RefreshService>().fire();
+      Shwoinvoice();
+      getRemainingAmount();
+      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;
@@ -162,7 +196,7 @@ class Shwoinvoicecontroller extends GetxController {
       Get.find<RefreshService>().fire();
       Shwoinvoice();
       getRemainingAmount();
-      showSnackbar("success".tr, "delete_success".tr, Colors.green);
+      // showSnackbar("success".tr, "delete_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
     }
@@ -626,5 +660,4 @@ class Shwoinvoicecontroller extends GetxController {
   //     onLayout: (PdfPageFormat format) async => pdf.save(),
   //   );
   // }
-
 }

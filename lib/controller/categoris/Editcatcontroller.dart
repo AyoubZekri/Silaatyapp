@@ -39,7 +39,7 @@ class Editcatcontroller extends GetxController {
       if (success) {
         statusrequest = Statusrequest.success;
         Get.back(result: true);
-        showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
+        // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
       } else {
         statusrequest = Statusrequest.failure;
         showSnackbar("error".tr, "operationFailed".tr, Colors.red);

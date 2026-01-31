@@ -57,11 +57,13 @@ class ProdactData {
   }
 
   Future<bool> updateProduct(
-      Map<String, Object?> data, Map<String, Object?> sale,
-      [File? image]) async {
+    Map<String, Object?> data,
+    int diff, [
+    File? image,
+  ]) async {
     final uuid = data["uuid"] as String;
-    final quantity = sale["quantity"] as int;
 
+    // تحديث الصورة (كما عندك، ما نبدلوش)
     if (image != null) {
       final oldResult = await sqldb.readData(
         "SELECT Product_image FROM products WHERE uuid = ? AND user_id = ?",
@@ -73,9 +75,7 @@ class ProdactData {
         if (oldPath != null && File(oldPath).existsSync()) {
           try {
             await File(oldPath).delete();
-          } catch (e) {
-            print("⚠️ Failed to delete old image: $e");
-          }
+          } catch (_) {}
         }
       }
 
@@ -85,6 +85,7 @@ class ProdactData {
       }
     }
 
+    // 1️⃣ تحديث المنتج
     final result = await sqldb.update(
       "products",
       data,
@@ -92,25 +93,56 @@ class ProdactData {
       [uuid, id],
     );
 
-    int resultsale = 2;
+    if (result <= 0) return false;
 
-    if (quantity > 0) {
-      resultsale = await sqldb.insert("sales", sale);
-    }
-    if (result > 0 && resultsale > 0) {
-      await _syncService.addToQueue("products", uuid, "update", data);
-      if (resultsale == 1) {
-        await _syncService.addToQueue(
+    //  تحديث آخر سطر sales فقط
+    if (diff != 0) {
+      final sales = await sqldb.readData(
+        """
+    SELECT uuid, quantity, unit_price
+    FROM sales
+    WHERE product_uuid = ? AND user_id = ?
+    ORDER BY created_at DESC
+    LIMIT 1
+    """,
+        [uuid, id],
+      );
+
+      if (sales.isEmpty) return true;
+
+      final sale = sales.first;
+      final saleUuid = sale["uuid"];
+      final oldSaleQty = sale["quantity"] as int;
+      final unitPrice = double.tryParse(sale["unit_price"].toString()) ?? 0;
+
+      final newSaleQty = oldSaleQty + diff;
+
+      if (newSaleQty <= 0) {
+        // إذا وصلت الكمية 0 → نحذف آخر حركة
+        await sqldb.delete(
           "sales",
-          sale["uuid"] as String,
-          "insert",
-          sale,
+          "uuid = ?",
+          [saleUuid],
+        );
+      } else {
+        // تعديل آخر سطر فقط
+        await sqldb.update(
+          "sales",
+          {
+            "quantity": newSaleQty,
+            "subtotal": newSaleQty * unitPrice,
+            "updated_at": DateTime.now().toIso8601String(),
+          },
+          "uuid = ?",
+          [saleUuid],
         );
       }
-      return true;
     }
 
-    return false;
+    // sync
+    await _syncService.addToQueue("products", uuid, "update", data);
+
+    return true;
   }
 
   Future<bool> updateQuantityProduct(
@@ -205,70 +237,118 @@ class ProdactData {
   }
 
   Future<bool> deleteProdact(Map<String, Object?> data) async {
-    final uuid = data["uuid"]?.toString().trim(); // تأكد string نظيف
+    final uuid = data["uuid"]?.toString().trim();
+
+    if (uuid == null || uuid.isEmpty) return false;
+
     try {
-      // 1️⃣ نتأكد المنتج موجود
-      final result = await sqldb.readData(
-        "SELECT * FROM products WHERE uuid = ? AND user_id = ? LIMIT 1",
+      // 1️⃣ تأكد المنتج موجود
+      final product = await sqldb.readData(
+        "SELECT uuid FROM products WHERE uuid = ? AND user_id = ? LIMIT 1",
         [uuid, id],
       );
 
-      if (result.isEmpty) {
+      if (product.isEmpty) {
         print("❌ المنتج غير موجود");
         return false;
       }
 
-      final lastSale = await sqldb.readData('''
-      SELECT created_at, uuid FROM sales 
-      WHERE product_uuid = ? 
-        AND user_id = ? 
+      // 2️⃣ حساب الكمية المباعة (type_sales = 2)
+      final soldResult = await sqldb.readData(
+        '''
+      SELECT SUM(quantity) AS total_sold
+      FROM sales
+      WHERE product_uuid = ?
+        AND user_id = ?
+        AND type_sales = 2
+      ''',
+        [uuid, id],
+      );
+
+      final int soldQty = (soldResult.first["total_sold"] as int?) ?? 0;
+
+      // 3️⃣ جلب سطر الإدخال (type_sales = 3)
+      final stockRow = await sqldb.readData(
+        '''
+      SELECT uuid
+      FROM sales
+      WHERE product_uuid = ?
+        AND user_id = ?
         AND type_sales = 3
-      ORDER BY created_at DESC 
       LIMIT 1
-    ''', [uuid, id]);
+      ''',
+        [uuid, id],
+      );
 
-      if (lastSale.isNotEmpty) {
-        final lastDateStr = lastSale.first["created_at"]?.toString() ?? "";
-        final lastDate = DateTime.tryParse(lastDateStr);
+      if (stockRow.isNotEmpty) {
+        final stockUuid = stockRow.first["uuid"] as String;
 
-        if (lastDate != null) {
-          final now = DateTime.now();
-          final difference = now.difference(lastDate).inHours;
+        if (soldQty == 0) {
+          // ❌ ما كاش مبيعات → نحذف الإدخال
+          await sqldb.delete(
+            "sales",
+            "uuid = ?",
+            [stockUuid],
+          );
 
-          if (difference < 24) {
-            final result = await sqldb.delete(
-              "sales",
-              "product_uuid = ? AND user_id = ? AND type_sales = 3",
-              [uuid, id],
-            );
+          await _syncService.addToQueue(
+            "sales",
+            stockUuid,
+            "update",
+            {
+              "uuid": stockUuid,
+              "is_delete": 1,
+              "updated_at": DateTime.now().toIso8601String(),
+            },
+          );
+        } else {
+          // ✅ كاين مبيعات → نعدّل الإدخال بالكمية المباعة
+          await sqldb.update(
+            "sales",
+            {
+              "quantity": soldQty,
+              "updated_at": DateTime.now().toIso8601String(),
+            },
+            "uuid = ?",
+            [stockUuid],
+          );
 
-            if (result > 0) {
-              await _syncService.addToQueue(
-                  "sales", lastSale.first["uuid"] as String, "update", {
-                "uuid": lastSale.first["uuid"] as String,
-                'is_delete': 1,
-                'updated_at': DateTime.now().toIso8601String(),
-              });
-            }
-          }
+          await _syncService.addToQueue(
+            "sales",
+            stockUuid,
+            "update",
+            {
+              "uuid": stockUuid,
+              "quantity": soldQty,
+              "updated_at": DateTime.now().toIso8601String(),
+            },
+          );
         }
       }
 
-      final resultup = await sqldb
-          .delete("products", "uuid = ? AND user_id = ?", [uuid, id]);
+      // 4️⃣ حذف المنتج
+      await sqldb.delete(
+        "products",
+        "uuid = ? AND user_id = ?",
+        [uuid, id],
+      );
 
-      if (resultup > 0) {
-        await _syncService.addToQueue("products", uuid!, "update", {
+      await _syncService.addToQueue(
+        "products",
+        uuid,
+        "update",
+        {
           "uuid": uuid,
-          'is_delete': 1,
-          'updated_at': DateTime.now().toIso8601String(),
-        });
-        print("✅ تم حذف المنتج بنجاح");
-        return true;
-      }
-      return false;
-    } catch (e) {
-      print("❌ خطأ أثناء التحديث: $e");
+          "is_delete": 1,
+          "updated_at": DateTime.now().toIso8601String(),
+        },
+      );
+
+      print("✅ تم حذف المنتج بنجاح");
+      return true;
+    } catch (e, st) {
+      print("❌ خطأ أثناء حذف المنتج: $e");
+      print(st);
       return false;
     }
   }
