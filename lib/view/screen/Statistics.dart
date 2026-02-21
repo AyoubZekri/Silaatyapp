@@ -19,6 +19,7 @@ class _StatisticsState extends State<Statistics> {
   @override
   Widget build(BuildContext context) {
     Statisticecontroller controller = Get.put(Statisticecontroller());
+
     final spots = (controller.chartData.isNotEmpty &&
             controller.chartData.first.chart.isNotEmpty)
         ? controller.chartData.first.chart.map((e) => e.toFlSpot()).toList()

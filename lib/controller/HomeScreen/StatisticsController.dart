@@ -1,6 +1,7 @@
 import 'package:Silaaty/core/constant/routes.dart';
 import 'package:get/get.dart';
 
+import '../../core/services/Services.dart';
 import '../../data/datasource/Remote/StatisticsData.dart';
 import '../../data/model/ChartPointModel.dart';
 
@@ -38,9 +39,18 @@ class Statisticecontroller extends GetxController {
     update();
   }
 
+  Future<void> reloadStats() async {
+    await loadChartData();
+    update();
+  }
+
   @override
   void onInit() {
-    loadChartData();
+    final refreshService = Get.find<RefreshService>();
+    ever(refreshService.refreshTrigger, (_) {
+      reloadStats();
+    });
+    Get.find<RefreshService>().fire();
     super.onInit();
   }
 }

@@ -6,19 +6,19 @@ import '../../../core/constant/Colorapp.dart';
 class ProductActionsBottomSheet extends StatelessWidget {
   final VoidCallback onReturn;
   final VoidCallback onEdit;
-  final VoidCallback onDelete;
 
   const ProductActionsBottomSheet({
     super.key,
     required this.onReturn,
     required this.onEdit,
-    required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
+    bool isRTL = Get.locale?.languageCode == 'ar';
+
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: isRTL ? TextDirection.rtl : TextDirection.ltr,
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: const BoxDecoration(
@@ -27,38 +27,22 @@ class ProductActionsBottomSheet extends StatelessWidget {
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment:
+              isRTL ? CrossAxisAlignment.end : CrossAxisAlignment.start,
           children: [
             _buildHeader(),
             const SizedBox(height: 12),
-
             _actionTile(
               icon: Icons.keyboard_return,
-              title: 'إرجاع المنتج',
+              title: 'return_product'.tr,
               color: Colors.blue,
-              onTap: () {
-                Get.back();
-                onReturn();
-              },
+              onTap: onReturn,
             ),
-
             _actionTile(
               icon: Icons.edit,
-              title: 'تعديل المنتج',
+              title: 'edit_product'.tr,
               color: Colors.orange,
-              onTap: () {
-                Get.back();
-                onEdit();
-              },
-            ),
-
-            _actionTile(
-              icon: Icons.delete,
-              title: 'حذف المنتج',
-              color: Colors.red,
-              onTap: () {
-                Get.back();
-                onDelete();
-              },
+              onTap: onEdit,
             ),
           ],
         ),
@@ -67,19 +51,16 @@ class ProductActionsBottomSheet extends StatelessWidget {
   }
 
   Widget _buildHeader() {
-    return Row(
-      children: const [
-        Expanded(
-          child: Text(
-            'اختر العملية',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColor.grey,
-            ),
-          ),
+    return Container(
+      alignment: Alignment.center,
+      child: Text(
+        'select_operation'.tr,
+        style: TextStyle(
+          fontSize: 20,
+          fontWeight: FontWeight.bold,
+          color: AppColor.grey,
         ),
-      ],
+      ),
     );
   }
 
@@ -89,17 +70,30 @@ class ProductActionsBottomSheet extends StatelessWidget {
     required Color color,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      onTap: onTap,
-      leading: CircleAvatar(
-        backgroundColor: color.withOpacity(0.1),
-        child: Icon(icon, color: color),
+    return InkWell(
+      onTap: () {
+        Get.back();
+        onTap();
+      },
+      child: Padding(
+        padding:
+            const EdgeInsets.only(top: 10, bottom: 10, left: 15, right: 15),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: color.withOpacity(0.1),
+              child: Icon(icon, color: color),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(fontSize: 16),
+              ),
+            ),
+          ],
+        ),
       ),
-      title: Text(
-        title,
-        style: const TextStyle(fontSize: 16),
-      ),
-      trailing: const Icon(Icons.arrow_back_ios, size: 16),
     );
   }
 }

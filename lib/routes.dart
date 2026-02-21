@@ -33,7 +33,6 @@ import 'package:Silaaty/view/screen/Setteng/Notification/ShwoNotification.dart';
 import 'package:Silaaty/view/screen/Setteng/Privacypolicy.dart';
 import 'package:Silaaty/view/screen/Setteng/Profail.dart';
 import 'package:Silaaty/view/screen/Setteng/profaile.dart';
-import 'package:Silaaty/view/screen/Zakate.dart';
 import 'package:Silaaty/view/screen/categoris/Addcat.dart';
 import 'package:Silaaty/view/screen/categoris/Editcat.dart';
 import 'package:Silaaty/view/screen/categoris/ShwoCat.dart';
@@ -53,6 +52,7 @@ import 'view/screen/SplashScreen.dart';
 import 'view/screen/Statistice/PublicFinance.dart';
 import 'view/screen/Statistice/StatisticeReports.dart';
 import 'view/screen/Statistice/StockBalance.dart';
+import 'view/screen/SubscriptionExpiredPage.dart';
 
 List<GetPage<dynamic>> routes = [
   GetPage(name: "/", page: () => const SplashScreen()),
@@ -127,5 +127,5 @@ List<GetPage<dynamic>> routes = [
   GetPage(name: Approutes.stockbalance, page: () => Stockbalance()),
   GetPage(name: Approutes.stockvalue, page: () => Stockvalue()),
   GetPage(name: Approutes.supplierreports, page: () => Supplierreports()),
-
+  GetPage(name: Approutes.subscriptionExpiredPage, page: () => SubscriptionExpiredPage()),
 ];

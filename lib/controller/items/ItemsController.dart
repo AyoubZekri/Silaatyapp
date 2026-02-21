@@ -35,7 +35,7 @@ class Itemscontroller extends GetxController {
   int getQuantity(String uuid) => quantities[uuid] ?? 0;
 
   void toggleSelect(String uuid, int maxQuantity) {
-    if (selectedUuids.contains(uuid) || (maxQuantity == 0 && type != 1)) {
+    if (selectedUuids.contains(uuid) || (maxQuantity == 0 && type == 0)) {
       // showSnackbar("error".tr, "غير متوفر", Colors.red);
       selectedUuids.remove(uuid);
       quantities[uuid] = 0;
@@ -265,6 +265,7 @@ class Itemscontroller extends GetxController {
       final List<Map<String, dynamic>> selected =
           List<Map<String, dynamic>>.from(args['selectedProducts']);
       type = args["type"] ?? 0;
+      print("=============================type$type");
       for (var p in selected) {
         final uuid = p['uuid'];
         final qty = p['quantity'] ?? 1;

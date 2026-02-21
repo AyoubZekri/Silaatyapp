@@ -1,4 +1,3 @@
-import 'package:Silaaty/core/constant/routes.dart';
 import 'package:Silaaty/data/datasource/Remote/SaleData.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -60,6 +59,8 @@ class PaymentController extends GetxController {
         "type_sales": (type == 1 ? 1 : 2), // 1 = in 2 = on 3
         "user_id": id,
         "created_at": DateTime.now().toIso8601String(),
+        "product_price_purchase": item["price_Purchase"],
+        "product_name": item["name"],  
       };
     }).toList();
     print(data);

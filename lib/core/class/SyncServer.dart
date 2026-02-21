@@ -44,7 +44,7 @@ class SyncService {
     );
 
     if (unsynced.isEmpty) {
-      print( " $tableℹ️ لا توجد بيانات لرفعها");
+      print(" $tableℹ️ لا توجد بيانات لرفعها");
       return;
     }
 
@@ -57,44 +57,79 @@ class SyncService {
         (i + batchSize > unsynced.length) ? unsynced.length : i + batchSize,
       );
 
-      final List<Map<String, dynamic>> payload = batch.map((row) {
-        final decoded = (row["data"] != null && row["data"] is String)
+      for (final row in batch) {
+        final data = row["data"] != null
             ? Map<String, dynamic>.from(jsonDecode(row["data"] as String))
             : <String, dynamic>{};
+        data["uuid"] = row["row_id"];
 
-        decoded["uuid"] = row["row_id"];
-        return decoded;
-      }).toList();
+        final token =
+            Get.find<Myservices>().sharedPreferences?.getString("token");
+        final headers = {
+          "Accept": "application/json",
+          if (token != null) "Authorization": "Bearer $token",
+        };
 
-      final token =
-          Get.find<Myservices>().sharedPreferences?.getString("token");
-      final headers = {
-        "Accept": "application/json",
-        if (token != null) "Authorization": "Bearer $token",
-        "Content-Type": "application/json",
-      };
+        try {
+          http.Response res;
 
-      try {
-        final res = await http.post(
-          Uri.parse("$baseUrl/$table"),
-          body: jsonEncode(payload),
-          headers: headers,
-        );
+          // تحقق إذا كانت صورة موجودة للمنتجات أو الفئات
+          String? filePath;
+          if (table == "products") filePath = data["Product_image"];
+          if (table == "categoris") filePath = data["categoris_image"];
 
-        if (res.statusCode == 200) {
-          final ids = batch.map((row) => row["id"]).join(',');
-          await _db.update(
-            "sync_queue",
-            {"synced": 1},
-            "id IN ($ids)",
-          );
-          print("$table نجاح رفع دفعة ${i ~/ batchSize + 1} (${batch.length}  سجل)");
-        } else {
-          print("❌ HTTP ${res.statusCode}: ${res.body}");
+          bool hasImage = filePath != null && File(filePath).existsSync();
+
+          if (hasImage) {
+            // إزالة الحقل قبل الإرسال
+            if (table == "products") data.remove("Product_image");
+            if (table == "categoris") data.remove("categoris_image");
+
+            final request =
+                http.MultipartRequest("POST", Uri.parse("$baseUrl/$table"));
+            request.headers.addAll(headers);
+
+            // إضافة الحقول العادية
+            data.forEach((key, value) {
+              request.fields[key] = value.toString();
+            });
+
+            // اسم الحقل حسب الجدول
+            final fieldName =
+                table == "categoris" ? "categoris_image" : "Product_image";
+
+            // إضافة الملف
+            request.files
+                .add(await http.MultipartFile.fromPath(fieldName, filePath));
+
+            final streamed = await request.send();
+            res = await http.Response.fromStream(streamed);
+            print("📤 رفع Multipart => $filePath");
+          } else {
+            // إرسال JSON عادي إذا ما فيه صورة
+            res = await http.post(
+              Uri.parse("$baseUrl/$table"),
+              body: jsonEncode(data),
+              headers: {...headers, "Content-Type": "application/json"},
+            );
+          }
+
+          if (res.statusCode == 200) {
+            await _db.update(
+              "sync_queue",
+              {"synced": 1},
+              "id=${row["id"]}",
+            );
+            print("✅ نجاح رفع ${data["uuid"]}");
+          } else {
+            print("❌ HTTP ${res.statusCode}: ${res.body}");
+          }
+        } catch (e) {
+          print("❌ استثناء: $e");
         }
-      } catch (e) {
-        print("❌ استثناء: $e");
       }
+
+      print("$table نجاح رفع دفعة ${i ~/ batchSize + 1} (${batch.length} سجل)");
     }
 
     print("🏁 انتهى الرفع.");
@@ -142,15 +177,32 @@ class SyncService {
     );
   }
 
-  Future<http.Response> _sendDataRequest(String table,
-      Map<String, dynamic> data, Map<String, String> headers) async {
-    String? filePath = data["Product_image"] ?? data["categoris_image"];
+  Future<http.Response> _sendDataRequest(
+    String table,
+    Map<String, dynamic> data,
+    Map<String, String> headers,
+  ) async {
+    String? filePath;
+
+    // تحديد الصورة حسب الجدول
+    if (table == "products") {
+      filePath = data["Product_image"];
+    } else if (table == "categoris") {
+      filePath = data["categoris_image"];
+    }
+
     bool hasImage = filePath != null && File(filePath).existsSync();
 
     if (hasImage) {
+      // إزالة المسار المحلي من JSON قبل الإرسال
+      if (table == "products") data.remove("Product_image");
+      if (table == "categoris") data.remove("categoris_image");
+      print("=====================prodact");
       return _sendMultipart(table, data, headers, filePath);
     }
+    print("=====================noprodact");
 
+    // إرسال البيانات بدون صورة
     return http.post(
       Uri.parse("$baseUrl/$table"),
       body: jsonEncode(data),
@@ -158,22 +210,26 @@ class SyncService {
     );
   }
 
-  Future<http.Response> _sendMultipart(String table, Map<String, dynamic> data,
-      Map<String, String> headers, String filePath) async {
+  Future<http.Response> _sendMultipart(
+    String table,
+    Map<String, dynamic> data,
+    Map<String, String> headers,
+    String filePath,
+  ) async {
     final request = http.MultipartRequest("POST", Uri.parse("$baseUrl/$table"));
     request.headers.addAll(headers);
 
-    data.remove("Product_image");
-    data.remove("categoris_image");
-
+    // إضافة الحقول العادية
     data.forEach((key, value) {
       request.fields[key] = value.toString();
     });
 
-    request.files.add(await http.MultipartFile.fromPath(
-      table == "categoris" ? "categoris_image" : "Product_image",
-      filePath,
-    ));
+    // اسم الحقل حسب الجدول
+    final fieldName =
+        table == "categoris" ? "categoris_image" : "Product_image";
+
+    // إضافة الملف نفسه
+    request.files.add(await http.MultipartFile.fromPath(fieldName, filePath));
 
     print("📤 رفع Multipart => $filePath");
 
@@ -251,7 +307,7 @@ class SyncService {
           break;
         }
         final serverCount = serverData.length;
-        if (table != "zakats") {
+        if (table != "zakats" && table != "products" && table != "categoris") {
           final deletedUuids = serverData
               .where((e) => e["is_delete"] == 1 || e["is_delete"] == "1")
               .map((e) => e["uuid"].toString())

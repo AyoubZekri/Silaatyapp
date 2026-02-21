@@ -10,13 +10,11 @@ import 'package:Silaaty/core/services/Services.dart';
 import 'package:Silaaty/routes.dart';
 import 'package:firebase_core/firebase_core.dart';
 
-
 final RouteObserver<ModalRoute<void>> routeObserver =
     RouteObserver<ModalRoute<void>>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
 
   await initialServices();
 
@@ -44,6 +42,8 @@ class MyApp extends StatelessWidget {
     LocalController controller = Get.put(LocalController());
     Get.put(RefreshService());
     return GetMaterialApp(
+      defaultTransition: Transition.fadeIn,
+      transitionDuration: const Duration(milliseconds: 300),
       navigatorObservers: [routeObserver],
       translations: MyTranslation(),
       debugShowCheckedModeBanner: false,
@@ -52,6 +52,12 @@ class MyApp extends StatelessWidget {
       locale: controller.language,
       initialBinding: Initialbindings(),
       getPages: routes,
+      builder: (context, child) {
+        return MediaQuery(
+          data: MediaQuery.of(context).copyWith(textScaleFactor: 1.0),
+          child: child!,
+        );
+      },
     );
   }
 }

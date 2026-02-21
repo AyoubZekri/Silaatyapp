@@ -158,6 +158,8 @@ class SQLDB {
         uuid TEXT,
         invoie_uuid TEXT,
         product_uuid TEXT,
+        product_name TEXT,
+        product_price_purchase REAL DEFAULT 0,
         user_id INTEGER NOT NULL,
         quantity INTEGER DEFAULT 1,
         unit_price REAL DEFAULT 0,

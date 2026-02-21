@@ -1,8 +1,6 @@
 import 'dart:io';
 import 'dart:math';
-import 'package:Silaaty/controller/items/ItemsController.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
-import 'package:Silaaty/core/constant/routes.dart';
 import 'package:Silaaty/data/datasource/Remote/Categoris_data.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 import 'package:Silaaty/data/model/Categoris_model.dart';
@@ -88,6 +86,8 @@ class Additemscontroller extends GetxController {
         "type_sales": 3, // 1 = in 2 = out 3
         "user_id": id,
         "created_at": DateTime.now().toIso8601String(),
+        "product_name": data["product_name"],
+        "product_price_purchase": data["product_price_purchase"],
       };
 
       try {

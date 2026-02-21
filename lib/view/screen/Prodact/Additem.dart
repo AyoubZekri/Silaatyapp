@@ -241,7 +241,7 @@ class _AdditemState extends State<Additem> {
                           if (!validInputsnak(controller.nameController.text, 1,
                               20, "Name".tr)) {
                             return;
-                          }
+                        }
                           
                           if (!validInputsnak(controller.barcodeController.text,
                               1, 13, "Barcode".tr)) {

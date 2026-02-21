@@ -73,10 +73,9 @@ class _SplashScreenState extends State<SplashScreen>
         DateTime today =
             DateTime(currentDate.year, currentDate.month, currentDate.day);
 
-        if ((today.isAfter(experimentDate) && status! <= 2||
+        if ((today.isAfter(experimentDate) && status! <= 2 ||
             today.isAtSameMomentAs(experimentDate) && status! <= 2)) {
-          await myServices.sharedPreferences!.clear();
-          Get.offAllNamed(Approutes.Login);
+          Get.offAllNamed(Approutes.subscriptionExpiredPage);
         } else {
           Get.offAllNamed(Approutes.HomeScreen);
         }

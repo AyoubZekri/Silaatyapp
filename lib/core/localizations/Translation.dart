@@ -455,8 +455,75 @@ class MyTranslation extends Translations {
               "عند حذف هذه الفاتورة سيتم حذف كل المنتجات التابعة لعملية البيع. هل تريد المتابعة؟",
           "virtualCustomer": "عميل افتراضي",
           "delete_category_warning":
-              "هل أنت متأكد أنك تريد حذف هذه الفئة؟ سيتم أيضًا حذف جميع المنتجات التابعة لها."
+              "هل أنت متأكد أنك تريد حذف هذه الفئة؟ سيتم أيضًا حذف جميع المنتجات التابعة لها.",
+          'return_product_question': 'هل تريد إرجاع المنتج؟',
+          'edit_quantity': 'تعديل الكمية',
+          'return': 'إرجاع',
+          'return_invoice_question': 'هل تريد إرجاع الفاتورة؟',
+          'select_operation': 'اختر العملية',
+          'edit_product': 'تعديل المنتج',
+          'return_product': 'إرجاع المنتج',
+          "انتهى اشتراكك": "انتهى اشتراكك",
+          "لقد انتهت فترة صلاحية اشتراكك الحالي. يرجى التجديد للاستمرار في استخدام التطبيق .":
+              "لقد انتهت فترة صلاحية اشتراكك الحالي. يرجى التجديد للاستمرار في استخدام التطبيق.",
+          "الباقة السابقة": "الباقة السابقة",
+          "الخطة المجانية": "الخطة المجانية",
+          "تاريخ الانتهاء": "تاريخ الانتهاء",
+          "تعذر فتح تطبيق البريد": "تعذر فتح تطبيق البريد",
+          "تواصل مع الدعم عبر البريد": "تواصل مع الدعم عبر البريد",
+          "مرحبا، أحتاج لتجديد الإشتراك": "مرحبا، أحتاج لتجديد الإشتراك",
+          "تعذر فتح واتساب": "تعذر فتح واتساب",
+          "تواصل مع الدعم عبر الواتساب": "تواصل مع الدعم عبر الواتساب",
+          "بإمكانك التواصل مع فريق الدعم لتجديد الإشتراك":
+              "بإمكانك التواصل مع فريق الدعم لتجديد الإشتراك",
         },
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+        // ::::::
+
         "en": {
           "deleteInvoiceWarning":
               "Deleting this invoice will also remove all related sale products. Proceed?",
@@ -914,7 +981,28 @@ class MyTranslation extends Translations {
           "لا يمكن أن يكون الخصم أقل من 0":
               "The discount cannot be less than 0",
           "delete_category_warning":
-              "Are you sure you want to delete this category? All related products will also be deleted."
+              "Are you sure you want to delete this category? All related products will also be deleted.",
+          'return_product_question': 'Do you want to return the product?',
+          'edit_quantity': 'Edit quantity',
+          'return': 'Return',
+          'return_invoice_question': 'Do you want to return the invoice?',
+          'select_operation': 'Select Operation',
+          'edit_product': 'Edit Product',
+          'return_product': 'Return Product',
+          "انتهى اشتراكك": "Your subscription has ended",
+          "لقد انتهت فترة صلاحية اشتراكك الحالي. يرجى التجديد للاستمرار في استخدام التطبيق .":
+              "Your current subscription has expired. Please renew to continue using the app.",
+          "الباقة السابقة": "Previous plan",
+          "الخطة المجانية": "Free plan",
+          "تاريخ الانتهاء": "Expiry date",
+          "تعذر فتح تطبيق البريد": "Unable to open email app",
+          "تواصل مع الدعم عبر البريد": "Contact support via email",
+          "مرحبا، أحتاج لتجديد الإشتراك":
+              "Hello, I need to renew my subscription",
+          "تعذر فتح واتساب": "Unable to open WhatsApp",
+          "تواصل مع الدعم عبر الواتساب": "Contact support via WhatsApp",
+          "بإمكانك التواصل مع فريق الدعم لتجديد الإشتراك":
+              "You can contact the support team to renew your subscription",
         },
       };
 }

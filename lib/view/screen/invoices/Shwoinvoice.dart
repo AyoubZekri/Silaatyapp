@@ -137,7 +137,7 @@ class _PaymentState extends State<Shwoinvoice> {
                                               fontWeight: FontWeight.bold,
                                               color: AppColor.backgroundcolor),
                                           middleText:
-                                              "هل تريد إرجاع المنتج؟".tr,
+                                              'return_product_question'.tr,
                                           onConfirm: () {
                                             controller.returnProduct(pro.uuid);
                                           },
@@ -156,7 +156,7 @@ class _PaymentState extends State<Shwoinvoice> {
                                           CustemQuantityDialog(
                                             controller:
                                                 controller.qtyController,
-                                            title: "تعديل الكمية",
+                                            title: 'edit_quantity'.tr,
                                             onCancel: () => Get.back(),
                                             onConfirm: () {
                                               if (!validInputsnak(
@@ -170,25 +170,6 @@ class _PaymentState extends State<Shwoinvoice> {
                                                   pro.uuid, pro.quantity);
                                             },
                                           ),
-                                        );
-                                      },
-                                      onDelete: () {
-                                        Get.defaultDialog(
-                                          backgroundColor: AppColor.white,
-                                          title: "Alert".tr,
-                                          titleStyle: const TextStyle(
-                                              fontWeight: FontWeight.bold,
-                                              color: AppColor.backgroundcolor),
-                                          middleText: "هل تريد حذف المنتج؟".tr,
-                                          onConfirm: () {
-                                            controller.deleteProduct(pro.uuid);
-                                          },
-                                          onCancel: () {},
-                                          buttonColor: AppColor.backgroundcolor,
-                                          confirmTextColor:
-                                              AppColor.primarycolor,
-                                          cancelTextColor:
-                                              AppColor.backgroundcolor,
                                         );
                                       },
                                     ),
@@ -352,17 +333,33 @@ class _PaymentState extends State<Shwoinvoice> {
                             onTap: () {
                               controller.generateArabicPdf();
                             },
-                            iconData: Icons.keyboard_return,
+                            iconData: Icons.picture_as_pdf,
                             title: "عرض PDF".tr,
                           ),
                           const SizedBox(width: 15),
                           Custemcartabbreviation(
                             width: Get.width / 4,
                             onTap: () {
-                              controller.returnFullInvoice(controller.uuid!);
+                              Get.defaultDialog(
+                                backgroundColor: AppColor.white,
+                                title: "Alert".tr,
+                                titleStyle: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColor.backgroundcolor,
+                                ),
+                                middleText: 'return_invoice_question'.tr,
+                                onConfirm: () {
+                                  controller
+                                      .returnFullInvoice(controller.uuid!);
+                                },
+                                onCancel: () {},
+                                buttonColor: AppColor.backgroundcolor,
+                                confirmTextColor: AppColor.primarycolor,
+                                cancelTextColor: AppColor.backgroundcolor,
+                              );
                             },
-                            iconData: Icons.picture_as_pdf,
-                            title: "ارجاع".tr,
+                            iconData: Icons.keyboard_return,
+                            title: 'return'.tr,
                           ),
                           const SizedBox(width: 15),
                           Custemcartabbreviation(

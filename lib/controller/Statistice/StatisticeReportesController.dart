@@ -79,6 +79,9 @@ class Statisticereportescontroller extends GetxController {
           ? {"from": customStartDate, "to": customEndDate}
           : {"filter": filterController},
     );
+    filterController = null;
+    customStartDate = null;
+    customEndDate = null;
   }
 
   gotoCustomerSales() {
@@ -94,6 +97,9 @@ class Statisticereportescontroller extends GetxController {
           ? {"from": customStartDate, "to": customEndDate}
           : {"filter": filterController},
     );
+    filterController = null;
+    customStartDate = null;
+    customEndDate = null;
   }
 
   gotoSupplierReports() {
@@ -109,5 +115,8 @@ class Statisticereportescontroller extends GetxController {
           ? {"from": customStartDate, "to": customEndDate}
           : {"filter": filterController},
     );
+    filterController = null;
+    customStartDate = null;
+    customEndDate = null;
   }
 }

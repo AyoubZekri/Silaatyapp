@@ -8,7 +8,6 @@ import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/services/Services.dart';
 import 'package:Silaaty/data/datasource/Remote/Categoris_data.dart';
 import 'package:Silaaty/data/model/Categoris_model.dart';
-import 'package:uuid/uuid.dart';
 
 import '../../core/functions/Snacpar.dart';
 
@@ -72,43 +71,46 @@ class Edititemcontroller extends GetxController {
     update();
   }
 
- EditProduct() async {
-  if (!formstate.currentState!.validate()) return;
+  EditProduct() async {
+    if (!formstate.currentState!.validate()) return;
 
-  final newQty = int.parse(quantityController.text);
-  final oldQty = int.parse(oldquantity!);
-  final diff = newQty - oldQty;
+    final newQty = int.parse(quantityController.text);
+    final oldQty = int.parse(oldquantity!);
 
-  if (newQty < 0) {
-    showSnackbar("error".tr, "كمية غير صالحة", Colors.red);
-    return;
+    if (newQty < 0) {
+      showSnackbar("error".tr, "كمية غير صالحة", Colors.red);
+      return;
+    }
+
+    final data = {
+      "uuid": uuid,
+      'product_name': nameController.text,
+      'product_description': descriptionController.text,
+      'product_quantity': newQty,
+      'product_price': priseController.text,
+      'categorie_id': selectedCategoryId.toString(),
+      'categoris_uuid': selectedtypeuuId.toString(),
+      'product_price_total': priceTotal.toString(),
+      'product_price_total_purchase': priceTotalPurchase.toString(),
+      'product_price_purchase': pricePurchaseController.text,
+      "codepar": barcodeController.text,
+      'updated_at': DateTime.now().toString().substring(0, 19),
+    };
+
+    final result = await prodactData.updateProduct(
+      data,
+      oldQty,
+      newQty,
+      file,
+    );
+    if (result) {
+      Get.find<RefreshService>().fire();
+      Get.back(result: true);
+    } else {
+      showSnackbar("error".tr, "error_updating_product".tr, Colors.red);
+    }
   }
 
-  Map<String, Object?> data = {
-    "uuid": uuid,
-    'product_name': nameController.text,
-    'product_description': descriptionController.text,
-    'product_quantity': newQty,
-    'product_price': priseController.text,
-    'categorie_id': selectedCategoryId.toString(),
-    'categoris_uuid': selectedtypeuuId.toString(),
-    'product_price_total': priceTotal.toString(),
-    'product_price_total_purchase': priceTotalPurchase.toString(),
-    'product_price_purchase': pricePurchaseController.text,
-    "codepar": barcodeController.text,
-    'updated_at': DateTime.now().toIso8601String(),
-  };
-
-  final result =
-      await prodactData.updateProduct(data, diff, file);
-
-  if (result) {
-    Get.find<RefreshService>().fire();
-    Get.back(result: true);
-  } else {
-    showSnackbar("error".tr, "error_updating_product".tr, Colors.red);
-  }
-}
   @override
   void onInit() {
     WidgetsBinding.instance.addPostFrameCallback((_) {

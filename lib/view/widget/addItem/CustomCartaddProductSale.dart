@@ -60,7 +60,8 @@ class Customcartaddproductsale extends StatelessWidget {
         ],
       ),
       child: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding:
+            const EdgeInsets.only(top: 35, bottom: 15, left: 10, right: 10),
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [

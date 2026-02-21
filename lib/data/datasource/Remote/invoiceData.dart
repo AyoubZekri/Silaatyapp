@@ -71,7 +71,7 @@ class Invoicedata {
 
       for (var row in salesRows) {
         await _syncService
-          .addToQueue("sales", row["uuid"] as String, "update", {
+            .addToQueue("sales", row["uuid"] as String, "update", {
           "uuid": row["uuid"] as String,
           'is_delete': 1,
           'updated_at': DateTime.now().toIso8601String(),
@@ -116,7 +116,7 @@ class Invoicedata {
   LEFT JOIN sales s 
       ON s.invoie_uuid = i.uuid 
       AND s.type_sales = 2                     
-  WHERE i.user_id = ?
+  WHERE i.user_id = ? AND (t.transactions = 2 OR t.transactions IS NULL)
   GROUP BY i.uuid
   ORDER BY i.invoies_date DESC;
 ''', [id]);
@@ -208,10 +208,9 @@ class Invoicedata {
         s.quantity,
         s.unit_price,
         s.subtotal,
-        p.product_name,
-        p.product_price
+        s.product_name,
+        s.unit_price As product_price
       FROM sales AS s
-      INNER JOIN products AS p ON s.product_uuid = p.uuid
       WHERE s.invoie_uuid = ? AND s.is_delete = 0
       ''',
         [invoiceUuid],

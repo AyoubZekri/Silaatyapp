@@ -31,8 +31,8 @@ class Logincontroller extends GetxController {
     if (formData!.validate()) {
       statusrequest = Statusrequest.loadeng;
       update();
-      String? fcmToken = await FirebaseMessaging.instance.getToken();
-      print("FCM Token: $fcmToken");
+       String? fcmToken = await FirebaseMessaging.instance.getToken();
+       print("FCM Token: $fcmToken");
       var response =
           await logenData.postdata(Password.text, Email.text, fcmToken!);
       if (response == Statusrequest.serverfailure) {
@@ -43,7 +43,6 @@ class Logincontroller extends GetxController {
       if (statusrequest == Statusrequest.success) {
         if (response["status"] == 1) {
           print(response["data"]["user"]["token"]);
-
           myServices.sharedPreferences!
               .setInt("id", response['data']["user"]["user"]['id']);
           myServices.sharedPreferences!

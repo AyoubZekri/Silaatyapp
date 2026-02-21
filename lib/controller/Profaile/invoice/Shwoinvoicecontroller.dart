@@ -153,6 +153,13 @@ class Shwoinvoicecontroller extends GetxController {
     final result = await saledata.returnSaleProduct(uuidSale);
 
     if (result["status"] == 1) {
+      print(result["msg"]);
+      print("===============0");
+
+      if (result["msg"] == "true") {
+        print("===============1");
+        Get.back(result: true);
+      }
       Get.back(result: true);
       Get.find<RefreshService>().fire();
       Shwoinvoice();
@@ -170,6 +177,7 @@ class Shwoinvoicecontroller extends GetxController {
     final result = await saledata.returnFullInvoice(uuidinvois);
 
     if (result["status"] == 1) {
+      Get.back();
       Get.back(result: true);
       Get.find<RefreshService>().fire();
       Shwoinvoice();
@@ -181,25 +189,6 @@ class Shwoinvoicecontroller extends GetxController {
     }
 
     update();
-  }
-
-  deleteProduct(String invuuid) async {
-    Map<String, Object?> data = {
-      "uuid": invuuid,
-      "RemainingAmount": getRemainingAmount(),
-    };
-    var result = await saledata.deleteProdact(data);
-    print("================================deleteProdact$result");
-
-    if (result) {
-      Get.back(result: true);
-      Get.find<RefreshService>().fire();
-      Shwoinvoice();
-      getRemainingAmount();
-      // showSnackbar("success".tr, "delete_success".tr, Colors.green);
-    } else {
-      showSnackbar("error".tr, "operation_failed".tr, Colors.red);
-    }
   }
 
   // void gotoaddproductNewSale() async {

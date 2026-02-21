@@ -8,6 +8,8 @@ class Approutes {
   static const String Additemsne = "/Additemsne";
   static const String Edititemsen = "/Edititemsen";
   static const String splashScreen = "/SplashScreen";
+  static const String subscriptionExpiredPage = "/SubscriptionExpiredPage";
+
 
 
   static const String profaile = "/Profaile";

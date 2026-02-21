@@ -3,6 +3,8 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 
 import '../../../core/constant/Colorapp.dart';
+import 'package:auto_size_text/auto_size_text.dart';
+
 
 class Custemcartabbreviation extends StatelessWidget {
   final String title;
@@ -48,10 +50,14 @@ class Custemcartabbreviation extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 5),
-            Text(
+            AutoSizeText(
               title,
-              style: TextStyle(
-                fontSize: 16,
+              maxLines: 1,
+              textAlign: TextAlign.center,
+              minFontSize: 13, // أقل حجم مسموح
+              stepGranularity: 1,
+              style: const TextStyle(
+                fontSize: 16, // الحجم الافتراضي
                 fontWeight: FontWeight.bold,
               ),
             )

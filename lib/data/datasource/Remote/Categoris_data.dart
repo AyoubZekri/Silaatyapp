@@ -26,7 +26,7 @@ class CategorisData {
       }
 
       final result = await _db.readData(
-        "SELECT * FROM categoris WHERE user_id = ? ORDER BY created_at ASC",
+        "SELECT * FROM categoris WHERE user_id = ? AND is_delete = 0 ORDER BY created_at ASC",
         [id],
       );
 
@@ -118,40 +118,132 @@ class CategorisData {
   /// ✅ حذف فئة
   Future<bool> deletecat(String uuid) async {
     try {
-      final cat =
-          await _db.readData("SELECT id FROM categoris WHERE uuid = ?", [uuid]);
+      // 1️⃣ جلب الفئة للتأكد من وجودها وغير محذوفة
+      final cat = await _db.readData(
+          "SELECT id FROM categoris WHERE uuid = ? AND is_delete=0", [uuid]);
 
       if (cat.isEmpty) return false;
 
-      final result = await _db.delete("categoris", "uuid = ?", [uuid]);
+      // 2️⃣ تحديث الفئة → محذوفة
+      final result = await _db.update(
+          "categoris",
+          {
+            "uuid": uuid,
+            "is_delete": 1,
+            "updated_at": DateTime.now().toIso8601String(),
+          },
+          "uuid = ?",
+          [uuid]);
 
-      if (result > 0) {
-        await _syncService.addToQueue("categoris", uuid, "update", {
-          "uuid": uuid,
-          'is_delete': 1,
-          'updated_at': DateTime.now().toIso8601String(),
-        });
+      if (result <= 0) return false;
 
-        final products = await _db.readData(
-            "SELECT uuid FROM products WHERE categoris_uuid = ?", [uuid]);
+      // 3️⃣ Sync الفئة
+      await _syncService.addToQueue("categoris", uuid, "update", {
+        "uuid": uuid,
+        'is_delete': 1,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
 
-        for (var p in products) {
-          await _syncService
-              .addToQueue("products", p["uuid"] as String, "update", {
-            "uuid": p["uuid"] as String,
-            'is_delete': 1,
-            'updated_at': DateTime.now().toIso8601String(),
-          });
+      // 4️⃣ جلب كل المنتجات التابعة للفئة
+      final products = await _db.readData(
+          "SELECT uuid, product_quantity FROM products WHERE categoris_uuid = ? AND user_id = ?",
+          [uuid, id]);
+
+      for (var p in products) {
+        final productUuid = p["uuid"] as String;
+        int remainingQty = int.tryParse(p["product_quantity"].toString()) ?? 0;
+
+        // 5️⃣ جلب كل سطور البيع من type_sales = 3 (stock) من الأخير للأول
+        final stockRows = await _db.readData(
+          '''
+      SELECT uuid, quantity
+      FROM sales
+      WHERE product_uuid = ?
+        AND user_id = ?
+        AND type_sales = 3
+      ORDER BY created_at DESC
+      ''',
+          [productUuid, id],
+        );
+
+        for (final row in stockRows) {
+          if (remainingQty <= 0) break;
+
+          final stockUuid = row["uuid"] as String;
+          final stockQty = int.tryParse(row["quantity"].toString()) ?? 0;
+
+          if (stockQty > remainingQty) {
+            final newQty = stockQty - remainingQty;
+
+            await _db.update(
+              "sales",
+              {
+                "quantity": newQty,
+                "updated_at": DateTime.now().toIso8601String(),
+              },
+              "uuid = ?",
+              [stockUuid],
+            );
+
+            await _syncService.addToQueue(
+              "sales",
+              stockUuid,
+              "update",
+              {
+                "uuid": stockUuid,
+                "quantity": newQty,
+                "updated_at": DateTime.now().toIso8601String(),
+              },
+            );
+
+            remainingQty = 0;
+          } else {
+            // حذف السطر
+            await _db.delete("sales", "uuid = ?", [stockUuid]);
+
+            await _syncService.addToQueue(
+              "sales",
+              stockUuid,
+              "update",
+              {
+                "uuid": stockUuid,
+                "is_delete": 1,
+                "updated_at": DateTime.now().toIso8601String(),
+              },
+            );
+
+            remainingQty -= stockQty;
+          }
         }
 
-        await _db.delete("products", "categoris_uuid = ?", [uuid]);
+        // 6️⃣ حذف المنتج نفسه
+        await _db.update(
+          "products",
+          {
+            "uuid": productUuid,
+            "is_delete": 1,
+            "updated_at": DateTime.now().toIso8601String(),
+          },
+          "uuid = ? AND user_id = ?",
+          [productUuid, id],
+        );
 
-        return true;
+        await _syncService.addToQueue(
+          "products",
+          productUuid,
+          "update",
+          {
+            "uuid": productUuid,
+            "is_delete": 1,
+            "updated_at": DateTime.now().toIso8601String(),
+          },
+        );
       }
 
-      return false;
-    } catch (e) {
+      return true;
+    } catch (e, st) {
       print("❌ deletecat error: $e");
+      print(st);
       return false;
     }
   }
