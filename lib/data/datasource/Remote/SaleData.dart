@@ -603,8 +603,8 @@ class Saledata {
     final query = data["codepar"];
 
     final result = await db.readData(
-      "SELECT * FROM products WHERE  user_id = ? AND codepar LIKE ? ",
-      [id, '%$query%'],
+      "SELECT * FROM products WHERE user_id = ? AND codepar = ?",
+      [id, query],
     );
     return result;
   }

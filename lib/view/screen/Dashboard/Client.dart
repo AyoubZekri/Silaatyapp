@@ -28,7 +28,7 @@ class _ClientState extends State<Client> {
             color: AppColor.backgroundcolor,
           ),
           title: Text(
-            'Convicts'.tr,
+            controller.type == 1 ? 'Dealer'.tr : 'Convicts'.tr,
             style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   color: AppColor.backgroundcolor,
                   fontSize: 24,

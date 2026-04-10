@@ -25,6 +25,7 @@ class MyTranslation extends Translations {
           "Prodacts": "السلع",
           "Necessary": "نفذ المخزون",
           "Account_clint": "معلومات العميل",
+
           "Account_Supplier": "معلومات المورد",
 
           "Dettes": "الديون",
@@ -476,6 +477,10 @@ class MyTranslation extends Translations {
           "تواصل مع الدعم عبر الواتساب": "تواصل مع الدعم عبر الواتساب",
           "بإمكانك التواصل مع فريق الدعم لتجديد الإشتراك":
               "بإمكانك التواصل مع فريق الدعم لتجديد الإشتراك",
+          'مورد': 'مورد',
+          'اختر مورد': 'اختر مورد',
+          'مورد جديد': 'مورد جديد',
+          'يرجى اختيار مورد أولاً': 'يرجى اختيار مورد أولاً',
         },
         // ::::::
         // ::::::
@@ -1003,6 +1008,10 @@ class MyTranslation extends Translations {
           "تواصل مع الدعم عبر الواتساب": "Contact support via WhatsApp",
           "بإمكانك التواصل مع فريق الدعم لتجديد الإشتراك":
               "You can contact the support team to renew your subscription",
+          'مورد': 'Supplier',
+          'اختر مورد': 'Select Supplier',
+          'مورد جديد': 'New Supplier',
+          'يرجى اختيار مورد أولاً': 'Please select a supplier first',
         },
       };
 }

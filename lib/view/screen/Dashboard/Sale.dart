@@ -63,6 +63,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                     selectedCustomer: controller.selectedCustomer,
                     onSelect: (value) {
                       controller.selectCustomer(value);
+                      print("===================$controller.selectedCustomer");
                     },
                   ),
                 ],
@@ -146,8 +147,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                       controller.deleteProduct(item["uuid"]);
                                       Get.back();
                                     },
-                                    onCancel: () {
-                                    },
+                                    onCancel: () {},
                                     buttonColor: AppColor.backgroundcolor,
                                     confirmTextColor: AppColor.primarycolor,
                                     cancelTextColor: AppColor.backgroundcolor,
@@ -266,8 +266,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                                         Icons.close,
                                                         color: AppColor
                                                             .backgroundcolor),
-                                                    onPressed: () =>
-                                                        Navigator.pop(context),
+                                                    onPressed: () => Get.back(),
                                                   ),
                                                 ],
                                               ),

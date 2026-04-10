@@ -6,6 +6,7 @@ import 'package:Silaaty/view/widget/Home/custemCartitems.dart';
 import 'package:Silaaty/view/widget/Home/custemSearch.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 
 import '../../../main.dart';
 
@@ -48,6 +49,64 @@ class _ItemsState extends State<Items> with RouteAware {
       return Scaffold(
         backgroundColor: AppColor.white,
         appBar: AppBar(
+          actions: [
+            IconButton(
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (context) {
+                    return Dialog(
+                      insetPadding: const EdgeInsets.all(20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: SizedBox(
+                        height: 400,
+                        child: Column(
+                          children: [
+                            AppBar(
+                              title: Text(
+                                "امسح الباركود".tr,
+                                style:
+                                    TextStyle(color: AppColor.backgroundcolor),
+                              ),
+                              automaticallyImplyLeading: false,
+                              backgroundColor: AppColor.primarycolor,
+                              actions: [
+                                IconButton(
+                                  icon: const Icon(Icons.close,
+                                      color: AppColor.backgroundcolor),
+                                  onPressed: () => Get.back(),
+                                ),
+                              ],
+                            ),
+                            Expanded(
+                              child: MobileScanner(
+                                onDetect: (capture) {
+                                  final barcodes = capture.barcodes;
+                                  if (barcodes.isNotEmpty) {
+                                    final scannedCode = barcodes.first.rawValue;
+                                    print(
+                                        "=======================$scannedCode");
+                                    controller.searchBarcode(scannedCode!);
+                                  }
+                                },
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                );
+              },
+              icon: const Icon(Icons.qr_code_scanner),
+            ),
+            SizedBox(
+              width: 10,
+            ),
+          ],
+        
           iconTheme: const IconThemeData(
             color: AppColor.backgroundcolor,
           ),

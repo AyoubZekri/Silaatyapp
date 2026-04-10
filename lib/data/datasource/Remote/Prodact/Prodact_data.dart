@@ -481,4 +481,14 @@ class ProdactData {
     }
   }
 
+  Future<List<Map<String, Object?>>> searchpro(Map data) async {
+    final query = data["codepar"];
+
+    final result = await sqldb.readData(
+      "SELECT * FROM products WHERE user_id = ? AND codepar = ?",
+      [id, query],
+    );
+    print("===========================$result");
+    return result;
+  }
 }

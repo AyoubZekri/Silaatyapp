@@ -250,7 +250,7 @@ class _EdititemState extends State<Edititem> {
                           }
 
                           if (!validInputsnak(controller.barcodeController.text,
-                              1, 13, "Barcode".tr)) {
+                              8, 13, "Barcode".tr)) {
                             return;
                           }
 

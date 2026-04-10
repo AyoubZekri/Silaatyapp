@@ -8,8 +8,10 @@ import 'package:Silaaty/data/model/Categoris_model.dart' hide Data;
 // ignore: library_prefixes
 import 'package:Silaaty/data/model/Product_Model.dart' as Prodact;
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../core/functions/Snacpar.dart';
 import '../../data/model/Product_Model.dart';
 
 class Itemscontroller extends GetxController {
@@ -165,6 +167,45 @@ class Itemscontroller extends GetxController {
           product.isNotEmpty ? Statusrequest.success : Statusrequest.failure;
     } else {
       product = [];
+      statusrequest = Statusrequest.failure;
+    }
+
+    update();
+  }
+
+  searchBarcode(String codepar) async {
+    Get.back();
+    await Future.delayed(const Duration(milliseconds: 200));
+    update();
+
+    String cleaned = codepar.replaceAll(RegExp(r'[^\d]'), '');
+
+    if (cleaned.length <= 9) {
+      cleaned = cleaned.substring(1);
+    }
+    print("====== CLEANED: $cleaned");
+
+    Map<String, Object?> data = {
+      "codepar": cleaned,
+    };
+
+    var result = await prodactData.searchpro(data);
+    print("🔍 Search Response: $result");
+
+    if (result.isNotEmpty) {
+      final res = await Get.toNamed(
+        Approutes.informationitem,
+        arguments: {"uuid": result.first['uuid']},
+      );
+
+      if (res == true) {
+        print("======$selectedCategoryId");
+        _cachedProducts.clear();
+        await getProdactnotcat();
+      }
+      statusrequest = Statusrequest.success;
+    } else {
+      showSnackbar("تنبيه".tr, "المنتج غير موجود".tr, Colors.orange);
       statusrequest = Statusrequest.failure;
     }
 

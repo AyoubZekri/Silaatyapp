@@ -95,15 +95,15 @@ class _AdditemState extends State<Additem> {
                                 ],
                               ),
                       ),
-              
+
                       CustemDropDownField(
                         hintText: "Category".tr,
                         items: controller.categories
                             .map((cat) => DropdownMenuItem<String>(
                                   value: cat.uuid,
                                   child: Text(Get.locale?.languageCode == "ar"
-                                  ? cat.categorisName ?? ''
-                                  : cat.categorisNameFr ?? ''),
+                                      ? cat.categorisName ?? ''
+                                      : cat.categorisNameFr ?? ''),
                                 ))
                             .toList(),
                         value: controller.selectedtypeuuid,
@@ -241,10 +241,10 @@ class _AdditemState extends State<Additem> {
                           if (!validInputsnak(controller.nameController.text, 1,
                               20, "Name".tr)) {
                             return;
-                        }
-                          
+                          }
+
                           if (!validInputsnak(controller.barcodeController.text,
-                              1, 13, "Barcode".tr)) {
+                              8, 13, "Barcode".tr)) {
                             return;
                           }
 

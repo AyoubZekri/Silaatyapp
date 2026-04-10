@@ -47,7 +47,11 @@ class AddTransactionController extends GetxController {
     final result = await transactionData.addtransaction(data);
 
     if (result == true) {
-      Get.back(result: true);
+      Get.back(result: {
+        "uuid": uuid,
+        "name": nameController.text.trim(),
+        "famlyname": familyNameController.text.trim(), // نفس الاسم اللي تستعمله
+      });
       // showSnackbar("success".tr, "add_success".tr, Colors.green);
     } else {
       statusRequest = Statusrequest.failure;

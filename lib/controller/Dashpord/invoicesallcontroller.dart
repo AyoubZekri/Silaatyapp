@@ -49,9 +49,12 @@ class Invoicesallcontroller extends GetxController {
         final name = invoiceData.name?.toLowerCase() ?? '';
         final family = invoiceData.familyName?.toLowerCase() ?? '';
         final data = invoiceData.date?.toLowerCase() ?? '';
+        final numper = invoiceData.number?.toLowerCase() ?? '';
+
 
         return name.contains(lowerQuery) ||
             family.contains(lowerQuery) ||
+            numper.contains(lowerQuery) ||
             data.contains(lowerQuery);
       }).toList();
     }

@@ -69,8 +69,7 @@ class _InvoicesState extends State<Invoices> with RouteAware {
           onRefresh: () async {
             await controller.refreshData();
           },
-          child: SingleChildScrollView(
-              child: Column(children: [
+          child: Column(children: [
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -212,7 +211,9 @@ class _InvoicesState extends State<Invoices> with RouteAware {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        "Account_clint".tr,
+                        controller.invoice?.transaction?.transactions == 2
+                            ? "Account_clint".tr
+                            : "Account_Supplier".tr,
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
@@ -353,7 +354,7 @@ class _InvoicesState extends State<Invoices> with RouteAware {
               iconData: Icons.receipt_long,
               title: "لا يوجد فواتير".tr,
               widget: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.6,
+                height: MediaQuery.of(context).size.height * 0.5,
                 child: ListView.builder(
                   itemCount: controller.invoice?.invoices?.where((inv) {
                         final debt = (inv.debt ?? 0).toDouble();
@@ -389,10 +390,10 @@ class _InvoicesState extends State<Invoices> with RouteAware {
                       child: Custemcartinvoice(
                         day: inv.date?.substring(8, 10) ?? "",
                         Mon: controller.getMonthAbbreviation(inv.date),
-                        Title: inv.debt.toString(),
+                        Title: "#${inv.number ?? ''}",
                         Status: (double.parse(inv.invoiceSum.toString())) -
                                     (inv.paymentPrice ?? 0) -
-                                    (inv.discount ?? 0) <
+                                    (inv.discount ?? 0) <=
                                 0
                             ? "Sincere".tr
                             : 'Not Sincere'.tr,
@@ -448,8 +449,7 @@ class _InvoicesState extends State<Invoices> with RouteAware {
                             onConfirm: () {
                               controller.deleteInvoice(inv.uuid!);
                             },
-                            onCancel: () {
-                            },
+                            onCancel: () {},
                             buttonColor: AppColor.backgroundcolor,
                             confirmTextColor: AppColor.primarycolor,
                             cancelTextColor: AppColor.backgroundcolor,
@@ -461,7 +461,7 @@ class _InvoicesState extends State<Invoices> with RouteAware {
                 ),
               ),
             ),
-          ])),
+          ]),
         ),
       );
     });

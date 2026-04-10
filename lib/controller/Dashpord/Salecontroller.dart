@@ -7,15 +7,18 @@ import '../../data/datasource/Remote/SaleData.dart';
 import '../../data/datasource/Remote/transactiondata.dart';
 
 class SaleController extends GetxController {
-  var selectedCustomer = 'العميل'.tr.obs;
-
-  final customers = ["virtualCustomer".tr, 'اختر عميل'.tr, 'عميل جديد'.tr];
+  int? type;
+  RxString selectedCustomer = ''.obs;
+  List<String> get customers => [
+        if (type != 1) "virtualCustomer".tr,
+        type == 1 ? 'اختر مورد'.tr : 'اختر عميل'.tr,
+        type == 1 ? 'مورد جديد'.tr : 'عميل جديد'.tr
+      ];
 
   var selectedUuid = ''.obs;
 
   var selectedName = ''.obs;
   var selectedFamilyName = ''.obs;
-  int? type;
 
   final Transactiondata transactiondata = Transactiondata(Get.find());
   Statusrequest statusrequest = Statusrequest.none;
@@ -92,20 +95,21 @@ class SaleController extends GetxController {
   void selectCustomer(String value) async {
     selectedCustomer.value = value;
 
-    if (value == 'اختر عميل'.tr) {
-      var result = await Get.toNamed(Approutes.client, arguments: {"type": 2});
-
+    if (value == 'اختر عميل'.tr || value == 'اختر مورد'.tr) {
+      var result = await Get.toNamed(Approutes.client,
+          arguments: {"type": type == 1 ? 1 : 2});
       if (result != null) {
         selectedUuid.value = result['uuid'] ?? '';
         selectedName.value = result['name'] ?? '';
         selectedFamilyName.value = result['famlyname'] ?? '';
-
         selectedCustomer.value =
             '${selectedName.value} ${selectedFamilyName.value}';
+        print("===================$selectedCustomer");
       }
-    } else if (value == 'عميل جديد'.tr) {
-      var result = await Get.toNamed(Approutes.AddConvict);
-
+    } else if (value == 'عميل جديد'.tr || value == 'مورد جديد'.tr) {
+      var result = await Get.toNamed(
+          type == 1 ? Approutes.AddDealer : Approutes.AddConvict);
+       print("===================$result");
       if (result != null) {
         selectedUuid.value = result['uuid'] ?? '';
         selectedName.value = result['name'] ?? '';
@@ -123,11 +127,20 @@ class SaleController extends GetxController {
   }
 
   search(String codepar) async {
+    Get.back();
+    await Future.delayed(const Duration(milliseconds: 200));
     update();
+    String cleaned = codepar.replaceAll(RegExp(r'[^\d]'), '');
+
+    if (cleaned.length <= 9) {
+      cleaned = cleaned.substring(1);
+    }
 
     Map<String, Object?> data = {
-      "codepar": codepar,
+      "codepar": cleaned,
     };
+
+    print("==================$cleaned");
 
     var result = await saledata.searchpro(data);
     print("🔍 Search Response: $result");
@@ -163,10 +176,8 @@ class SaleController extends GetxController {
       }
 
       _calculateTotals();
-      Get.back();
       statusrequest = Statusrequest.success;
     } else {
-      Get.back();
       showSnackbar("تنبيه".tr, "المنتج غير موجود".tr, Colors.orange);
       statusrequest = Statusrequest.failure;
       update();
@@ -192,10 +203,17 @@ class SaleController extends GetxController {
   }
 
   void gotoPayment() {
-    if (selectedCustomer.value == 'العميل'.tr ||
-        selectedCustomer.value == 'عميل جديد'.tr ||
-        selectedCustomer.value == 'اختر عميل'.tr) {
-      showSnackbar("تنبيه".tr, "يرجى اختيار العميل أولاً".tr, Colors.orange);
+    if (selectedCustomer.value == (type == 1 ? 'مورد'.tr : 'العميل'.tr) ||
+        selectedCustomer.value ==
+            (type == 1 ? 'مورد جديد'.tr : 'عميل جديد'.tr) ||
+        selectedCustomer.value ==
+            (type == 1 ? 'اختر مورد'.tr : 'اختر عميل'.tr,)) {
+      showSnackbar(
+          "تنبيه".tr,
+          type == 1
+              ? "يرجى اختيار مورد أولاً".tr
+              : "يرجى اختيار العميل أولاً".tr,
+          Colors.orange);
       return;
     }
 
@@ -205,6 +223,7 @@ class SaleController extends GetxController {
 
       return;
     }
+    print("===================$type");
     Get.toNamed(Approutes.payment, arguments: {
       "products": selectedProducts,
       "uuid": selectedUuid.value,
@@ -216,25 +235,29 @@ class SaleController extends GetxController {
     })?.then((result) {
       if (result == true) {
         resetData();
+        final arge = Get.arguments;
+        if (arge != null) {
+          type = arge["type"];
+        }
       }
     });
   }
 
   void resetData() {
-    selectedCustomer.value = 'العميل'.tr;
+    selectedCustomer.value = type == 1 ? 'مورد'.tr : 'العميل'.tr;
     selectedUuid.value = '';
     selectedName.value = '';
     selectedFamilyName.value = '';
     selectedProducts.clear();
     totalallPrice = 0.0;
     totalItems = 0;
-    type = 0;
     update();
   }
 
   @override
   void onInit() {
     resetData();
+    selectedCustomer = (type == 1 ? 'مورد'.tr : 'العميل'.tr).obs;
     print("=========================${selectedCustomer.value}");
     final arge = Get.arguments;
     print("=========================${arge}");
