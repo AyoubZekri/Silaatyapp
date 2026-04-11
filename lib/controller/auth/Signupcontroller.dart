@@ -48,7 +48,7 @@ class SignupControllerImp extends SignupController {
         showSnackbar("error".tr, "noInternet".tr, Colors.red);
       }
       statusrequest = handlingData(response);
-      // print("=============================== Controller $response ");
+      print("=============================== Controller $response ");
       if (Statusrequest.success == statusrequest) {
         if (response["status"] == 1) {
           Get.offNamed(Approutes.VerifiycodeSignUp, arguments: {

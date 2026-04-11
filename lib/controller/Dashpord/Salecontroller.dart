@@ -108,8 +108,9 @@ class SaleController extends GetxController {
       }
     } else if (value == 'عميل جديد'.tr || value == 'مورد جديد'.tr) {
       var result = await Get.toNamed(
-          type == 1 ? Approutes.AddDealer : Approutes.AddConvict);
-       print("===================$result");
+          type == 1 ? Approutes.AddDealer : Approutes.AddConvict,
+          arguments: {"type": type == 1 ? 1 : 2});
+      print("===================$result");
       if (result != null) {
         selectedUuid.value = result['uuid'] ?? '';
         selectedName.value = result['name'] ?? '';

@@ -481,6 +481,7 @@ class MyTranslation extends Translations {
           'اختر مورد': 'اختر مورد',
           'مورد جديد': 'مورد جديد',
           'يرجى اختيار مورد أولاً': 'يرجى اختيار مورد أولاً',
+          "check": "تحقق",
         },
         // ::::::
         // ::::::
@@ -1012,6 +1013,7 @@ class MyTranslation extends Translations {
           'اختر مورد': 'Select Supplier',
           'مورد جديد': 'New Supplier',
           'يرجى اختيار مورد أولاً': 'Please select a supplier first',
+          "check": "checks",
         },
       };
 }

@@ -58,23 +58,30 @@ class Verifiycodesetting extends StatelessWidget {
                         //   iconData: Icons.person_2_outlined,
                         // ),
                         Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: OtpTextField(
-                            borderRadius: BorderRadius.circular(10),
-                            numberOfFields: 5,
-                            borderColor: const Color(0xFF512DA8),
-                            //set to true to show as box or false to show as dash
-                            showFieldAsBox: true,
-                            //runs when a code is typed in
-                            onCodeChanged: (String code) {
-                              //handle validation or checks here
-                            },
-                            //runs when every textfield is filled
-                            onSubmit: (String verificationCode) {
-                              controller.GoToresetPasswored(
-                                  verificationCode, "resePasswordsetting");
-                            }, // end onSubmit
-                          ),
+                            textDirection: TextDirection.ltr,
+                            child: OtpTextField(
+                              numberOfFields: 5,
+                              borderRadius: BorderRadius.circular(10),
+                              borderColor: const Color(0xFF512DA8),
+                              showFieldAsBox: true,
+
+                              fieldWidth: 45, // صغّر العرض باش يقل padding
+
+                              styles: List.generate(
+                                5,
+                                (index) => const TextStyle(
+                                  fontSize: 18,
+                                  height: 1, // مهم باش ينقص الارتفاع الداخلي
+                                ),
+                              ),
+
+                              onSubmit: (verificationCode) {
+                                controller.GoToresetPasswored(
+                                    verificationCode, "resePasswordsetting");
+                              },
+                            )),
+                        SizedBox(
+                          height: 30,
                         ),
                         InkWell(
                             onTap: () {

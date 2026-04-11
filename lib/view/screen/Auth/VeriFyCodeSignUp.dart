@@ -52,18 +52,27 @@ class VerifiycodeSignUp extends StatelessWidget {
                           height: 55,
                         ),
                         Directionality(
-                          textDirection: TextDirection.ltr,
-                          child: OtpTextField(
-                            borderRadius: BorderRadius.circular(10),
-                            numberOfFields: 5,
-                            borderColor: const Color(0xFF512DA8),
-                            showFieldAsBox: true,
-                            onCodeChanged: (String code) {},
-                            onSubmit: (String verificationCode) {
-                              controller.GoToSuccessSignup(verificationCode);
-                            },
-                          ),
-                        ),
+                            textDirection: TextDirection.ltr,
+                            child: OtpTextField(
+                              numberOfFields: 5,
+                              borderRadius: BorderRadius.circular(10),
+                              borderColor: const Color(0xFF512DA8),
+                              showFieldAsBox: true,
+
+                              fieldWidth: 45, // صغّر العرض باش يقل padding
+
+                              styles: List.generate(
+                                5,
+                                (index) => const TextStyle(
+                                  fontSize: 18,
+                                  height: 1, // مهم باش ينقص الارتفاع الداخلي
+                                ),
+                              ),
+
+                              onSubmit: (code) {
+                                controller.GoToSuccessSignup(code);
+                              },
+                            )),
                         const SizedBox(
                           height: 30,
                         ),
