@@ -114,8 +114,7 @@ class Invoicedata {
   LEFT JOIN transactions t 
   ON t.uuid = i.Transaction_uuid        
   LEFT JOIN sales s 
-      ON s.invoie_uuid = i.uuid 
-      AND s.type_sales = 2                     
+      ON s.invoie_uuid = i.uuid                     
   WHERE i.user_id = ? AND (t.transactions = 2 OR t.transactions IS NULL)
   GROUP BY i.uuid
   ORDER BY i.invoies_date DESC;

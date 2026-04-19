@@ -176,24 +176,33 @@ class Informationitemcontroller extends GetxController {
         showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
         return;
       }
-      await Future.delayed(
-          const Duration(milliseconds: 50)); // تأكد إن الـ widget مرسوم
+
+      await WidgetsBinding.instance.endOfFrame;
 
       final boundary = ticketKey.currentContext?.findRenderObject()
           as RenderRepaintBoundary?;
+
       if (boundary == null) {
-        print("❌ خطأ: الـ RenderRepaintBoundary غير موجود");
+        showSnackbar("error".tr, "boundary null".tr, Colors.red);
         return;
       }
 
-      final image = await boundary.toImage(pixelRatio: 3.0);
+      final image = await boundary.toImage(pixelRatio: 2.5);
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
-      if (byteData == null) return;
+
+      if (byteData == null) {
+        showSnackbar("error".tr, "byteData null".tr, Colors.red);
+        return;
+      }
 
       Uint8List imageBytes = byteData.buffer.asUint8List();
 
       img.Image? decodedImage = img.decodeImage(imageBytes);
-      if (decodedImage == null) return;
+      if (decodedImage == null) {
+        showSnackbar("error".tr, "decodedImage null".tr, Colors.red);
+        return;
+      }
+      ;
 
       decodedImage = img.copyResize(decodedImage, width: 384);
 
@@ -201,9 +210,10 @@ class Informationitemcontroller extends GetxController {
 
       await PrintBluetoothThermal.writeBytes(bytes);
       await PrintBluetoothThermal.writeBytes([10, 10, 10]);
+
       print("✅ تم الطباعة بنجاح");
     } catch (e) {
-      print("❌ خطأ أثناء الطباعة: $e");
+      showSnackbar("error".tr, "$e", Colors.red);
     }
   }
 

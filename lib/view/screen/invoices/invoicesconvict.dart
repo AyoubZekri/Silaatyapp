@@ -357,20 +357,16 @@ class _InvoicesState extends State<Invoices> with RouteAware {
                 height: MediaQuery.of(context).size.height * 0.5,
                 child: ListView.builder(
                   itemCount: controller.invoice?.invoices?.where((inv) {
-                        final debt = (inv.debt ?? 0).toDouble();
-                        final isPaid = debt == 0;
-                        if (controller.selectedIndex == 1) return isPaid;
-                        if (controller.selectedIndex == 2) return !isPaid;
+                        if (controller.selectedIndex == 1) return inv.isPaid;
+                        if (controller.selectedIndex == 2) return !inv.isPaid;
                         return true;
                       }).length ??
                       0,
                   itemBuilder: (context, index) {
                     final filteredInvoices =
                         controller.invoice!.invoices!.where((inv) {
-                      final debt = (inv.debt ?? 0).toDouble();
-                      final isPaid = debt == 0;
-                      if (controller.selectedIndex == 1) return isPaid;
-                      if (controller.selectedIndex == 2) return !isPaid;
+                      if (controller.selectedIndex == 1) return inv.isPaid;
+                      if (controller.selectedIndex == 2) return !inv.isPaid;
                       return true;
                     }).toList();
 
@@ -391,12 +387,7 @@ class _InvoicesState extends State<Invoices> with RouteAware {
                         day: inv.date?.substring(8, 10) ?? "",
                         Mon: controller.getMonthAbbreviation(inv.date),
                         Title: "#${inv.number ?? ''}",
-                        Status: (double.parse(inv.invoiceSum.toString())) -
-                                    (inv.paymentPrice ?? 0) -
-                                    (inv.discount ?? 0) <=
-                                0
-                            ? "Sincere".tr
-                            : 'Not Sincere'.tr,
+                        Status: inv.isPaid ? "Sincere".tr : 'Not Sincere'.tr,
                         Price:
                             "${((double.parse(inv.invoiceSum.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)) < 0 ? 0 : (double.parse(inv.invoiceSum.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)}",
                         onTap: () {

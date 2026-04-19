@@ -1,11 +1,9 @@
 import 'dart:io';
-import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
-import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:printing/printing.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';

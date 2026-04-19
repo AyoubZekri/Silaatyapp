@@ -168,12 +168,16 @@ class _InvoicesallState extends State<Invoicesall> with RouteAware {
                             day: inv.date!.substring(8, 10),
                             Mon: controller.getMonthAbbreviation(inv.date),
                             Title: "#${inv.number ?? ''}",
-                            Status:
-                                inv.debt == 0 ? "Sincere".tr : "Not Sincere".tr,
+                            Status: inv.debt! <= 0
+                                ? "Sincere".tr
+                                : "Not Sincere".tr,
                             Price: "${inv.debt}",
                             onTap: () {
+                              print("================i$index");
+                              print(
+                                  "================${controller.filteredInvoices}");
                               controller
-                                  .gotoShowInvoice(controller.invoices[index]);
+                                  .gotoShowInvoice(filteredInvoices[index]);
                             },
                             onDelete: () {
                               Get.defaultDialog(

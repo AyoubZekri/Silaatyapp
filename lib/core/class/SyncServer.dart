@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:sqflite/sqflite.dart';
 
 import '../../LinkApi.dart';
 import '../services/Services.dart';
@@ -135,37 +136,37 @@ class SyncService {
     print("🏁 انتهى الرفع.");
   }
 
-  Future<void> _processQueueRow(Map row) async {
-    final table = row["table_name"];
-    final operation = row["operation"];
-    final data = row["data"] != null ? jsonDecode(row["data"]) : {};
-    data["uuid"] = row["row_id"];
+  // Future<void> _processQueueRow(Map row) async {
+  //   final table = row["table_name"];
+  //   final operation = row["operation"];
+  //   final data = row["data"] != null ? jsonDecode(row["data"]) : {};
+  //   data["uuid"] = row["row_id"];
 
-    final token = Get.find<Myservices>().sharedPreferences?.getString("token");
-    final headers = {
-      "Accept": "application/json",
-      if (token != null) "Authorization": "Bearer $token",
-    };
+  //   final token = Get.find<Myservices>().sharedPreferences?.getString("token");
+  //   final headers = {
+  //     "Accept": "application/json",
+  //     if (token != null) "Authorization": "Bearer $token",
+  //   };
 
-    try {
-      http.Response res;
+  //   try {
+  //     http.Response res;
 
-      if (operation == "delete") {
-        res = await _deleteRequest(table, data, headers);
-      } else {
-        res = await _sendDataRequest(table, data, headers);
-      }
+  //     if (operation == "delete") {
+  //       res = await _deleteRequest(table, data, headers);
+  //     } else {
+  //       res = await _sendDataRequest(table, data, headers);
+  //     }
 
-      if (res.statusCode == 200) {
-        await _db.update("sync_queue", {"synced": 1}, "id=${row["id"]}");
-        print("✅ نجاح رفع ${data["uuid"]}");
-      } else {
-        print("❌ HTTP ${res.statusCode}: ${res.body}");
-      }
-    } catch (e) {
-      print("❌ استثناء: $e");
-    }
-  }
+  //     if (res.statusCode == 200) {
+  //       await _db.update("sync_queue", {"synced": 1}, "id=${row["id"]}");
+  //       print("✅ نجاح رفع ${data["uuid"]}");
+  //     } else {
+  //       print("❌ HTTP ${res.statusCode}: ${res.body}");
+  //     }
+  //   } catch (e) {
+  //     print("❌ استثناء: $e");
+  //   }
+  // }
 
   Future<http.Response> _deleteRequest(
       String table, Map data, Map<String, String> headers) {
@@ -363,46 +364,66 @@ class SyncService {
 
   Future<void> _syncServerRecords(
       String table, List<dynamic> serverData) async {
+    final columns = await getTableColumns(_db, table);
+
     for (var record in serverData) {
       final uuid = record["uuid"];
 
-      // معالجة الصور
-      if (record["categoris_image"] != null &&
-          record["categoris_image"] != "") {
+      // images
+      if ((record["categoris_image"] ?? "") != "") {
         record["categoris_image"] =
             await _downloadAndSaveImage(record["categoris_image"]);
       }
-      if (record["Product_image"] != null && record["Product_image"] != "") {
+
+      if ((record["Product_image"] ?? "") != "") {
         record["Product_image"] =
             await _downloadAndSaveImage(record["Product_image"]);
       }
 
       record.remove("id");
 
+      final filtered = filterRecord(
+        Map<String, dynamic>.from(record),
+        columns,
+      );
+
       final existing =
           await _db.readData("SELECT * FROM $table WHERE uuid='$uuid'");
 
       if (existing.isEmpty) {
-        await _db.insert(table, Map<String, Object?>.from(record));
+        await _db.insert(table, filtered);
       } else {
         final local = existing.first;
+
         final serverUpdated =
             DateTime.tryParse(record["updated_at"] ?? "") ?? DateTime(1970);
+
         final rawDate = local["updated_at"];
 
-        final localUpdated = (rawDate != null &&
-                rawDate.toString().isNotEmpty &&
-                rawDate.toString() != "null")
+        final localUpdated = (rawDate != null)
             ? DateTime.tryParse(rawDate.toString()) ?? DateTime(1970)
             : DateTime(1970);
+
         if (serverUpdated.isAfter(localUpdated)) {
-          await _db.update(
-              table, Map<String, Object?>.from(record), "uuid='$uuid'");
+          await _db.update(table, filtered, "uuid='$uuid'");
         }
       }
     }
   }
 
+  Map<String, Object?> filterRecord(
+    Map<String, dynamic> record,
+    Set<String> columns,
+  ) {
+    return Map.fromEntries(
+      record.entries.where((e) => columns.contains(e.key)),
+    );
+  }
+
+  Future<Set<String>> getTableColumns(SQLDB db, String table) async {
+    final res = await db.readData('PRAGMA table_info($table)');
+    return res.map((e) => e['name'] as String).toSet();
+  }
   // ---------------------------------------------------------
   // FULL SYNC
   // ---------------------------------------------------------
@@ -417,18 +438,18 @@ class SyncService {
 
     await pushQueue("categoris");
     await pushQueue("transactions");
+    await pushQueue("sales");
     await pushQueue("invoies");
     await pushQueue("products");
-    await pushQueue("sales");
     await pushQueue("notifications");
     await pushQueue("reports");
     await pushQueue("zakats");
 
     await pullFromServer("categoris");
     await pullFromServer("transactions");
+    await pullFromServer("sales");
     await pullFromServer("invoies");
     await pullFromServer("products");
-    await pullFromServer("sales");
     await pullFromServer("notifications");
     await pullFromServer("reports");
     await pullFromServer("zakats");

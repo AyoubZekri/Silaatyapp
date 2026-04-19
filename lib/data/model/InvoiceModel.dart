@@ -248,6 +248,13 @@ class InvoiceItem {
         'family_name': familyName,
         'phone_number': phoneNumber,
       };
+
+  double get remaining {
+    final total = double.tryParse(invoiceSum.toString()) ?? 0;
+    return total - (paymentPrice ?? 0) - (discount ?? 0);
+  }
+
+  bool get isPaid => remaining <= 0;
 }
 
 class Transaction {
