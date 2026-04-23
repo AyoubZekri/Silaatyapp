@@ -318,15 +318,24 @@ class _PaymentState extends State<Shwoinvoice> {
                             iconData: Icons.discount,
                             title: "Discount".tr,
                           ),
-                          // const SizedBox(width: 15),
-                          // Custemcartabbreviation(
-                          //   width: Get.width / 4,
-                          //   onTap: () {
-                          //     controller.printInvoiceBluetooth();
-                          //   },
-                          //   iconData: Icons.print_outlined,
-                          //   title: "طباعة".tr,
-                          // ),
+                          const SizedBox(width: 15),
+                          Custemcartabbreviation(
+                            width: Get.width / 4,
+                            onTap: () {
+                              controller.showThermalInvoicePreview();
+                            },
+                            iconData: Icons.remove_red_eye_outlined,
+                            title: "Preview".tr,
+                          ),
+                          const SizedBox(width: 15),
+                          Custemcartabbreviation(
+                            width: Get.width / 4,
+                            onTap: () {
+                              controller.printThermalInvoice();
+                            },
+                            iconData: Icons.print_outlined,
+                            title: "طباعة".tr,
+                          ),
                           const SizedBox(width: 15),
                           Custemcartabbreviation(
                             width: Get.width / 4,

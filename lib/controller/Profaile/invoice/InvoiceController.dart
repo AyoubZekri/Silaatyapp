@@ -4,6 +4,7 @@ import 'package:Silaaty/data/datasource/Remote/invoiceData.dart';
 import 'package:Silaaty/data/model/InvoiceModel.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../core/functions/Snacpar.dart';
@@ -32,7 +33,7 @@ class InvoicesController extends GetxController {
         "user_id": id,
         "invoies_numper":
             DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10),
-        "invoies_date": DateTime.now().toIso8601String(),
+        "invoies_date": DateFormat('yyyy-MM-dd HH:mm').format(DateTime.now()),
         "created_at": DateTime.now().toIso8601String(),
       };
       var result = await invoicedata.addinvoice(data);
@@ -54,7 +55,6 @@ class InvoicesController extends GetxController {
 
   EditInvoice(String invuuid) async {
     if (formstate.currentState!.validate()) {
-
       Map<String, Object?> data = {
         "uuid": invuuid,
         'invoies_payment_date': dateController.text,
@@ -77,7 +77,6 @@ class InvoicesController extends GetxController {
   }
 
   deleteInvoice(String invuuid) async {
-
     Map<String, Object?> data = {
       "uuid": invuuid,
     };

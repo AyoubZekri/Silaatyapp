@@ -482,6 +482,13 @@ class MyTranslation extends Translations {
           'مورد جديد': 'مورد جديد',
           'يرجى اختيار مورد أولاً': 'يرجى اختيار مورد أولاً',
           "check": "تحقق",
+          "QTY": "الكمية",
+          "DESC": "الوصف",
+          "AMT": "المبلغ",
+          "SUBTOTAL": "المجموع الفرعي",
+          "AMOUNT": "المبلغ الإجمالي",
+          "THANK YOU": "شكراً لزيارتكم",
+          "Preview": "عرض الفاتورة",
         },
         // ::::::
         // ::::::
@@ -1014,6 +1021,13 @@ class MyTranslation extends Translations {
           'مورد جديد': 'New Supplier',
           'يرجى اختيار مورد أولاً': 'Please select a supplier first',
           "check": "checks",
+          "QTY": "QTY",
+          "DESC": "DESC",
+          "AMT": "AMT",
+          "SUBTOTAL": "SUBTOTAL",
+          "AMOUNT": "AMOUNT",
+          "THANK YOU": "THANK YOU",
+          "Preview": "Preview",
         },
       };
 }

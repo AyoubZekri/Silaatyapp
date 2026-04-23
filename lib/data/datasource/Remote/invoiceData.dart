@@ -215,7 +215,7 @@ class Invoicedata {
         [invoiceUuid],
       );
       final invoies = await db.readData("""
-          SELECT Payment_price,discount
+          SELECT Payment_price,discount,invoies_date
           FROM invoies
           WHERE uuid = ?
         """, [invoiceUuid]);
@@ -247,6 +247,7 @@ class Invoicedata {
           "sum_price": totalSum,
           "Payment_price": paymentprice,
           "discount": discount,
+          "invoies_date": invoies.first["invoies_date"],
         }
       };
     } catch (e) {

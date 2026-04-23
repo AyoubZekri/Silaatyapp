@@ -9,6 +9,10 @@ import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 import 'package:Silaaty/data/datasource/Remote/SaleData.dart';
 import 'package:Silaaty/data/datasource/Remote/invoiceData.dart';
+import 'package:screenshot/screenshot.dart';
+import 'package:barcode_widget/barcode_widget.dart';
+import 'package:image/image.dart' as img;
+import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 import '../../../core/functions/Snacpar.dart';
 import '../../../core/services/Services.dart';
@@ -483,6 +487,402 @@ class Shwoinvoicecontroller extends GetxController {
     );
 
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
+  }
+
+  final ScreenshotController screenshotController = ScreenshotController();
+
+  Future<void> printThermalInvoice() async {
+    try {
+      bool? status = await PrintBluetoothThermal.connectionStatus;
+      if (status != true) {
+        showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
+        return;
+      }
+
+      final productsList = productSale?.products ?? [];
+      final address = myServices.sharedPreferences!.getString("adresse") ?? "";
+      final phoneNumber =
+          myServices.sharedPreferences!.getString("phone") ?? "";
+      final nameSaler =
+          myServices.sharedPreferences!.getString("family_name") ?? "";
+
+      final customerName = [
+        invoices?.familyName,
+        invoices?.name,
+      ].where((e) => e != null && e.trim().isNotEmpty).join(" ");
+      final safeCustomerName =
+          customerName.isEmpty ? "غير معروف".tr : customerName;
+
+      final isArabic = Get.locale?.languageCode == "ar";
+
+      // Build the receipt design as a widget
+      Widget receiptWidget = _buildThermalReceiptWidget(
+        nameSaler: nameSaler,
+        address: address,
+        phoneNumber: phoneNumber,
+        invoices: invoices!,
+        safeCustomerName: safeCustomerName,
+        productsList: productsList,
+        isArabic: isArabic,
+      );
+
+      final Uint8List? imageBytes =
+          await screenshotController.captureFromWidget(
+        receiptWidget,
+        delay: const Duration(milliseconds: 100),
+      );
+
+      if (imageBytes != null) {
+        img.Image? decodedImage = img.decodeImage(imageBytes);
+        if (decodedImage != null) {
+          decodedImage = img.copyResize(decodedImage, width: 384);
+          final bytes = _convertImageToRaster(decodedImage);
+          await PrintBluetoothThermal.writeBytes(bytes);
+          await PrintBluetoothThermal.writeBytes([10, 10, 10, 10, 10]);
+        }
+      }
+    } catch (e) {
+      print("Error during thermal printing: $e");
+      showSnackbar("error".tr, "operation_failed".tr, Colors.red);
+    }
+  }
+
+  Widget _buildAmountRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text("$label: ", style: const TextStyle(fontSize: 14)),
+          SizedBox(
+            width: 120,
+            child: Text(value,
+                textAlign: TextAlign.right,
+                style: const TextStyle(fontSize: 14)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void showThermalInvoicePreview() {
+    final productsList = productSale?.products ?? [];
+    final address = myServices.sharedPreferences!.getString("adresse") ?? "";
+    final phoneNumber = myServices.sharedPreferences!.getString("phone") ?? "";
+    final nameSaler =
+        myServices.sharedPreferences!.getString("family_name") ?? "";
+
+    final customerName = [
+      invoices?.familyName,
+      invoices?.name,
+    ].where((e) => e != null && e.trim().isNotEmpty).join(" ");
+    final safeCustomerName =
+        customerName.isEmpty ? "غير معروف".tr : customerName;
+
+    final isArabic = Get.locale?.languageCode == "ar";
+
+    Get.dialog(
+      Dialog(
+        backgroundColor: Colors.white,
+        insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            AppBar(
+              title: Text("Preview".tr),
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              centerTitle: true,
+              leading: IconButton(
+                icon: const Icon(Icons.close, color: Colors.black),
+                onPressed: () => Get.back(),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.print, color: Colors.black),
+                  onPressed: () {
+                    Get.back();
+                    printThermalInvoice();
+                  },
+                ),
+              ],
+            ),
+            Flexible(
+              child: SingleChildScrollView(
+                child: _buildThermalReceiptWidget(
+                  nameSaler: nameSaler,
+                  address: address,
+                  phoneNumber: phoneNumber,
+                  invoices: invoices!,
+                  safeCustomerName: safeCustomerName,
+                  productsList: productsList,
+                  isArabic: isArabic,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildThermalReceiptWidget({
+    required String nameSaler,
+    required String address,
+    required String phoneNumber,
+    required InvoiceItem invoices,
+    required String safeCustomerName,
+    required List<dynamic> productsList,
+    required bool isArabic,
+  }) {
+    return Directionality(
+      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+      child: Material(
+        color: Colors.white,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 20),
+          width: 400, // Standard width for 58mm capture
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      nameSaler.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 26,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                        fontFamily: 'Cairo',
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      address,
+                      style: const TextStyle(fontSize: 16, color: Colors.black),
+                      textAlign: TextAlign.center,
+                    ),
+                    if (phoneNumber.isNotEmpty)
+                      Text(
+                        phoneNumber,
+                        style:
+                            const TextStyle(fontSize: 15, color: Colors.black),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "-------------------------------------------------------------------------",
+                maxLines: 1,
+                style: TextStyle(color: Colors.black, letterSpacing: -1),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${'التاريخ'.tr}: ${invoices.date!.substring(0, 10)}",
+                    style: const TextStyle(fontSize: 14, color: Colors.black),
+                  ),
+                  SizedBox(width: 5),
+                  Text(
+                    invoices.date!.length > 16
+                        ? invoices.date!.substring(11, 19)
+                        : "",
+                    style: const TextStyle(fontSize: 14, color: Colors.black),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 5),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "${'رقم الفتورة'.tr}: ${invoices.number}",
+                    style: const TextStyle(fontSize: 14, color: Colors.black),
+                  ),
+                  SizedBox(height: 5),
+                  Text(
+                    "${'الزبون'.tr}: $safeCustomerName",
+                    style: const TextStyle(
+                        fontSize: 14, color: Color.fromRGBO(0, 0, 0, 1)),
+                    textAlign: TextAlign.start,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              const Text(
+                "-------------------------------------------------------------------------",
+                maxLines: 1,
+                style: TextStyle(color: Colors.black, letterSpacing: -1),
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  Expanded(
+                      flex: 2,
+                      child: Text("المنتج".tr,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13))),
+                  Expanded(
+                      flex: 2,
+                      child: Text('QTY'.tr,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13))),
+                  Expanded(
+                      flex: 2,
+                      child: Text("سعر الوحدة".tr,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13),
+                          textAlign:
+                              isArabic ? TextAlign.left : TextAlign.right)),
+                  Expanded(
+                      flex: 2,
+                      child: Text('السعر الإجمالي'.tr,
+                          style: const TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 13),
+                          textAlign:
+                              isArabic ? TextAlign.left : TextAlign.right)),
+                ],
+              ),
+              const SizedBox(height: 5),
+              const Text(
+                "-------------------------------------------------------------------------",
+                maxLines: 1,
+                style: TextStyle(color: Colors.black, letterSpacing: -1),
+              ),
+              const SizedBox(height: 10),
+              ...productsList.map((p) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 4),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                            flex: 2,
+                            child: Text(p.productName,
+                                style: const TextStyle(fontSize: 13))),
+                        Expanded(
+                            flex: 2,
+                            child: Text("${p.quantity}",
+                                style: const TextStyle(fontSize: 13))),
+                        Expanded(
+                            flex: 2,
+                            child: Text("${p.subtotal}",
+                                textAlign:
+                                    isArabic ? TextAlign.left : TextAlign.right,
+                                style: const TextStyle(fontSize: 13))),
+                        Expanded(
+                            flex: 2,
+                            child: Text("${p.unitPrice}",
+                                textAlign:
+                                    isArabic ? TextAlign.left : TextAlign.right,
+                                style: const TextStyle(fontSize: 13))),
+                      ],
+                    ),
+                  )),
+              const SizedBox(height: 15),
+              const Text(
+                "-------------------------------------------------------------------------",
+                maxLines: 1,
+                style: TextStyle(color: Colors.black, letterSpacing: -1),
+              ),
+              const SizedBox(height: 10),
+              _buildAmountRow("SUBTOTAL".tr, "${invoices.totalSales}"),
+              if (double.tryParse(invoices.discount.toString()) != 0)
+                _buildAmountRow("Discount".tr, "${invoices.discount!}"),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "AMOUNT".tr,
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    "${invoices.totalSales! - invoices.discount!} ${'DA'.tr}",
+                    style: const TextStyle(
+                        fontSize: 22, fontWeight: FontWeight.bold),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 15),
+              const Text(
+                "-------------------------------------------------------------------------",
+                maxLines: 1,
+                style: TextStyle(color: Colors.black, letterSpacing: -1),
+              ),
+              const SizedBox(height: 15),
+              Center(
+                child: Column(
+                  children: [
+                    Text(
+                      "*** ${'THANK YOU'.tr} ***",
+                      style: const TextStyle(
+                          fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                    const SizedBox(height: 20),
+                    if (invoices.uuid != null)
+                      SizedBox(
+                        height: 60,
+                        width: 200,
+                        child: BarcodeWidget(
+                          barcode: Barcode.code128(),
+                          data: invoices.uuid!,
+                          drawText: false,
+                          width: 200,
+                          height: 60,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 25),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  List<int> _convertImageToRaster(img.Image image) {
+    List<int> bytes = [];
+    int width = image.width;
+    int height = image.height;
+    int widthBytes = (width + 7) ~/ 8;
+
+    bytes.addAll([
+      29,
+      118,
+      48,
+      0,
+      widthBytes % 256,
+      widthBytes ~/ 256,
+      height % 256,
+      height ~/ 256
+    ]);
+
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < widthBytes; x++) {
+        int byte = 0;
+        for (int bit = 0; bit < 8; bit++) {
+          int px = x * 8 + bit;
+          if (px < width) {
+            var pixel = image.getPixel(px, y);
+            if (pixel.luminance < 128) {
+              byte |= (128 >> bit);
+            }
+          }
+        }
+        bytes.add(byte);
+      }
+    }
+    return bytes;
   }
 
   // Future<void> printInvoiceBluetooth() async {
