@@ -278,31 +278,38 @@ class _InformationitemState extends State<Informationitem> {
 
   Widget buildPrintableTicket(String name, String barcode, double price) {
     return Container(
-      width: 384,
+      width: 320,
+      height: 115,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: AppColor.backgroundcolor, width: 2),
       ),
-      padding: const EdgeInsets.all(5),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(
-            name,
-            style: TextStyle(
-                fontSize: 21, fontWeight: FontWeight.w700, color: Colors.black),
-            textAlign: TextAlign.center,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Text(
+              name,
+              style: const TextStyle(
+                  fontSize: 17,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.black),
+              textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
           const SizedBox(height: 5),
           BarcodeWidget(
             barcode: Barcode.code128(),
             data: barcode,
             width: 180,
-            height: 70,
+            height: 45,
             drawText: true,
           ),
-          const SizedBox(height: 5),
           Text("${price.toStringAsFixed(2)} ${"DA".tr}",
               style: const TextStyle(fontSize: 20, color: Colors.black)),
         ],

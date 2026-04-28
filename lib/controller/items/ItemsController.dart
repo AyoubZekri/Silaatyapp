@@ -180,9 +180,9 @@ class Itemscontroller extends GetxController {
 
     String cleaned = codepar.replaceAll(RegExp(r'[^\d]'), '');
 
-    if (cleaned.length <= 9) {
-      cleaned = cleaned.substring(1);
-    }
+    // if (cleaned.length <= 9) {
+    //   cleaned = cleaned.substring(1);
+    // }
     print("====== CLEANED: $cleaned");
 
     Map<String, Object?> data = {
