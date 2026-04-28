@@ -10,12 +10,12 @@ class Custemrowprodact extends StatelessWidget {
   final Color color;
   final Color colorp;
   final void Function()? onTap;
-  final void Function()? onLongPress; 
+  final void Function()? onLongPress;
 
   const Custemrowprodact({
     super.key,
     this.onTap,
-    this.onLongPress, 
+    this.onLongPress,
     required this.title,
     required this.price,
     this.da,
@@ -30,14 +30,22 @@ class Custemrowprodact extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      onLongPress: onLongPress, 
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      onLongPress: onLongPress,
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(
+              color: Colors.grey.withOpacity(0.2),
+              width: 0.5,
+            ),
+          ),
+        ),
         child: Row(
           children: [
-            // العنوان
+            // العنوان (Name)
             Expanded(
-              flex: 2,
+              flex: 3,
               child: Text(
                 title,
                 style: Theme.of(context)
@@ -49,21 +57,23 @@ class Custemrowprodact extends StatelessWidget {
               ),
             ),
 
-            // السعر
+            const SizedBox(width: 4),
+
+            // السعر (Price)
             Expanded(
               flex: 2,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (da != null)
-                    Text(
-                      da!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium!
-                          .copyWith(color: colorp, fontSize: fontSize),
-                    ),
-                  const SizedBox(width: 3),
+                  // if (da != null)
+                  //   Text(
+                  //     da!,
+                  //     style: Theme.of(context)
+                  //         .textTheme
+                  //         .headlineMedium!
+                  //         .copyWith(color: colorp, fontSize: fontSize - 2),
+                  //   ),
+                  const SizedBox(width: 2),
                   Flexible(
                     child: Text(
                       price,
@@ -71,7 +81,7 @@ class Custemrowprodact extends StatelessWidget {
                           .textTheme
                           .headlineMedium!
                           .copyWith(color: colorp, fontSize: fontSize),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
@@ -79,9 +89,9 @@ class Custemrowprodact extends StatelessWidget {
               ),
             ),
 
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
 
-            // الكمية
+            // الكمية (Qty)
             Expanded(
               flex: 2,
               child: Text(
@@ -96,21 +106,23 @@ class Custemrowprodact extends StatelessWidget {
               ),
             ),
 
-            // القيمة
+            const SizedBox(width: 8),
+
+            // القيمة (Total Value)
             Expanded(
               flex: 2,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.end,
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  if (da != null)
-                    Text(
-                      da!,
-                      style: Theme.of(context)
-                          .textTheme
-                          .headlineMedium!
-                          .copyWith(color: colorp, fontSize: fontSize),
-                    ),
-                  const SizedBox(width: 3),
+                  // if (da != null)
+                  //   Text(
+                  //     da!,
+                  //     style: Theme.of(context)
+                  //         .textTheme
+                  //         .headlineMedium!
+                  //         .copyWith(color: colorp, fontSize: fontSize - 2),
+                  //   ),
+                  // const SizedBox(width: 2),
                   Flexible(
                     child: Text(
                       value,

@@ -27,7 +27,7 @@ class Costumtitlepayment extends StatelessWidget {
             ],
           ),
           Container(
-            margin: EdgeInsets.only(top: 10, bottom: 10),
+            margin: EdgeInsets.only(top: 10),
             color: Colors.grey[300],
             height: 1,
           ),

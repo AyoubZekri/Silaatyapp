@@ -31,7 +31,8 @@ class PaymentController extends GetxController {
 
   Future<void> addSale() async {
     final String uuidinvoice = Uuid().v4();
-
+    print(
+        "========================================${DateTime.now().toIso8601String()}");
     update();
     Map<String, Object?> data = {
       "uuid": uuidinvoice,
@@ -39,7 +40,7 @@ class PaymentController extends GetxController {
       "user_id": id,
       "invoies_numper":
           DateTime.now().millisecondsSinceEpoch.toString().substring(0, 10),
-      "invoies_date": DateTime.now().toIso8601String(),
+      "invoies_date": DateFormat('yyyy-MM-dd HH:mm:ss').format(DateTime.now()),
       "discount": discountController.text,
       "invoies_payment_date": DateTime.now().toIso8601String(),
       "created_at": DateTime.now().toIso8601String(),
@@ -60,7 +61,7 @@ class PaymentController extends GetxController {
         "user_id": id,
         "created_at": DateTime.now().toIso8601String(),
         "product_price_purchase": item["price_Purchase"],
-        "product_name": item["name"],  
+        "product_name": item["name"],
       };
     }).toList();
     print(data);
@@ -96,7 +97,7 @@ class PaymentController extends GetxController {
     if (args['type'] != null) type = args['type'];
 
     currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    
+
     discountController = TextEditingController(text: "0");
     paymentController = TextEditingController(text: "0");
 
@@ -104,8 +105,6 @@ class PaymentController extends GetxController {
 
     discountController.addListener(recalculateFinalAmount);
     paymentController.addListener(recalculateFinalAmount);
-
-
 
     if (selectedCustomer == "virtualCustomer".tr) {
       paymentController =

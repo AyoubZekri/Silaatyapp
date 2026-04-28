@@ -6,11 +6,13 @@ import '../../../core/constant/Colorapp.dart';
 class ProductActionsBottomSheet extends StatelessWidget {
   final VoidCallback onReturn;
   final VoidCallback onEdit;
+  final String? productName;
 
   const ProductActionsBottomSheet({
     super.key,
     required this.onReturn,
     required this.onEdit,
+    this.productName,
   });
 
   @override
@@ -53,13 +55,27 @@ class ProductActionsBottomSheet extends StatelessWidget {
   Widget _buildHeader() {
     return Container(
       alignment: Alignment.center,
-      child: Text(
-        'select_operation'.tr,
-        style: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-          color: AppColor.grey,
-        ),
+      child: Column(
+        children: [
+          if (productName != null && productName!.isNotEmpty)
+            Text(
+              productName!,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppColor.backgroundcolor,
+              ),
+            ),
+          // if (productName != null && productName!.isNotEmpty)
+          //   const SizedBox(height: 4),
+          // Text(
+          //   'select_operation'.tr,
+          //   style: TextStyle(
+          //     fontSize: 14,
+          //     color: AppColor.grey,
+          //   ),
+          // ),
+        ],
       ),
     );
   }

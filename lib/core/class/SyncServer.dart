@@ -5,8 +5,6 @@ import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'package:path_provider/path_provider.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:sqflite/sqflite.dart';
-
 import '../../LinkApi.dart';
 import '../services/Services.dart';
 import '../functions/CheckInternat.dart';
@@ -284,6 +282,7 @@ class SyncService {
 
       int limit = 50;
       int page = 0;
+      int totalDownloaded = 0;
       bool hasMore = true;
 
       while (hasMore) {
@@ -295,13 +294,19 @@ class SyncService {
             if (token != null) "Authorization": "Bearer $token",
           },
         );
-
         if (res.statusCode != 200) {
           print("⚠️ HTTP ${res.statusCode}");
           break;
         }
 
         final List<dynamic> serverData = jsonDecode(res.body);
+        totalDownloaded += serverData.length;
+        print(
+            "📥 دفعة ${page + 1}: تم استلام ${serverData.length} سجل (الإجمالي: $totalDownloaded)");
+
+        if (serverData.isNotEmpty) {
+          print("📄 آخر سجل مستلم في هذه الدفعة: ${serverData.last}");
+        }
 
         if (serverData.isEmpty) {
           hasMore = false;
@@ -321,8 +326,6 @@ class SyncService {
         }
 
         await _syncServerRecords(table, serverData);
-
-        print("📥 دفعة ${page + 1}: ${serverData.length} سجل");
 
         hasMore = serverCount == limit;
         page++;
@@ -367,46 +370,52 @@ class SyncService {
     final columns = await getTableColumns(_db, table);
 
     for (var record in serverData) {
-      final uuid = record["uuid"];
+      try {
+        final uuid = record["uuid"];
+        if (uuid == null) continue;
 
-      // images
-      if ((record["categoris_image"] ?? "") != "") {
-        record["categoris_image"] =
-            await _downloadAndSaveImage(record["categoris_image"]);
-      }
-
-      if ((record["Product_image"] ?? "") != "") {
-        record["Product_image"] =
-            await _downloadAndSaveImage(record["Product_image"]);
-      }
-
-      record.remove("id");
-
-      final filtered = filterRecord(
-        Map<String, dynamic>.from(record),
-        columns,
-      );
-
-      final existing =
-          await _db.readData("SELECT * FROM $table WHERE uuid='$uuid'");
-
-      if (existing.isEmpty) {
-        await _db.insert(table, filtered);
-      } else {
-        final local = existing.first;
-
-        final serverUpdated =
-            DateTime.tryParse(record["updated_at"] ?? "") ?? DateTime(1970);
-
-        final rawDate = local["updated_at"];
-
-        final localUpdated = (rawDate != null)
-            ? DateTime.tryParse(rawDate.toString()) ?? DateTime(1970)
-            : DateTime(1970);
-
-        if (serverUpdated.isAfter(localUpdated)) {
-          await _db.update(table, filtered, "uuid='$uuid'");
+        // images
+        if ((record["categoris_image"] ?? "") != "") {
+          record["categoris_image"] =
+              await _downloadAndSaveImage(record["categoris_image"]);
         }
+
+        if ((record["Product_image"] ?? "") != "") {
+          record["Product_image"] =
+              await _downloadAndSaveImage(record["Product_image"]);
+        }
+
+        record.remove("id");
+
+        final filtered = filterRecord(
+          Map<String, dynamic>.from(record),
+          columns,
+        );
+
+        final existing =
+            await _db.readData("SELECT * FROM $table WHERE uuid = ?", [uuid]);
+
+        if (existing.isEmpty) {
+          await _db.insert(table, filtered);
+          print("📥 تم حفظ سجل جديد: $uuid في جدول $table");
+        } else {
+          final local = existing.first;
+
+          final serverUpdated =
+              DateTime.tryParse(record["updated_at"] ?? "") ?? DateTime(1970);
+
+          final rawDate = local["updated_at"];
+          final localUpdated = (rawDate != null)
+              ? DateTime.tryParse(rawDate.toString()) ?? DateTime(1970)
+              : DateTime(1970);
+
+          if (serverUpdated.isAfter(localUpdated)) {
+            await _db.update(table, filtered, "uuid = ?", [uuid]);
+            print("🔄 تم تحديث سجل موجود: $uuid في جدول $table");
+          }
+        }
+      } catch (e) {
+        print("❌ فشل معالجة سجل في جدول $table: $e");
       }
     }
   }
@@ -415,8 +424,21 @@ class SyncService {
     Map<String, dynamic> record,
     Set<String> columns,
   ) {
+    // توحيد أسماء الأعمدة لتكون حروف صغيرة للمقارنة
+    final lowerColumns = columns.map((e) => e.toLowerCase()).toSet();
+
     return Map.fromEntries(
-      record.entries.where((e) => columns.contains(e.key)),
+      record.entries.where((e) {
+        final key = e.key.toLowerCase();
+        return lowerColumns.contains(key);
+      }).map((e) {
+        // نستخدم اسم العمود الأصلي من القاعدة للحفاظ على التوافق
+        final originalKey = columns.firstWhere(
+          (col) => col.toLowerCase() == e.key.toLowerCase(),
+          orElse: () => e.key,
+        );
+        return MapEntry(originalKey, e.value);
+      }),
     );
   }
 
@@ -437,26 +459,28 @@ class SyncService {
     print("🌐 بدء المزامنة…");
 
     await pushQueue("categoris");
-    await pushQueue("transactions");
-    await pushQueue("sales");
-    await pushQueue("invoies");
     await pushQueue("products");
+    await pushQueue("transactions");
+    await pushQueue("invoies");
+    await pushQueue("sales");
     await pushQueue("notifications");
     await pushQueue("reports");
     await pushQueue("zakats");
 
     await pullFromServer("categoris");
-    await pullFromServer("transactions");
-    await pullFromServer("sales");
-    await pullFromServer("invoies");
     await pullFromServer("products");
+    await pullFromServer("transactions");
+    await pullFromServer("invoies");
+    await pullFromServer("sales");
     await pullFromServer("notifications");
     await pullFromServer("reports");
     await pullFromServer("zakats");
 
     print("✅ كل المزامنة كملت بنجاح");
 
-    Get.find<RefreshService>().fire();
+    if (Get.isRegistered<RefreshService>()) {
+      Get.find<RefreshService>().fire();
+    }
   }
 
   // ---------------------------------------------------------

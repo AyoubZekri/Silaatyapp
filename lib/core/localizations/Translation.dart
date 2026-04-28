@@ -489,6 +489,15 @@ class MyTranslation extends Translations {
           "AMOUNT": "المبلغ الإجمالي",
           "THANK YOU": "شكراً لزيارتكم",
           "Preview": "عرض الفاتورة",
+          "نجاح": "نجاح",
+          "تمت الطباعة بنجاح": "تمت الطباعة بنجاح",
+          "خطأ في تحديد مساحة الطباعة": "خطأ في تحديد مساحة الطباعة",
+          "خطأ في معالجة بيانات الصورة": "خطأ في معالجة بيانات الصورة",
+          "خطأ في فك تشفير الصورة": "خطأ في فك تشفير الصورة",
+          "فشل الاتصال بالطابعة": "فشل الاتصال بالطابعة",
+          "سعر خاص": "سعر خاص",
+          "تعديل المنتج": "تعديل المنتج",
+          "الكمية": "الكمية",
         },
         // ::::::
         // ::::::
@@ -588,6 +597,9 @@ class MyTranslation extends Translations {
           "Name Prodact": "Name Prodact",
           "Description": "Description",
           "Quantity": "Quantity",
+          "سعر خاص": "Special Price",
+          "تعديل المنتج": "Edit Product",
+          "الكمية": "Quantity",
           "Price": "Price",
           "Prise Total": "Prise Total",
           "Prise Prodact": "Prise Prodact",
@@ -1028,6 +1040,12 @@ class MyTranslation extends Translations {
           "AMOUNT": "AMOUNT",
           "THANK YOU": "THANK YOU",
           "Preview": "Preview",
+          "نجاح": "Success",
+          "تمت الطباعة بنجاح": "Printed successfully",
+          "خطأ في تحديد مساحة الطباعة": "Error determining print area",
+          "خطأ في معالجة بيانات الصورة": "Error processing image data",
+          "خطأ في فك تشفير الصورة": "Error decoding image",
+          "فشل الاتصال بالطابعة": "Failed to connect to the printer",
         },
       };
 }

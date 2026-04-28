@@ -78,7 +78,7 @@ class Edititemcontroller extends GetxController {
     final oldQty = int.parse(oldquantity!);
 
     if (newQty < 0) {
-      showSnackbar("error".tr, "كمية غير صالحة", Colors.red);
+      showSnackbar("error".tr, "كمية غير صالحة".tr, Colors.red);
       return;
     }
 

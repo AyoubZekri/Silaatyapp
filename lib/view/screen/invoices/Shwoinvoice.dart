@@ -1,4 +1,4 @@
-import 'package:Silaaty/controller/Profaile/invoice/ShwoinvoiCecontroller.dart';
+import 'package:Silaaty/controller/Profaile/invoice/Shwoinvoicecontroller.dart';
 import 'package:Silaaty/view/widget/Bills/CustemEditpayment.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -115,7 +115,19 @@ class _PaymentState extends State<Shwoinvoice> {
                       title: "تفاصيل الطلب".tr,
                     ),
 
-                    const SizedBox(height: 15),
+                    Custemrowprodact(
+                      title: "Product".tr,
+                      price: "Price".tr,
+                      fontSize: 17,
+                      color: AppColor.backgroundcolor,
+                      colorp: AppColor.backgroundcolor,
+                      q: "Quantity".tr,
+                      value: "Value".tr,
+                    ),
+                    Container(
+                      color: Colors.grey[300],
+                      height: 1,
+                    ),
                     SizedBox(
                       height: 250,
                       child: HandlingviewShimmer(
@@ -129,6 +141,7 @@ class _PaymentState extends State<Shwoinvoice> {
                                 onTap: () {
                                   Get.bottomSheet(
                                     ProductActionsBottomSheet(
+                                      productName: pro.productName,
                                       onReturn: () {
                                         Get.defaultDialog(
                                           backgroundColor: AppColor.white,
@@ -330,10 +343,14 @@ class _PaymentState extends State<Shwoinvoice> {
                           const SizedBox(width: 15),
                           Custemcartabbreviation(
                             width: Get.width / 4,
-                            onTap: () {
-                              controller.printThermalInvoice();
-                            },
-                            iconData: Icons.print_outlined,
+                            onTap: controller.isPrinting
+                                ? null
+                                : () {
+                                    controller.printThermalInvoice();
+                                  },
+                            iconData: controller.isPrinting
+                                ? Icons.hourglass_empty
+                                : Icons.print_outlined,
                             title: "طباعة".tr,
                           ),
                           const SizedBox(width: 15),

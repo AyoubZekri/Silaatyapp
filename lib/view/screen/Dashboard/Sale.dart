@@ -81,10 +81,8 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
               q: "Quantity".tr,
               value: "Value".tr,
             ),
-            const SizedBox(height: 5),
             Container(
                 color: Colors.grey[400], height: 1, width: double.infinity),
-            const SizedBox(height: 10),
             Expanded(
               child: Column(
                 children: [
@@ -122,16 +120,113 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                       TextEditingController(
                                     text: item['quantity'].toString(),
                                   );
+                                  final currentPrice = controller.type == 1
+                                      ? item['price_Purchase']
+                                      : item['price'];
+                                  TextEditingController priceController =
+                                      TextEditingController(
+                                    text: currentPrice.toString(),
+                                  );
 
                                   Get.dialog(
-                                    CustemQuantityDialog(
-                                      controller: qtyController,
-                                      title: "تعديل الكمية".tr,
-                                      onCancel: () => Get.back(),
-                                      onConfirm: () {
-                                        controller.updateQuantity(item['uuid'],
-                                            int.parse(qtyController.text));
-                                      },
+                                    AlertDialog(
+                                      backgroundColor: AppColor.white,
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(15),
+                                      ),
+                                      title: Center(
+                                        child: Text(
+                                          "تعديل المنتج".tr,
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: AppColor.backgroundcolor,
+                                          ),
+                                        ),
+                                      ),
+                                      content: Column(
+                                        mainAxisSize: MainAxisSize.min,
+                                        children: [
+                                          TextFormField(
+                                            controller: qtyController,
+                                            keyboardType: TextInputType.number,
+                                            decoration: InputDecoration(
+                                              labelText: "الكمية".tr,
+                                              filled: true,
+                                              fillColor: Colors.grey[100],
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                    color: Colors.grey),
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                              suffixIcon: const Icon(
+                                                Icons.inventory_2_outlined,
+                                                color: AppColor.backgroundcolor,
+                                              ),
+                                            ),
+                                          ),
+                                          const SizedBox(height: 12),
+                                          TextFormField(
+                                            controller: priceController,
+                                            keyboardType: const TextInputType
+                                                .numberWithOptions(
+                                                decimal: true),
+                                            decoration: InputDecoration(
+                                              labelText: "سعر خاص".tr,
+                                              filled: true,
+                                              fillColor: Colors.grey[100],
+                                              border: OutlineInputBorder(
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                              enabledBorder: OutlineInputBorder(
+                                                borderSide: const BorderSide(
+                                                    color: Colors.grey),
+                                                borderRadius:
+                                                    BorderRadius.circular(30),
+                                              ),
+                                              suffixIcon: const Icon(
+                                                Icons.attach_money,
+                                                color: AppColor.backgroundcolor,
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Get.back(),
+                                          child: Text("Cancel".tr),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            final qty = int.tryParse(
+                                                qtyController.text);
+                                            final price = double.tryParse(
+                                                priceController.text);
+                                            if (qty != null && qty > 0) {
+                                              controller.updateQuantity(
+                                                  item['uuid'], qty);
+                                            }
+                                            if (price != null && price > 0) {
+                                              controller.updateProductPrice(
+                                                  item['uuid'], price);
+                                            }
+                                            Get.back();
+                                          },
+                                          style: ElevatedButton.styleFrom(
+                                            backgroundColor:
+                                                AppColor.backgroundcolor,
+                                          ),
+                                          child: Text("Edit".tr,
+                                              style: const TextStyle(
+                                                  color: AppColor.white)),
+                                        ),
+                                      ],
                                     ),
                                   );
                                 },
@@ -162,9 +257,10 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                 colorp: AppColor.grey,
                                 da: "DA".tr,
                                 q: item["quantity"].toString(),
-                                value: (controller.type == 1
-                                        ? item["price_Purchase"]
-                                        : item["price"] * item["quantity"])
+                                value: ((controller.type == 1
+                                            ? item["price_Purchase"]
+                                            : item["price"]) *
+                                        item["quantity"])
                                     .toString(),
                               );
                             },

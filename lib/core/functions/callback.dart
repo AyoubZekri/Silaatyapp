@@ -38,7 +38,7 @@ class SyncForegroundService {
     print("AlarmManager stopped");
   }
 }
-
+@pragma('vm:entry-point')
 void syncCallback() async {
   await initialServices();
   if (await checkInternet()) {

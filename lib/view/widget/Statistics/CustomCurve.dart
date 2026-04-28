@@ -14,44 +14,50 @@ class CustomCurve extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // 1. Sort the incoming spots by X to prevent any zigzag overlapping
+    List<FlSpot> sortedSpots = List.from(spots);
+    sortedSpots.sort((a, b) => a.x.compareTo(b.x));
+
     final List<FlSpot> curveSpots = [];
     if (period == "day") {
-      if (spots.isNotEmpty) {
-        double xMapped = hourToX(spots.first.x.toInt());
-        if (xMapped != 0) {
-          curveSpots.add(FlSpot(xMapped - 1 / 2, 0));
+      if (sortedSpots.isNotEmpty) {
+        double xMappedFirst = hourToX(sortedSpots.first.x.toInt());
+        if (xMappedFirst > 0) {
+          curveSpots.add(FlSpot(xMappedFirst - 0.5, 0));
         } else {
-          curveSpots.add(FlSpot(xMapped, 0));
+          curveSpots.add(FlSpot(xMappedFirst, 0));
         }
 
-        for (var s in spots) {
+        for (var s in sortedSpots) {
           double xMapped = hourToX(s.x.toInt());
           curveSpots.add(FlSpot(xMapped, s.y));
         }
 
-        double xMappedfin = hourToX(spots.last.x.toInt());
-        if (xMappedfin + 0.5 < _getMaxX()) {
-          curveSpots.add(FlSpot(xMappedfin + 0.5, 0));
+        double xMappedLast = hourToX(sortedSpots.last.x.toInt());
+        if (xMappedLast + 0.5 < _getMaxX()) {
+          curveSpots.add(FlSpot(xMappedLast + 0.5, 0));
         } else {
-          curveSpots.add(FlSpot(xMappedfin, 0));
+          curveSpots.add(FlSpot(xMappedLast, 0));
         }
       }
     } else {
-      if (spots.isNotEmpty) {
-        if (spots.first != 0) {
-          curveSpots.add(FlSpot(spots.first.x - 1 / 2, 0));
+      if (sortedSpots.isNotEmpty) {
+        if (sortedSpots.first.x > 0) {
+          curveSpots.add(FlSpot(sortedSpots.first.x - 0.5, 0));
         } else {
-          curveSpots.add(FlSpot(spots.first.x, 0));
+          curveSpots.add(FlSpot(sortedSpots.first.x, 0));
         }
-        curveSpots.addAll(spots);
-        if (spots.last.x + 1 / 2 < _getMaxX()) {
-          curveSpots.add(FlSpot(spots.last.x + 1 / 2, 0));
+        curveSpots.addAll(sortedSpots);
+        if (sortedSpots.last.x + 0.5 < _getMaxX()) {
+          curveSpots.add(FlSpot(sortedSpots.last.x + 0.5, 0));
         } else {
-          curveSpots.add(FlSpot(spots.last.x, 0));
+          curveSpots.add(FlSpot(sortedSpots.last.x, 0));
         }
       }
-      ;
     }
+
+    // 2. Guarantee final spots are sorted correctly for FlChart
+    curveSpots.sort((a, b) => a.x.compareTo(b.x));
 
     return Container(
       padding: const EdgeInsets.only(right: 30),
@@ -69,20 +75,26 @@ class CustomCurve extends StatelessWidget {
               bottomTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 22,
-                  interval: 1,
-                  getTitlesWidget: (value, meta) =>
-                      _buildBottomTitle(value.toInt()),
+                  reservedSize: 28,
+                  interval: _getInterval(),
+                  getTitlesWidget: (value, meta) => Padding(
+                    padding: const EdgeInsets.only(top: 8.0),
+                    child: _buildBottomTitle(value.toInt()),
+                  ),
                 ),
               ),
               leftTitles: AxisTitles(
                 sideTitles: SideTitles(
                   showTitles: true,
-                  reservedSize: 40,
+                  reservedSize: 42,
+                  interval: _getLeftInterval(),
                   getTitlesWidget: (value, meta) {
+                    if (value == 0) return const SizedBox.shrink();
                     return Text(
                       _formatY(value),
-                      style: const TextStyle(fontSize: 11),
+                      style: const TextStyle(fontSize: 10, color: Colors.grey),
+                      maxLines: 1,
+                      overflow: TextOverflow.visible,
                     );
                   },
                 ),
@@ -94,15 +106,35 @@ class CustomCurve extends StatelessWidget {
             ),
             borderData: FlBorderData(
               show: true,
-              border: const Border(
-                bottom: BorderSide(color: Colors.black, width: 1),
-                left: BorderSide(color: Colors.black, width: 1),
+              border: Border(
+                bottom: BorderSide(color: Colors.grey.shade400, width: 1),
+                left: BorderSide(color: Colors.grey.shade400, width: 1),
+                top: BorderSide.none,
+                right: BorderSide.none,
+              ),
+            ),
+            lineTouchData: LineTouchData(
+              enabled: true,
+              touchTooltipData: LineTouchTooltipData(
+                getTooltipItems: (touchedSpots) {
+                  return touchedSpots.map((spot) {
+                    return LineTooltipItem(
+                      spot.y.toStringAsFixed(2),
+                      const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                    );
+                  }).toList();
+                },
               ),
             ),
             lineBarsData: [
               LineChartBarData(
                 spots: curveSpots,
-                isCurved: false,
+                isCurved: true,
+                curveSmoothness: 0.35,
                 barWidth: 3,
                 preventCurveOverShooting: true,
                 color: Colors.blueAccent,
@@ -111,14 +143,15 @@ class CustomCurve extends StatelessWidget {
                   getDotPainter: (spot, percent, barData, index) {
                     return FlDotCirclePainter(
                       radius: 3,
-                      color: Colors.blueAccent,
-                      strokeColor: Colors.white,
+                      color: Colors.white,
+                      strokeWidth: 2,
+                      strokeColor: Colors.blueAccent,
                     );
                   },
                 ),
                 belowBarData: BarAreaData(
                   show: true,
-                  color: Colors.blueAccent.withOpacity(0.2),
+                  color: Colors.blueAccent.withOpacity(0.15),
                 ),
               )
             ],
@@ -126,6 +159,27 @@ class CustomCurve extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  double _getInterval() {
+    switch (period) {
+      case 'day': return 1;
+      case 'week': return 1;
+      case 'month': return 5;
+      case 'year': return 3;
+      default: return 1;
+    }
+  }
+
+  double _getLeftInterval() {
+    double maxY = _getMaxY();
+    if (maxY <= 5) return 1;
+    if (maxY <= 50) return 10;
+    if (maxY <= 500) return 100;
+    if (maxY <= 5000) return 1000;
+    if (maxY <= 50000) return 10000;
+    if (maxY <= 500000) return 100000;
+    return maxY / 5; // aim for ~5 labels
   }
 
   // ✅ Dynamic maxY depending on data
@@ -138,6 +192,9 @@ class CustomCurve extends StatelessWidget {
 
   // ✅ Format Y axis, 1000 = 1k
   String _formatY(double value) {
+    if (value >= 1000000) {
+      return "${(value / 1000000).toStringAsFixed(1)}M";
+    }
     if (value >= 1000) {
       return "${(value / 1000).toStringAsFixed(1)}k";
     }
@@ -146,38 +203,32 @@ class CustomCurve extends StatelessWidget {
 
   // ✅ Bottom X labels by period
   Widget _buildBottomTitle(int value) {
+    const style = TextStyle(fontSize: 11, color: Colors.grey);
     switch (period) {
       case 'day':
         const times = [
-          "8AM",
-          "10AM",
-          "12PM",
-          "2PM",
-          "4PM",
-          "6PM",
-          "8PM",
-          "10PM"
+          "8AM", "10AM", "12PM", "2PM", "4PM", "6PM", "8PM", "10PM"
         ];
-        if (value >= 0 && value < times.length) return Text(times[value]);
+        if (value >= 0 && value < times.length) return Text(times[value], style: style);
         break;
 
       case 'week':
         const days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
-        if (value >= 0 && value < days.length) return Text(days[value]);
+        if (value >= 0 && value < days.length) return Text(days[value], style: style);
         break;
 
       case 'month':
-        if (value % 5 == 0) return Text("$value d");
+        if (value > 0 && value <= 30) return Text("$value d", style: style);
         break;
 
       case 'year':
         const months = ["Jan", "Apr", "Jul", "Oct", "Dec"];
         if (value % 3 == 0 && value ~/ 3 < months.length) {
-          return Text(months[value ~/ 3]);
+          return Text(months[value ~/ 3], style: style);
         }
         break;
     }
-    return const Text("");
+    return const SizedBox.shrink();
   }
 
   double _getMaxX() {
@@ -196,25 +247,8 @@ class CustomCurve extends StatelessWidget {
   }
 
   double hourToX(int hour) {
-    switch (hour) {
-      case 8:
-        return 0;
-      case 10:
-        return 1;
-      case 12:
-        return 2;
-      case 14:
-        return 3;
-      case 16:
-        return 4;
-      case 18:
-        return 5;
-      case 20:
-        return 6;
-      case 22:
-        return 7;
-      default:
-        return 0;
-    }
+    if (hour < 8) return 0;
+    if (hour > 22) return 7;
+    return (hour - 8) / 2.0;
   }
 }

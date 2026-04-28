@@ -128,7 +128,7 @@ class ProdactData {
               "quantity": saleQty,
               "subtotal": saleQty * unitPrice,
               "product_name": data["product_name"],
-              "unit_price": data["product_price"],
+              "unit_price": data["product_price_purchase"],
               "product_price_purchase": data["product_price_purchase"],
               "updated_at": DateTime.now().toIso8601String(),
             },
@@ -139,12 +139,34 @@ class ProdactData {
             "quantity": saleQty,
             "subtotal": saleQty * unitPrice,
             "product_name": data["product_name"],
-            "unit_price": data["product_price"],
+            "unit_price": data["product_price_purchase"],
             "product_price_purchase": data["product_price_purchase"],
             "updated_at": DateTime.now().toIso8601String(),
           });
         } else {
-          // لا يوجد سجلات type_sales = 3 → يمكن إنشاء سجل جديد هنا إذا أردت
+          // لا يوجد سجلات type_sales = 3 → إنشاء سجل جديد للزيادة
+          final String saleUuid = const Uuid().v4();
+          final double unitPrice =
+              double.tryParse(data["product_price_purchase"].toString()) ?? 0;
+          final double purchasePrice =
+              double.tryParse(data["product_price_purchase"].toString()) ?? 0;
+
+          final Map<String, Object?> newSale = {
+            "uuid": saleUuid,
+            "product_uuid": uuid,
+            "product_name": data["product_name"],
+            "quantity": remainingDiff,
+            "unit_price": unitPrice,
+            "product_price_purchase": purchasePrice,
+            "subtotal": remainingDiff * unitPrice,
+            "type_sales": 3,
+            "user_id": id,
+            "created_at": DateTime.now().toIso8601String(),
+            "updated_at": DateTime.now().toIso8601String(),
+          };
+
+          await sqldb.insert("sales", newSale);
+          await _syncService.addToQueue("sales", saleUuid, "insert", newSale);
         }
       }
       // ➖ إذا الكمية الجديدة أصغر من القديمة
@@ -156,7 +178,7 @@ class ProdactData {
           final saleUuid = sale["uuid"] as String;
           int saleQty = int.tryParse(sale["quantity"]?.toString() ?? '0') ?? 0;
           final unitPrice =
-              double.tryParse(data["product_price"].toString()) ?? 0;
+              double.tryParse(data["product_price_purchase"].toString()) ?? 0;
 
           if (saleQty >= remainingDiff) {
             saleQty -= remainingDiff;
@@ -180,7 +202,7 @@ class ProdactData {
                 "quantity": saleQty,
                 "subtotal": saleQty * unitPrice,
                 "product_name": data["product_name"],
-                "unit_price": data["product_price"],
+                "unit_price": data["product_price_purchase"],
                 "product_price_purchase": data["product_price_purchase"],
                 "updated_at": DateTime.now().toIso8601String(),
               },
@@ -191,7 +213,7 @@ class ProdactData {
               "quantity": saleQty,
               "subtotal": saleQty * unitPrice,
               "product_name": data["product_name"],
-              "unit_price": data["product_price"],
+              "unit_price": data["product_price_purchase"],
               "product_price_purchase": data["product_price_purchase"],
               "updated_at": DateTime.now().toIso8601String(),
             });
@@ -200,7 +222,8 @@ class ProdactData {
       }
     }
     if (diff == 0) {
-      final unitPrice = double.tryParse(data["product_price"].toString()) ?? 0;
+      final unitPrice =
+          double.tryParse(data["product_price_purchase"].toString()) ?? 0;
 
       // جلب uuid و quantity لجميع سجلات type_sales = 3
       final sale12 = await sqldb.readData(
@@ -221,7 +244,7 @@ class ProdactData {
           {
             "subtotal": saleQty * unitPrice,
             "product_name": data["product_name"],
-            "unit_price": data["product_price"],
+            "unit_price": data["product_price_purchase"],
             "product_price_purchase": data["product_price_purchase"],
             "updated_at": DateTime.now().toIso8601String(),
           },
@@ -235,7 +258,7 @@ class ProdactData {
           "update",
           {
             "product_name": data["product_name"],
-            "unit_price": data["product_price"],
+            "unit_price": data["product_price_purchase"],
             "product_price_purchase": data["product_price_purchase"],
             "updated_at": DateTime.now().toIso8601String(),
           },

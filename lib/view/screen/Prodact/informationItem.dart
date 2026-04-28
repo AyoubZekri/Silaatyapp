@@ -244,19 +244,32 @@ class _InformationitemState extends State<Informationitem> {
               style: TextStyle(color: AppColor.backgroundcolor), // نص بنفسجي
             ),
           ),
-          ElevatedButton(
-            onPressed: () {
-              controller.printUniversalTicket(
-                name: name,
-                barcode: barcode,
-                price: price,
-              );
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColor.backgroundcolor,
-              foregroundColor: AppColor.white,
+          GetBuilder<Informationitemcontroller>(
+            builder: (controller) => ElevatedButton(
+              onPressed: controller.isPrinting
+                  ? null
+                  : () {
+                      controller.printUniversalTicket(
+                        name: name,
+                        barcode: barcode,
+                        price: price,
+                      );
+                    },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColor.backgroundcolor,
+                foregroundColor: AppColor.white,
+              ),
+              child: controller.isPrinting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text("طباعة".tr),
             ),
-            child: Text("طباعة".tr),
           ),
         ],
       ),
@@ -271,7 +284,7 @@ class _InformationitemState extends State<Informationitem> {
         borderRadius: BorderRadius.circular(15),
         border: Border.all(color: AppColor.backgroundcolor, width: 2),
       ),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(5),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -281,7 +294,7 @@ class _InformationitemState extends State<Informationitem> {
                 fontSize: 21, fontWeight: FontWeight.w700, color: Colors.black),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
           BarcodeWidget(
             barcode: Barcode.code128(),
             data: barcode,
@@ -289,7 +302,7 @@ class _InformationitemState extends State<Informationitem> {
             height: 70,
             drawText: true,
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 5),
           Text("${price.toStringAsFixed(2)} ${"DA".tr}",
               style: const TextStyle(fontSize: 20, color: Colors.black)),
         ],

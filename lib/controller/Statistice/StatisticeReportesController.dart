@@ -24,7 +24,7 @@ class Statisticereportescontroller extends GetxController {
     // نضرة مالية عامة
     if (filterController == null &&
         (customStartDate == null || customEndDate == null)) {
-      showSnackbar("خطأ", "يرجى تحديد فترة زمنية  .", Colors.red);
+      showSnackbar("تنبيه".tr, "يرجى تحديد فترة زمنية .".tr, Colors.red);
       return;
     }
     Get.toNamed(
@@ -52,7 +52,7 @@ class Statisticereportescontroller extends GetxController {
     // رصيد المخزون
     if (filterController == null &&
         (customStartDate == null || customEndDate == null)) {
-      showSnackbar("خطأ", "يرجى تحديد فترة زمنية .", Colors.red);
+      showSnackbar("تنبيه".tr, "يرجى تحديد فترة زمنية .".tr, Colors.red);
       return;
     }
     Get.toNamed(
@@ -70,7 +70,7 @@ class Statisticereportescontroller extends GetxController {
     // قيمة المخزون
     if (filterController == null &&
         (customStartDate == null || customEndDate == null)) {
-      showSnackbar("خطأ", "يرجى تحديد فترة زمنية .", Colors.red);
+      showSnackbar("تنبيه".tr, "يرجى تحديد فترة زمنية .".tr, Colors.red);
       return;
     }
     Get.toNamed(

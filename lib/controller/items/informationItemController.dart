@@ -3,6 +3,7 @@ import 'dart:ui' as ui;
 
 import 'package:Silaaty/controller/items/Edititemcontroller.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
+import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/constant/routes.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 import 'package:Silaaty/data/model/Product_Model.dart';
@@ -25,6 +26,7 @@ class Informationitemcontroller extends GetxController {
 
   ProdactData prodactData = ProdactData(Get.find());
   Statusrequest statusrequest = Statusrequest.none;
+  bool isPrinting = false;
   List<Data> InfoProduct = [];
   Future<void> GotoEdititem() async {
     final product = InfoProduct[0];
@@ -62,6 +64,7 @@ class Informationitemcontroller extends GetxController {
     print("============================================== $result");
     print("$uid");
     if (result == true) {
+      Get.find<RefreshService>().fire();
       Get.back(result: true);
       // showSnackbar(
       //     "success".tr, "product_deleted_successfully".tr, Colors.green);
@@ -170,10 +173,74 @@ class Informationitemcontroller extends GetxController {
     required String barcode,
     required double price,
   }) async {
+    if (isPrinting) return;
+    isPrinting = true;
+    update();
+
     try {
-      bool? status = await PrintBluetoothThermal.connectionStatus;
-      if (status != true) {
-        showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
+      // التحقق من حالة البلوتوث
+      bool bluetoothEnabled = await PrintBluetoothThermal.bluetoothEnabled;
+      if (!bluetoothEnabled) {
+        showSnackbar(
+            "تنبيه".tr, "الرجاء تفعيل البلوتوث أولاً".tr, Colors.orange);
+        return;
+      }
+
+      // الحصول على قائمة الطابعات المقترنة
+      final List<BluetoothInfo> pairedDevices =
+          await PrintBluetoothThermal.pairedBluetooths;
+
+      if (pairedDevices.isEmpty) {
+        showSnackbar("تنبيه".tr, "لا توجد طابعات مقترنة".tr, Colors.orange);
+        return;
+      }
+
+      // اختيار الطابعة
+      BluetoothInfo? selectedPrinter = await Get.dialog<BluetoothInfo>(
+        AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text("اختر الطابعة".tr, textAlign: TextAlign.center),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: pairedDevices.length,
+              itemBuilder: (context, index) {
+                final device = pairedDevices[index];
+                return ListTile(
+                  leading:
+                      const Icon(Icons.print, color: AppColor.backgroundcolor),
+                  title: Text(device.name),
+                  subtitle: Text(device.macAdress),
+                  onTap: () => Get.back(result: device),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      if (selectedPrinter == null) return;
+
+      // التحقق من حالة الاتصال الحالية
+      bool isConnected = await PrintBluetoothThermal.connectionStatus;
+      print("Current connection status: $isConnected");
+
+      if (isConnected) {
+        // إذا كان هناك اتصال سابق، نغلقه أولاً لضمان الاتصال بالطابعة المختارة حديثاً
+        await PrintBluetoothThermal.disconnect;
+        await Future.delayed(
+            const Duration(milliseconds: 500)); // تأخير بسيط لضمان الإغلاق
+      }
+
+      // الاتصال بالطابعة المختارة
+      bool connectionStatus = await PrintBluetoothThermal.connect(
+          macPrinterAddress: selectedPrinter.macAdress);
+
+      print("result status connect: $connectionStatus");
+
+      if (!connectionStatus) {
+        showSnackbar("خطأ".tr, "فشل الاتصال بالطابعة".tr, Colors.red);
         return;
       }
 
@@ -183,7 +250,7 @@ class Informationitemcontroller extends GetxController {
           as RenderRepaintBoundary?;
 
       if (boundary == null) {
-        showSnackbar("error".tr, "boundary null".tr, Colors.red);
+        showSnackbar("error".tr, "خطأ في تحديد مساحة الطباعة".tr, Colors.red);
         return;
       }
 
@@ -191,7 +258,7 @@ class Informationitemcontroller extends GetxController {
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData == null) {
-        showSnackbar("error".tr, "byteData null".tr, Colors.red);
+        showSnackbar("error".tr, "خطأ في معالجة بيانات الصورة".tr, Colors.red);
         return;
       }
 
@@ -199,10 +266,9 @@ class Informationitemcontroller extends GetxController {
 
       img.Image? decodedImage = img.decodeImage(imageBytes);
       if (decodedImage == null) {
-        showSnackbar("error".tr, "decodedImage null".tr, Colors.red);
+        showSnackbar("error".tr, "خطأ في فك تشفير الصورة".tr, Colors.red);
         return;
       }
-      ;
 
       decodedImage = img.copyResize(decodedImage, width: 384);
 
@@ -211,9 +277,13 @@ class Informationitemcontroller extends GetxController {
       await PrintBluetoothThermal.writeBytes(bytes);
       await PrintBluetoothThermal.writeBytes([10, 10, 10]);
 
+      showSnackbar("نجاح".tr, "تمت الطباعة بنجاح".tr, Colors.green);
       print("✅ تم الطباعة بنجاح");
     } catch (e) {
       showSnackbar("error".tr, "$e", Colors.red);
+    } finally {
+      isPrinting = false;
+      update();
     }
   }
 

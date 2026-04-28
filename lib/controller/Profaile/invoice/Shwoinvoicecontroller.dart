@@ -14,6 +14,7 @@ import 'package:barcode_widget/barcode_widget.dart';
 import 'package:image/image.dart' as img;
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
+import '../../../core/constant/Colorapp.dart';
 import '../../../core/functions/Snacpar.dart';
 import '../../../core/services/Services.dart';
 import '../../../data/model/InvoiceModel.dart';
@@ -21,6 +22,7 @@ import '../../../data/model/InvoiceSalesModel.dart';
 
 class Shwoinvoicecontroller extends GetxController {
   String? uuid;
+  bool isPrinting = false;
 
   List<Map<String, dynamic>> products = [];
 
@@ -492,10 +494,67 @@ class Shwoinvoicecontroller extends GetxController {
   final ScreenshotController screenshotController = ScreenshotController();
 
   Future<void> printThermalInvoice() async {
+    if (isPrinting) return;
+    isPrinting = true;
+    update();
     try {
-      bool? status = await PrintBluetoothThermal.connectionStatus;
-      if (status != true) {
-        showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
+      // التحقق من حالة البلوتوث
+      bool bluetoothEnabled = await PrintBluetoothThermal.bluetoothEnabled;
+      if (!bluetoothEnabled) {
+        showSnackbar(
+            "تنبيه".tr, "الرجاء تفعيل البلوتوث أولاً".tr, Colors.orange);
+        return;
+      }
+
+      // الحصول على قائمة الطابعات المقترنة
+      final List<BluetoothInfo> pairedDevices =
+          await PrintBluetoothThermal.pairedBluetooths;
+
+      if (pairedDevices.isEmpty) {
+        showSnackbar("تنبيه".tr, "لا توجد طابعات مقترنة".tr, Colors.orange);
+        return;
+      }
+
+      // اختيار الطابعة
+      BluetoothInfo? selectedPrinter = await Get.dialog<BluetoothInfo>(
+        AlertDialog(
+          backgroundColor: Colors.white,
+          title: Text("اختر الطابعة".tr, textAlign: TextAlign.center),
+          content: SizedBox(
+            width: double.maxFinite,
+            child: ListView.builder(
+              shrinkWrap: true,
+              itemCount: pairedDevices.length,
+              itemBuilder: (context, index) {
+                final device = pairedDevices[index];
+                return ListTile(
+                  leading:
+                      const Icon(Icons.print, color: AppColor.backgroundcolor),
+                  title: Text(device.name),
+                  subtitle: Text(device.macAdress),
+                  onTap: () => Get.back(result: device),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      if (selectedPrinter == null) return;
+
+      // التحقق من حالة الاتصال الحالية
+      bool isConnected = await PrintBluetoothThermal.connectionStatus;
+      if (isConnected) {
+        await PrintBluetoothThermal.disconnect;
+        await Future.delayed(const Duration(milliseconds: 500));
+      }
+
+      // الاتصال بالطابعة المختارة
+      bool connectionStatus = await PrintBluetoothThermal.connect(
+          macPrinterAddress: selectedPrinter.macAdress);
+
+      if (!connectionStatus) {
+        showSnackbar("خطأ".tr, "فشل الاتصال بالطابعة".tr, Colors.red);
         return;
       }
 
@@ -538,12 +597,17 @@ class Shwoinvoicecontroller extends GetxController {
           decodedImage = img.copyResize(decodedImage, width: 384);
           final bytes = _convertImageToRaster(decodedImage);
           await PrintBluetoothThermal.writeBytes(bytes);
-          await PrintBluetoothThermal.writeBytes([10, 10, 10, 10, 10]);
+          await PrintBluetoothThermal.writeBytes([10, 10, 10]);
+
+          showSnackbar("نجاح".tr, "تمت الطباعة بنجاح".tr, Colors.green);
+          print("✅ تم الطباعة بنجاح");
         }
       }
     } catch (e) {
-      print("Error during thermal printing: $e");
-      showSnackbar("error".tr, "operation_failed".tr, Colors.red);
+      showSnackbar("error".tr, "${'حدث خطأ أثناء الطباعة'.tr}: $e", Colors.red);
+    } finally {
+      isPrinting = false;
+      update();
     }
   }
 
@@ -553,13 +617,9 @@ class Shwoinvoicecontroller extends GetxController {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("$label: ", style: const TextStyle(fontSize: 14)),
-          SizedBox(
-            width: 120,
-            child: Text(value,
-                textAlign: TextAlign.right,
-                style: const TextStyle(fontSize: 14)),
-          ),
+          Text("$label: ", style: TextStyle(fontSize: 14)),
+          Text(value,
+              textAlign: TextAlign.right, style: const TextStyle(fontSize: 14)),
         ],
       ),
     );
@@ -635,6 +695,7 @@ class Shwoinvoicecontroller extends GetxController {
     required List<dynamic> productsList,
     required bool isArabic,
   }) {
+    print("========================================${invoices.date}");
     return Directionality(
       textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
       child: Material(

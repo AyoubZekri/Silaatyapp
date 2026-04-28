@@ -63,6 +63,22 @@ class SaleController extends GetxController {
     }
   }
 
+  void updateProductPrice(String uuid, double newPrice) {
+    final index = selectedProducts.indexWhere((item) => item['uuid'] == uuid);
+    if (index != -1) {
+      var item = selectedProducts[index];
+      if (type == 1) {
+        item['price_Purchase'] = newPrice;
+      } else {
+        item['price'] = newPrice;
+      }
+      item['total'] = newPrice * item['quantity'];
+      selectedProducts[index] = Map<String, dynamic>.from(item);
+      _calculateTotals();
+      update();
+    }
+  }
+
   void deleteProduct(String uuid) {
     final index = selectedProducts.indexWhere((item) => item['uuid'] == uuid);
     if (index != -1) {
@@ -78,9 +94,8 @@ class SaleController extends GetxController {
       0.0,
       (sum, item) =>
           sum +
-          (type == 1
-              ? item['price_Purchase'] * item['quantity']
-              : item['price'] * item['quantity']),
+          ((type == 1 ? item['price_Purchase'] : item['price']) *
+              item['quantity']),
     );
   }
 
@@ -162,10 +177,11 @@ class SaleController extends GetxController {
 
       if (existingIndex != -1) {
         selectedProducts[existingIndex]['quantity'] += 1;
-        selectedProducts[existingIndex]['total'] = type == 1
-            ? selectedProducts[existingIndex]['price_Purchase']
-            : selectedProducts[existingIndex]['price'] *
-                selectedProducts[existingIndex]['quantity'];
+        selectedProducts[existingIndex]['total'] =
+            (type == 1
+                ? selectedProducts[existingIndex]['price_Purchase']
+                : selectedProducts[existingIndex]['price']) *
+            selectedProducts[existingIndex]['quantity'];
       } else {
         selectedProducts.add({
           "uuid": uuid,

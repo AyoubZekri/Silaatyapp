@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../core/functions/Snacpar.dart';
+import '../../core/services/Services.dart';
 
 class Shwocatcontroller extends GetxController {
   late int id;
@@ -56,6 +57,7 @@ class Shwocatcontroller extends GetxController {
     final success = await categorisData.deletecat(uuid);
 
     if (success) {
+      Get.find<RefreshService>().fire();
       statusrequest = Statusrequest.success;
       Get.back();
       // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);

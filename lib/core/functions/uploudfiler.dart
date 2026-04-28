@@ -3,14 +3,65 @@ import 'dart:io';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
+
+/// Compresses an image file if it exceeds 1MB.
+/// Iteratively reduces quality until the file is under 1MB.
+Future<File> compressImageIfNeeded(File file) async {
+  final int oneMB = 1024 * 1024;
+  int fileSize = await file.length();
+
+  if (fileSize <= oneMB) return file;
+
+  final dir = await getTemporaryDirectory();
+  final targetPath =
+      '${dir.path}/compressed_${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+  int quality = 80;
+
+  while (quality > 10) {
+    final XFile? result = await FlutterImageCompress.compressAndGetFile(
+      file.absolute.path,
+      targetPath,
+      quality: quality,
+      minWidth: 1024,
+      minHeight: 1024,
+    );
+
+    if (result != null) {
+      final compressedFile = File(result.path);
+      final compressedSize = await compressedFile.length();
+      if (compressedSize <= oneMB) {
+        return compressedFile;
+      }
+    }
+    quality -= 15;
+  }
+
+  // Last attempt with minimum quality
+  final XFile? finalResult = await FlutterImageCompress.compressAndGetFile(
+    file.absolute.path,
+    targetPath,
+    quality: 10,
+    minWidth: 800,
+    minHeight: 800,
+  );
+
+  if (finalResult != null) {
+    return File(finalResult.path);
+  }
+
+  return file;
+}
 
 imageuploadcamera() async {
   final XFile? file = await ImagePicker()
       .pickImage(source: ImageSource.camera, imageQuality: 90);
   if (file != null) {
-    return File(file.path);
+    return await compressImageIfNeeded(File(file.path));
   } else {
     return null;
   }
@@ -23,7 +74,12 @@ fileuploadGallery([isvg = true]) async {
           isvg ? ["svg", "SVG"] : ["png", "PNG", "jpg", "JPG", "jpeg", "gif"]);
 
   if (result != null) {
-    return File(result.files.single.path!);
+    File pickedFile = File(result.files.single.path!);
+    // Only compress non-SVG image files
+    if (!isvg) {
+      return await compressImageIfNeeded(pickedFile);
+    }
+    return pickedFile;
   } else {
     return null;
   }

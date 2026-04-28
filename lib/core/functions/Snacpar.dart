@@ -30,14 +30,14 @@ void showSnackbar(String titleKey, String messageKey, Color color) {
       backgroundColor: color,
       icon: Icon(iconData, color: Colors.white),
       titleText: Text(
-        titleKey.tr,
+        titleKey,
         style: const TextStyle(
           fontWeight: FontWeight.bold,
           color: Colors.white,
         ),
       ),
       messageText: Text(
-        messageKey.tr,
+        messageKey,
         style: const TextStyle(color: Colors.white),
       ),
       duration: const Duration(seconds: 3),
