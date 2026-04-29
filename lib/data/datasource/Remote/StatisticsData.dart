@@ -98,28 +98,36 @@ class Statisticsdata {
     GROUP BY x ORDER BY x
   """;
 
-    // الإحصائيات العامة
+    // الإحصائيات العامة (المبيعات والأرباح)
     String queryStats = """
     SELECT
       IFNULL(SUM(invoice_sales), 0) AS total_sales,
-      IFNULL(SUM(invoice_profit - invoice_discount), 0) AS total_profit,
-      IFNULL(SUM(invoice_expenses), 0) AS total_expenses
+      IFNULL(SUM(invoice_profit - invoice_discount), 0) AS total_profit
     FROM (
       SELECT 
         i.uuid,
         i.discount AS invoice_discount,
         SUM(CASE WHEN s.type_sales = 2 THEN s.subtotal ELSE 0 END) AS invoice_sales,
-        SUM(CASE WHEN s.type_sales = 2 THEN (s.unit_price - s.product_price_purchase) * s.quantity ELSE 0 END) AS invoice_profit,
-        SUM(CASE WHEN s.type_sales = 3 THEN s.subtotal ELSE 0 END) AS invoice_expenses
+        SUM(CASE WHEN s.type_sales = 2 THEN (s.unit_price - s.product_price_purchase) * s.quantity ELSE 0 END) AS invoice_profit
       FROM invoies i
       JOIN sales s ON s.invoie_uuid = i.uuid
-      WHERE i.user_id = ? AND $dateCondition
+      LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
+      WHERE i.user_id = ? AND $dateCondition AND (t.transactions IS NULL OR t.transactions = 2)
       GROUP BY i.uuid
     )
   """;
 
+    // المصاريف (فواتير الشراء transactions = 1)
+    String queryExpenses = """
+    SELECT IFNULL(SUM(i.Payment_price - i.discount), 0) AS total_expenses
+    FROM invoies i
+    JOIN transactions t ON t.uuid = i.Transaction_uuid
+    WHERE i.user_id = ? AND t.transactions = 1 AND $dateCondition
+  """;
+
     final resultGraph = await db.readData(queryGraph, [id]);
     final resultStats = await db.readData(queryStats, [id]);
+    final resultExpenses = await db.readData(queryExpenses, [id]);
 
     return [
       {
@@ -128,14 +136,11 @@ class Statisticsdata {
                 {"x": 0, "y": 0}
               ]
             : resultGraph,
-        "stats": resultStats.isNotEmpty
-            ? resultStats.first
-            : {
-                "total_sales": 0,
-                "total_profit": 0,
-                "total_expenses": 0,
-                "total_invoices": 0,
-              },
+        "stats": {
+              "total_sales": resultStats.isNotEmpty ? resultStats.first["total_sales"] ?? 0 : 0,
+              "total_profit": resultStats.isNotEmpty ? resultStats.first["total_profit"] ?? 0 : 0,
+              "total_expenses": resultExpenses.isNotEmpty ? resultExpenses.first["total_expenses"] ?? 0 : 0,
+            },
       }
     ];
   }
