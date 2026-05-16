@@ -208,8 +208,10 @@ class Invoicedata {
         s.unit_price,
         s.subtotal,
         s.product_name,
-        s.unit_price As product_price
+        s.unit_price As product_price,
+        p.type
       FROM sales AS s
+      LEFT JOIN products AS p ON p.uuid = s.product_uuid
       WHERE s.invoie_uuid = ? AND s.is_delete = 0
       ''',
         [invoiceUuid],

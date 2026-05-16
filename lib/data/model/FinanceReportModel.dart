@@ -121,7 +121,7 @@ class FinanceDetail {
   final double totalDiscount;
   final double expenses;
   final int totalInvoices;
-  final int itemsSold;
+  final double itemsSold;
   final double revenue;
   final double profitRate;
 
@@ -147,7 +147,7 @@ class FinanceDetail {
       totalDiscount: (json['total_discount'] ?? 0).toDouble(),
       expenses: (json['expenses'] ?? 0).toDouble(),
       totalInvoices: (json['total_invoices'] ?? 0).toInt(),
-      itemsSold: (json['items_sold'] ?? 0).toInt(),
+      itemsSold: (json['items_sold'] ?? 0).toDouble(),
       revenue: (json['revenue'] ?? 0).toDouble(),
       profitRate: (json['profit_rate'] ?? 0).toDouble(),
     );
@@ -184,7 +184,7 @@ class FinanceProduct {
     return FinanceProduct(
       uuid: json['uuid'] ?? '',
       name: json['product_name'] ?? '',
-      quantity: json['product_quantity'] ?? "0.0",
+      quantity: json['product_quantity']?.toString() ?? "0.0",
     );
   }
 
@@ -199,10 +199,10 @@ class FinanceProduct {
 
 class StockProduct {
   final String productName;
-  final int startQuantity;
-  final int inQuantity;
-  final int soldQuantity;
-  final int endQuantity;
+  final double startQuantity;
+  final double inQuantity;
+  final double soldQuantity;
+  final double endQuantity;
   final double startsubtotal;
   final double insubtotal;
   final double soldsubtotal;
@@ -223,10 +223,10 @@ class StockProduct {
   factory StockProduct.fromJson(Map<String, dynamic> json) {
     return StockProduct(
       productName: json['product_name'] ?? '',
-      startQuantity: json['start_quantity'] ?? 0,
-      inQuantity: json['in_quantity'] ?? 0,
-      soldQuantity: json['sold_quantity'] ?? 0,
-      endQuantity: json['end_quantity'] ?? 0,
+      startQuantity: (json['start_quantity'] ?? 0).toDouble(),
+      inQuantity: (json['in_quantity'] ?? 0).toDouble(),
+      soldQuantity: (json['sold_quantity'] ?? 0).toDouble(),
+      endQuantity: (json['end_quantity'] ?? 0).toDouble(),
       startsubtotal: (json['start_subtotal'] ?? 0.0).toDouble(),
       insubtotal: (json['in_subtotal'] ?? 0.0).toDouble(),
       soldsubtotal: (json['sold_subtotal'] ?? 0.0).toDouble(),

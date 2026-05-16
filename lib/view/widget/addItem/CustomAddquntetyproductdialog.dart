@@ -3,17 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+class DecimalTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text == '') return newValue;
+    if (RegExp(r'^\d*\.?\d{0,3}$').hasMatch(newValue.text)) {
+      return newValue;
+    }
+    return oldValue;
+  }
+}
 
 class Customaddquntetyproductdialog extends StatefulWidget {
   final TextEditingController? Mycontroller;
   final Function() onPressed;
-  final int value;
+  final double value;
 
   // final String? Function(String?) valid;
   final Function() onback;
-  final Function(int) onChanged;
+  final Function(double) onChanged;
   final Key? form;
   final String title;
+  final bool isDecimal;
 
   const Customaddquntetyproductdialog(
       {super.key,
@@ -23,6 +35,7 @@ class Customaddquntetyproductdialog extends StatefulWidget {
       required this.value,
       this.form,
       required this.title,
+      this.isDecimal = false,
       required this.onChanged});
 
   @override
@@ -32,7 +45,7 @@ class Customaddquntetyproductdialog extends StatefulWidget {
 
 class _AddInvoiceDialogState extends State<Customaddquntetyproductdialog> {
   late TextEditingController _controller;
-  late int _value;
+  late double _value;
 
   @override
   void initState() {
@@ -40,14 +53,15 @@ class _AddInvoiceDialogState extends State<Customaddquntetyproductdialog> {
     _value = widget.value;
 
     _controller = widget.Mycontroller ?? TextEditingController();
-    _controller.text = _value.toString();
+    _controller.text =
+        _value % 1 == 0 ? _value.toInt().toString() : _value.toString();
 
     _controller.addListener(_controllerListener);
   }
 
   void _controllerListener() {
     if (!mounted) return;
-    final parsed = int.tryParse(_controller.text);
+    final parsed = double.tryParse(_controller.text);
     if (parsed != null && parsed != _value) {
       setState(() {
         _value = parsed;
@@ -56,13 +70,14 @@ class _AddInvoiceDialogState extends State<Customaddquntetyproductdialog> {
     }
   }
 
-  void _updateValue(int newValue) {
+  void _updateValue(double newValue) {
     if (!mounted) return;
     setState(() {
       _value = newValue;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _controller.text = _value.toString();
+        _controller.text =
+            _value % 1 == 0 ? _value.toInt().toString() : _value.toString();
       });
     });
     widget.onChanged(_value);
@@ -112,8 +127,12 @@ class _AddInvoiceDialogState extends State<Customaddquntetyproductdialog> {
                   Expanded(
                     child: TextFormField(
                       controller: _controller,
-                      keyboardType: TextInputType.number,
-                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      keyboardType: widget.isDecimal
+                          ? const TextInputType.numberWithOptions(decimal: true)
+                          : TextInputType.number,
+                      inputFormatters: widget.isDecimal
+                          ? [DecimalTextInputFormatter()]
+                          : [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
                         // labelText: widget.label,
                         labelStyle: TextStyle(
@@ -137,7 +156,7 @@ class _AddInvoiceDialogState extends State<Customaddquntetyproductdialog> {
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(),
                         onPressed: () {
-                          if (_value > 0) _updateValue(_value - 1);
+                          if (_value >= 1) _updateValue(_value - 1);
                         },
                         icon: Icon(Icons.arrow_back_ios,
                             color: AppColor.grey, size: 16),

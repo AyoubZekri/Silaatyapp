@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -13,6 +14,7 @@ import 'package:screenshot/screenshot.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:image/image.dart' as img;
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
+import 'package:pos_universal_printer/pos_universal_printer.dart';
 
 import '../../../core/constant/Colorapp.dart';
 import '../../../core/functions/Snacpar.dart';
@@ -46,7 +48,6 @@ class Shwoinvoicecontroller extends GetxController {
     update();
     Map<String, Object?> data = {"uuid": uuid};
     var result = await invoicedata.showInvoice(data);
-    print("==================================================$result");
     if (result["status"] == 1) {
       final modele = InvoiceSalesData.fromJson(result["data"]);
       productSale = modele;
@@ -54,7 +55,6 @@ class Shwoinvoicecontroller extends GetxController {
     } else {
       statusrequest = Statusrequest.failure;
     }
-
     update();
   }
 
@@ -68,19 +68,12 @@ class Shwoinvoicecontroller extends GetxController {
       "uuid": invuuid,
       'Payment_price': paymentpriceinvoise,
     };
-    print("=================================${paymentPrice.text}");
     var result = await invoicedata.Editinvoise(data);
-
-    print("==================================================$result");
     if (result) {
       paymentPrice.clear();
       Get.back();
       Get.find<RefreshService>().fire();
-      paymentPrice.addListener(() {
-        update();
-      });
       Shwoinvoice();
-      // showSnackbar("success".tr, "operation_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "error_editing_product".tr, Colors.red);
     }
@@ -101,14 +94,11 @@ class Shwoinvoicecontroller extends GetxController {
       'discount': discount.text,
     };
     var result = await invoicedata.Editinvoise(data);
-
-    print("==================================================$result");
     if (result) {
       discount.clear();
       Get.back();
       Get.find<RefreshService>().fire();
       Shwoinvoice();
-      // showSnackbar("success".tr, "operation_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "error_editing_product".tr, Colors.red);
     }
@@ -120,96 +110,65 @@ class Shwoinvoicecontroller extends GetxController {
       "uuid": invuuid,
     };
     var result = await invoicedata.deleteinvoice(data);
-    print("==================================================$result");
-
     if (result["status"] == 1) {
       Get.back();
       Get.find<RefreshService>().fire();
       Get.back();
-      // showSnackbar("success".tr, "delete_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
     }
   }
 
-  Future<void> editProduct(String uuidSale, int quantity) async {
+  Future<void> editProduct(String uuidSale, double quantity) async {
     final result = await saledata.updateSaleQuantity(
-        uuidSale, int.parse(qtyController.text), getRemainingAmount());
-
+        uuidSale, quantity, getRemainingAmount());
     if (result["status"] == 1) {
       Get.back(result: true);
       qtyController.clear();
       Get.find<RefreshService>().fire();
       Shwoinvoice();
-      getRemainingAmount();
-      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else if (result["status"] == 2) {
       showSnackbar("error".tr, "المخزون لا يكفي".tr, Colors.red);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;
     }
-
     update();
   }
 
   Future<void> returnProduct(String uuidSale) async {
     final result = await saledata.returnSaleProduct(uuidSale);
-
     if (result["status"] == 1) {
-      print(result["msg"]);
-      print("===============0");
-
-      if (result["msg"] == "true") {
-        print("===============1");
-        Get.back(result: true);
-      }
       Get.back(result: true);
       Get.find<RefreshService>().fire();
       Shwoinvoice();
-      getRemainingAmount();
-      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;
     }
-
     update();
   }
 
   Future<void> returnFullInvoice(String uuidinvois) async {
     final result = await saledata.returnFullInvoice(uuidinvois);
-
     if (result["status"] == 1) {
       Get.back();
       Get.back(result: true);
       Get.find<RefreshService>().fire();
       Shwoinvoice();
-      getRemainingAmount();
-      // showSnackbar("success".tr, "operationSuccess".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;
     }
-
     update();
   }
-
-  // void gotoaddproductNewSale() async {
-  //   final result = await Get.toNamed(Approutes.addProductSale);
-  //   if (result != null && result is List) {
-  //     // addProducts(List<Map<String, dynamic>>.from(result));
-  //   }
-  // }
 
   double getRemainingAmount() {
     final total = double.tryParse(productSale?.sumPrice.toString() ?? "0") ?? 0;
     final paid =
         double.tryParse(productSale?.paymentprice.toString() ?? "0") ?? 0;
-    ;
     final discount =
         double.tryParse(productSale?.discount.toString() ?? "0") ?? 0;
-
     final remaining = total - (paid + discount);
     return remaining < 0 ? 0 : remaining;
   }
@@ -222,11 +181,11 @@ class Shwoinvoicecontroller extends GetxController {
       uuid = invoices?.uuid;
       paymentpriceinvoise = invoices!.paymentPrice!;
     }
-
     Shwoinvoice();
     super.onInit();
   }
 
+  @override
   void dispose() {
     paymentPrice.dispose();
     super.dispose();
@@ -298,7 +257,6 @@ class Shwoinvoicecontroller extends GetxController {
           return pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.stretch,
             children: [
-              // ====== Header ======
               pw.Container(
                 padding: pw.EdgeInsets.all(10),
                 decoration: pw.BoxDecoration(
@@ -352,8 +310,6 @@ class Shwoinvoicecontroller extends GetxController {
                 ),
               ),
               pw.SizedBox(height: 10),
-
-              // ====== Invoice title ======
               pw.Center(
                 child: pw.Text(
                   "فاتورة بيع".tr,
@@ -366,8 +322,6 @@ class Shwoinvoicecontroller extends GetxController {
                 ),
               ),
               pw.SizedBox(height: 10),
-
-              // ====== Client Info ======
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
                 children: [
@@ -399,15 +353,12 @@ class Shwoinvoicecontroller extends GetxController {
                 ),
               ),
               pw.SizedBox(height: 15),
-
-              // ====== Table ======
               pw.Table(
                 border: pw.TableBorder.all(
                   color: PdfColor.fromHex("#4F46E5"),
                   width: 0.7,
                 ),
                 children: [
-                  // Header
                   pw.TableRow(
                     decoration:
                         pw.BoxDecoration(color: PdfColor.fromHex("#C7C4F9")),
@@ -428,8 +379,6 @@ class Shwoinvoicecontroller extends GetxController {
                       );
                     }).toList(),
                   ),
-
-                  // Rows
                   ...tableData.skip(1).map((row) {
                     return pw.TableRow(
                       children: row.map((cell) {
@@ -453,23 +402,25 @@ class Shwoinvoicecontroller extends GetxController {
                 ],
               ),
               pw.SizedBox(height: 10),
-
-              // ====== Total ======
-              pw.Align(
-                alignment: pw.Alignment.centerLeft,
-                child: pw.Text(
-                  "${'الإجمالي'.tr}: ${invoices!.totalSales} ${'DA'.tr} ",
-                  style: pw.TextStyle(
-                      font: isArabicText('الإجمالي'.tr) && isArabicText('DA'.tr)
-                          ? arabicFont
-                          : englishFont,
-                      fontSize: 14,
-                      fontWeight: pw.FontWeight.bold),
+              pw.Container(
+                padding: const pw.EdgeInsets.symmetric(vertical: 8),
+                child: pw.Column(
+                  children: [
+                    _buildPdfRow(arabicFont, englishFont, "المجموع الفرعي".tr,
+                        "${invoices!.totalSales} ${'DA'.tr}"),
+                    if (invoices!.discount != 0)
+                      _buildPdfRow(arabicFont, englishFont, "الخصم".tr,
+                          "${invoices!.discount} ${'DA'.tr}"),
+                    _buildPdfRow(arabicFont, englishFont, "المدفوع".tr,
+                        "${double.tryParse(productSale?.paymentprice.toString() ?? "0") ?? 0} ${'DA'.tr}"),
+                    pw.Divider(color: PdfColor.fromHex("#4F46E5")),
+                    _buildPdfRow(arabicFont, englishFont, "الباقي".tr,
+                        "${getRemainingAmount()} ${'DA'.tr}",
+                        isBold: true),
+                  ],
                 ),
               ),
               pw.SizedBox(height: 20),
-
-              // ====== Footer ======
               pw.Row(
                 mainAxisAlignment: pw.MainAxisAlignment.center,
                 children: [
@@ -487,81 +438,190 @@ class Shwoinvoicecontroller extends GetxController {
         },
       ),
     );
-
     await Printing.layoutPdf(onLayout: (format) async => pdf.save());
   }
 
+  pw.Widget _buildPdfRow(
+      pw.Font arabicFont, pw.Font englishFont, String label, String value,
+      {bool isBold = false}) {
+    bool isArabicText(String text) {
+      final arabicRegex = RegExp(r'[\u0600-\u06FF]');
+      return arabicRegex.hasMatch(text);
+    }
+
+    return pw.Padding(
+      padding: const pw.EdgeInsets.symmetric(vertical: 2),
+      child: pw.Row(
+        mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+        children: [
+          pw.Text(
+            label,
+            style: pw.TextStyle(
+              font: isArabicText(label) ? arabicFont : englishFont,
+              fontSize: 12,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+            ),
+          ),
+          pw.Text(
+            value,
+            style: pw.TextStyle(
+              font: isArabicText(value) ? arabicFont : englishFont,
+              fontSize: 12,
+              fontWeight: isBold ? pw.FontWeight.bold : pw.FontWeight.normal,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   final ScreenshotController screenshotController = ScreenshotController();
+  int get printerWidth =>
+      myServices.sharedPreferences?.getInt("printer_width") ?? 460;
+  set printerWidth(int value) =>
+      myServices.sharedPreferences?.setInt("printer_width", value);
+
+  void showWidthSelectionDialog() {
+    Get.defaultDialog(
+      title: "مقاس الورق".tr,
+      middleText: "يرجى اختيار مقاس ورق الفواتير (سيتم حفظه دائماً)".tr,
+      backgroundColor: Colors.white,
+      titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+      cancel: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+        onPressed: () {
+          myServices.sharedPreferences?.setInt("printer_width", 460);
+          Get.back();
+          printThermalInvoice();
+        },
+        child: Text("58mm".tr, style: const TextStyle(color: Colors.white)),
+      ),
+      confirm: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+        onPressed: () {
+          myServices.sharedPreferences?.setInt("printer_width", 576);
+          Get.back();
+          printThermalInvoice();
+        },
+        child: Text("80mm".tr, style: const TextStyle(color: Colors.white)),
+      ),
+    );
+  }
 
   Future<void> printThermalInvoice() async {
     if (isPrinting) return;
+
     isPrinting = true;
     update();
+
     try {
-      // التحقق من حالة البلوتوث
+      int? savedWidth = myServices.sharedPreferences?.getInt("printer_width");
+
+      if (savedWidth == null) {
+        isPrinting = false;
+        update();
+        showWidthSelectionDialog();
+        return;
+      }
+
+      int printerWidth = savedWidth;
+
       bool bluetoothEnabled = await PrintBluetoothThermal.bluetoothEnabled;
+
       if (!bluetoothEnabled) {
         showSnackbar(
-            "تنبيه".tr, "الرجاء تفعيل البلوتوث أولاً".tr, Colors.orange);
+          "تنبيه".tr,
+          "الرجاء تفعيل البلوتوث أولاً".tr,
+          Colors.orange,
+        );
+
         return;
       }
 
-      // الحصول على قائمة الطابعات المقترنة
-      final List<BluetoothInfo> pairedDevices =
-          await PrintBluetoothThermal.pairedBluetooths;
+      bool isConnected = await PrintBluetoothThermal.connectionStatus;
 
-      if (pairedDevices.isEmpty) {
-        showSnackbar("تنبيه".tr, "لا توجد طابعات مقترنة".tr, Colors.orange);
-        return;
-      }
+      if (!isConnected) {
+        final List<BluetoothInfo> pairedDevices =
+            await PrintBluetoothThermal.pairedBluetooths;
 
-      // اختيار الطابعة
-      BluetoothInfo? selectedPrinter = await Get.dialog<BluetoothInfo>(
-        AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text("اختر الطابعة".tr, textAlign: TextAlign.center),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: pairedDevices.length,
-              itemBuilder: (context, index) {
-                final device = pairedDevices[index];
-                return ListTile(
-                  leading:
-                      const Icon(Icons.print, color: AppColor.backgroundcolor),
-                  title: Text(device.name),
-                  subtitle: Text(device.macAdress),
-                  onTap: () => Get.back(result: device),
-                );
-              },
+        if (pairedDevices.isEmpty) {
+          showSnackbar(
+            "تنبيه".tr,
+            "لا توجد طابعات مقترنة".tr,
+            Colors.orange,
+          );
+
+          isPrinting = false;
+          update();
+          return;
+        }
+
+        BluetoothInfo? selectedPrinter = await Get.dialog<BluetoothInfo>(
+          AlertDialog(
+            backgroundColor: Colors.white,
+            title: Text(
+              "اختر الطابعة".tr,
+              textAlign: TextAlign.center,
+            ),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: pairedDevices.length,
+                itemBuilder: (context, index) {
+                  final device = pairedDevices[index];
+
+                  return ListTile(
+                    leading: const Icon(
+                      Icons.print,
+                      color: AppColor.backgroundcolor,
+                    ),
+                    title: Text(device.name),
+                    subtitle: Text(device.macAdress),
+                    onTap: () => Get.back(result: device),
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      if (selectedPrinter == null) return;
+        if (selectedPrinter == null) {
+          isPrinting = false;
+          update();
+          return;
+        }
 
-      // التحقق من حالة الاتصال الحالية
-      bool isConnected = await PrintBluetoothThermal.connectionStatus;
-      if (isConnected) {
+        await PrintBluetoothThermal.isPermissionBluetoothGranted;
+
         await PrintBluetoothThermal.disconnect;
-        await Future.delayed(const Duration(milliseconds: 500));
-      }
 
-      // الاتصال بالطابعة المختارة
-      bool connectionStatus = await PrintBluetoothThermal.connect(
-          macPrinterAddress: selectedPrinter.macAdress);
+        bool connectionStatus = await PrintBluetoothThermal.connect(
+          macPrinterAddress: selectedPrinter.macAdress,
+        ).timeout(
+          const Duration(seconds: 5),
+        );
 
-      if (!connectionStatus) {
-        showSnackbar("خطأ".tr, "فشل الاتصال بالطابعة".tr, Colors.red);
-        return;
+        if (!connectionStatus) {
+          showSnackbar(
+            "خطأ".tr,
+            "فشل الاتصال بالطابعة".tr,
+            Colors.red,
+          );
+
+          isPrinting = false;
+          update();
+          return;
+        }
       }
 
       final productsList = productSale?.products ?? [];
+
       final address = myServices.sharedPreferences!.getString("adresse") ?? "";
+
       final phoneNumber =
           myServices.sharedPreferences!.getString("phone") ?? "";
+
       final nameSaler =
           myServices.sharedPreferences!.getString("family_name") ?? "";
 
@@ -569,12 +629,12 @@ class Shwoinvoicecontroller extends GetxController {
         invoices?.familyName,
         invoices?.name,
       ].where((e) => e != null && e.trim().isNotEmpty).join(" ");
+
       final safeCustomerName =
           customerName.isEmpty ? "غير معروف".tr : customerName;
 
       final isArabic = Get.locale?.languageCode == "ar";
 
-      // Build the receipt design as a widget
       Widget receiptWidget = _buildThermalReceiptWidget(
         nameSaler: nameSaler,
         address: address,
@@ -583,28 +643,46 @@ class Shwoinvoicecontroller extends GetxController {
         safeCustomerName: safeCustomerName,
         productsList: productsList,
         isArabic: isArabic,
+        width: printerWidth.toDouble(),
       );
 
       final Uint8List? imageBytes =
           await screenshotController.captureFromWidget(
         receiptWidget,
-        delay: const Duration(milliseconds: 100),
+        delay: Duration.zero,
       );
 
       if (imageBytes != null) {
         img.Image? decodedImage = img.decodeImage(imageBytes);
-        if (decodedImage != null) {
-          decodedImage = img.copyResize(decodedImage, width: 384);
-          final bytes = _convertImageToRaster(decodedImage);
-          await PrintBluetoothThermal.writeBytes(bytes);
-          await PrintBluetoothThermal.writeBytes([10, 10, 10]);
 
-          showSnackbar("نجاح".tr, "تمت الطباعة بنجاح".tr, Colors.green);
-          print("✅ تم الطباعة بنجاح");
+        if (decodedImage != null) {
+          decodedImage = img.copyResize(
+            decodedImage,
+            width: printerWidth,
+            interpolation: img.Interpolation.nearest,
+          );
+
+          List<int> bytes;
+
+          String? printerMode = myServices.sharedPreferences?.getString(
+            "printer_mode",
+          );
+
+          if (printerMode == "label") {
+            bytes = convertImageToTSPL(decodedImage);
+          } else {
+            bytes = _convertImageToEscPos(decodedImage);
+          }
+
+          await PrintBluetoothThermal.writeBytes(bytes);
         }
       }
     } catch (e) {
-      showSnackbar("error".tr, "${'حدث خطأ أثناء الطباعة'.tr}: $e", Colors.red);
+      showSnackbar(
+        "error".tr,
+        "حدث خطأ أثناء الطباعة".tr,
+        Colors.red,
+      );
     } finally {
       isPrinting = false;
       update();
@@ -677,6 +755,7 @@ class Shwoinvoicecontroller extends GetxController {
                   safeCustomerName: safeCustomerName,
                   productsList: productsList,
                   isArabic: isArabic,
+                  width: printerWidth.toDouble(),
                 ),
               ),
             ),
@@ -694,418 +773,412 @@ class Shwoinvoicecontroller extends GetxController {
     required String safeCustomerName,
     required List<dynamic> productsList,
     required bool isArabic,
+    double width = 460.0,
   }) {
-    print("========================================${invoices.date}");
-    return Directionality(
-      textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
-      child: Material(
+    return Container(
         color: Colors.white,
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20),
-          width: 400, // Standard width for 58mm capture
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      nameSaler.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 26,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                        fontFamily: 'Cairo',
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    const SizedBox(height: 5),
-                    Text(
-                      address,
-                      style: const TextStyle(fontSize: 16, color: Colors.black),
-                      textAlign: TextAlign.center,
-                    ),
-                    if (phoneNumber.isNotEmpty)
-                      Text(
-                        phoneNumber,
-                        style:
-                            const TextStyle(fontSize: 15, color: Colors.black),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "-------------------------------------------------------------------------",
-                maxLines: 1,
-                style: TextStyle(color: Colors.black, letterSpacing: -1),
-              ),
-              const SizedBox(height: 10),
-              Row(
+        child: Directionality(
+          textDirection: isArabic ? TextDirection.rtl : TextDirection.ltr,
+          child: Material(
+            color: Colors.white,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              width: width,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    "${'التاريخ'.tr}: ${invoices.date!.substring(0, 10)}",
-                    style: const TextStyle(fontSize: 14, color: Colors.black),
-                  ),
-                  SizedBox(width: 5),
-                  Text(
-                    invoices.date!.length > 16
-                        ? invoices.date!.substring(11, 19)
-                        : "",
-                    style: const TextStyle(fontSize: 14, color: Colors.black),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 5),
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    "${'رقم الفتورة'.tr}: ${invoices.number}",
-                    style: const TextStyle(fontSize: 14, color: Colors.black),
-                  ),
-                  SizedBox(height: 5),
-                  Text(
-                    "${'الزبون'.tr}: $safeCustomerName",
-                    style: const TextStyle(
-                        fontSize: 14, color: Color.fromRGBO(0, 0, 0, 1)),
-                    textAlign: TextAlign.start,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              const Text(
-                "-------------------------------------------------------------------------",
-                maxLines: 1,
-                style: TextStyle(color: Colors.black, letterSpacing: -1),
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  Expanded(
-                      flex: 2,
-                      child: Text("المنتج".tr,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 13))),
-                  Expanded(
-                      flex: 2,
-                      child: Text('QTY'.tr,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 13))),
-                  Expanded(
-                      flex: 2,
-                      child: Text("سعر الوحدة".tr,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 13),
-                          textAlign:
-                              isArabic ? TextAlign.left : TextAlign.right)),
-                  Expanded(
-                      flex: 2,
-                      child: Text('السعر الإجمالي'.tr,
-                          style: const TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 13),
-                          textAlign:
-                              isArabic ? TextAlign.left : TextAlign.right)),
-                ],
-              ),
-              const SizedBox(height: 5),
-              const Text(
-                "-------------------------------------------------------------------------",
-                maxLines: 1,
-                style: TextStyle(color: Colors.black, letterSpacing: -1),
-              ),
-              const SizedBox(height: 10),
-              ...productsList.map((p) => Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 4),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
+                  Center(
+                    child: Column(
                       children: [
-                        Expanded(
-                            flex: 2,
-                            child: Text(p.productName,
-                                style: const TextStyle(fontSize: 13))),
-                        Expanded(
-                            flex: 2,
-                            child: Text("${p.quantity}",
-                                style: const TextStyle(fontSize: 13))),
-                        Expanded(
-                            flex: 2,
-                            child: Text("${p.subtotal}",
-                                textAlign:
-                                    isArabic ? TextAlign.left : TextAlign.right,
-                                style: const TextStyle(fontSize: 13))),
-                        Expanded(
-                            flex: 2,
-                            child: Text("${p.unitPrice}",
-                                textAlign:
-                                    isArabic ? TextAlign.left : TextAlign.right,
-                                style: const TextStyle(fontSize: 13))),
+                        Text(
+                          nameSaler.toUpperCase(),
+                          style: const TextStyle(
+                            fontSize: 26,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                            fontFamily: 'Cairo',
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 5),
+                        Text(
+                          address,
+                          style: const TextStyle(
+                              fontSize: 16, color: Colors.black),
+                          textAlign: TextAlign.center,
+                        ),
+                        if (phoneNumber.isNotEmpty)
+                          Text(
+                            phoneNumber,
+                            style: const TextStyle(
+                                fontSize: 15, color: Colors.black),
+                          ),
                       ],
                     ),
-                  )),
-              const SizedBox(height: 15),
-              const Text(
-                "-------------------------------------------------------------------------",
-                maxLines: 1,
-                style: TextStyle(color: Colors.black, letterSpacing: -1),
-              ),
-              const SizedBox(height: 10),
-              _buildAmountRow("SUBTOTAL".tr, "${invoices.totalSales}"),
-              if (double.tryParse(invoices.discount.toString()) != 0)
-                _buildAmountRow("Discount".tr, "${invoices.discount!}"),
-              const SizedBox(height: 10),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    "AMOUNT".tr,
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
                   ),
-                  Text(
-                    "${invoices.totalSales! - invoices.discount!} ${'DA'.tr}",
-                    style: const TextStyle(
-                        fontSize: 22, fontWeight: FontWeight.bold),
+                  const SizedBox(height: 10),
+                  const SizedBox(height: 10),
+                  Text("-" * (width ~/ 5).toInt(),
+                      maxLines: 1,
+                      style: const TextStyle(
+                          color: Colors.black, overflow: TextOverflow.clip)),
+                  const SizedBox(height: 10),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${'التاريخ'.tr}: ${invoices.date!.substring(0, 10)}",
+                        style:
+                            const TextStyle(fontSize: 14, color: Colors.black),
+                      ),
+                      const SizedBox(width: 5),
+                      Text(
+                        invoices.date!.length > 16
+                            ? invoices.date!.substring(11, 19)
+                            : "",
+                        style:
+                            const TextStyle(fontSize: 14, color: Colors.black),
+                      ),
+                    ],
                   ),
+                  const SizedBox(height: 5),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        "${'رقم الفتورة'.tr}: ${invoices.number}",
+                        style:
+                            const TextStyle(fontSize: 14, color: Colors.black),
+                      ),
+                      const SizedBox(height: 5),
+                      Text(
+                        "${'الزبون'.tr}: $safeCustomerName",
+                        style: const TextStyle(
+                            fontSize: 14, color: Color.fromRGBO(0, 0, 0, 1)),
+                        textAlign: TextAlign.start,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Text("-" * (width ~/ 5).toInt(),
+                      maxLines: 1,
+                      style: const TextStyle(
+                          color: Colors.black, overflow: TextOverflow.clip)),
+                  const SizedBox(height: 10),
+                  Row(
+                    children: [
+                      Expanded(
+                          flex: 2,
+                          child: Text("المنتج".tr,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13))),
+                      Expanded(
+                          flex: 1,
+                          child: Text('QTY'.tr,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13))),
+                      Expanded(
+                          flex: 2,
+                          child: Text("سعر الوحدة".tr,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13),
+                              textAlign:
+                                  isArabic ? TextAlign.left : TextAlign.right)),
+                      Expanded(
+                          flex: 2,
+                          child: Text('السعر الإجمالي'.tr,
+                              style: const TextStyle(
+                                  fontWeight: FontWeight.bold, fontSize: 13),
+                              textAlign:
+                                  isArabic ? TextAlign.left : TextAlign.right)),
+                    ],
+                  ),
+                  const SizedBox(height: 5),
+                  Text("-" * (width ~/ 5).toInt(),
+                      maxLines: 1,
+                      style: const TextStyle(
+                          color: Colors.black, overflow: TextOverflow.clip)),
+                  const SizedBox(height: 10),
+                  ...productsList.map((p) => Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(
+                                flex: 2,
+                                child: Text(p.productName,
+                                    style: const TextStyle(fontSize: 13))),
+                            Expanded(
+                                flex: 1,
+                                child: Text("${p.quantity}",
+                                    style: const TextStyle(fontSize: 13))),
+                            Expanded(
+                                flex: 2,
+                                child: Text("${p.unitPrice.toStringAsFixed(2)}",
+                                    textAlign: isArabic
+                                        ? TextAlign.left
+                                        : TextAlign.right,
+                                    style: const TextStyle(fontSize: 13))),
+                            Expanded(
+                                flex: 2,
+                                child: Text("${p.subtotal.toStringAsFixed(2)}",
+                                    textAlign: isArabic
+                                        ? TextAlign.left
+                                        : TextAlign.right,
+                                    style: const TextStyle(fontSize: 13))),
+                          ],
+                        ),
+                      )),
+                  const SizedBox(height: 15),
+                  Text("-" * (width ~/ 5).toInt(),
+                      maxLines: 1,
+                      style: const TextStyle(
+                          color: Colors.black, overflow: TextOverflow.clip)),
+                  const SizedBox(height: 10),
+                  _buildAmountRow(
+                      "المجموع الفرعي".tr, "${invoices.totalSales} ${'DA'.tr}"),
+                  if (double.tryParse(invoices.discount.toString()) != 0)
+                    _buildAmountRow(
+                        "الخصم".tr, "${invoices.discount!} ${'DA'.tr}"),
+                  _buildAmountRow("المدفوع".tr,
+                      "${double.tryParse(productSale?.paymentprice.toString() ?? "0") ?? 0} ${'DA'.tr}"),
+                  const SizedBox(height: 5),
+                  Text("-" * (width ~/ 5).toInt(),
+                      maxLines: 1,
+                      style: const TextStyle(
+                          color: Colors.black, overflow: TextOverflow.clip)),
+                  const SizedBox(height: 5),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        "الباقي".tr,
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                      Text(
+                        "${getRemainingAmount().toStringAsFixed(2)} ${'DA'.tr}",
+                        style: const TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 15),
+                  Text("-" * (width ~/ 5).toInt(),
+                      maxLines: 1,
+                      style: const TextStyle(
+                          color: Colors.black, overflow: TextOverflow.clip)),
+                  const SizedBox(height: 15),
+                  Center(
+                    child: Column(
+                      children: [
+                        Text(
+                          "*** ${'THANK YOU'.tr} ***",
+                          style: const TextStyle(
+                              fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                        const SizedBox(height: 20),
+                        if (invoices.uuid != null)
+                          SizedBox(
+                            height: 60,
+                            width: 200,
+                            child: BarcodeWidget(
+                              barcode: Barcode.code128(),
+                              data: invoices.uuid!,
+                              drawText: false,
+                              width: 200,
+                              height: 60,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 25),
                 ],
               ),
-              const SizedBox(height: 15),
-              const Text(
-                "-------------------------------------------------------------------------",
-                maxLines: 1,
-                style: TextStyle(color: Colors.black, letterSpacing: -1),
-              ),
-              const SizedBox(height: 15),
-              Center(
-                child: Column(
-                  children: [
-                    Text(
-                      "*** ${'THANK YOU'.tr} ***",
-                      style: const TextStyle(
-                          fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                    const SizedBox(height: 20),
-                    if (invoices.uuid != null)
-                      SizedBox(
-                        height: 60,
-                        width: 200,
-                        child: BarcodeWidget(
-                          barcode: Barcode.code128(),
-                          data: invoices.uuid!,
-                          drawText: false,
-                          width: 200,
-                          height: 60,
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-              const SizedBox(height: 25),
-            ],
+            ),
           ),
-        ),
-      ),
-    );
+        ));
   }
 
-  List<int> _convertImageToRaster(img.Image image) {
+  List<int> convertImageToTSPL(img.Image image) {
+    // 1. جعل العرض يقبل القسمة على 8 (Padding)
+    int width = (image.width / 8).ceil() * 8;
+    int widthBytes = width ~/ 8;
+
     List<int> bytes = [];
-    int width = image.width;
-    int height = image.height;
-    int widthBytes = (width + 7) ~/ 8;
 
-    bytes.addAll([
-      29,
-      118,
-      48,
-      0,
-      widthBytes % 256,
-      widthBytes ~/ 256,
-      height % 256,
-      height ~/ 256
-    ]);
+    // الفواتير دائماً تستخدم ورق متصل بغض النظر عن إعدادات الباركود
 
-    for (int y = 0; y < height; y++) {
+    int contentHeight = image.height;
+    int topMargin = 0;
+
+    // نبحث عن أول وآخر سطر فيه محتوى (غير أبيض)
+    // لقص الفراغ الزائد - يعمل على كلا نوعي الورق
+    int lastContentRow = 0;
+    int firstContentRow = image.height;
+
+    for (int y = 0; y < image.height; y++) {
+      for (int x = 0; x < image.width; x++) {
+        var pixel = image.getPixel(x, y);
+        double val = 0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b;
+        if (val < 128) {
+          if (y < firstContentRow) firstContentRow = y;
+          if (y > lastContentRow) lastContentRow = y;
+          break;
+        }
+      }
+    }
+
+    if (lastContentRow > 0) {
+      // الفواتير دائماً ورق متصل، نجعل الهامش 120 (حوالي 1.5 سم)
+      int margin = 120;
+      topMargin = (firstContentRow - margin).clamp(0, image.height);
+      contentHeight = (lastContentRow - topMargin + margin)
+          .clamp(1, image.height - topMargin);
+    }
+    int topPadding = 50;
+    int bottomPadding = 0;
+    // تحديد عرض الورق الفعلي بالمليمتر بناءً على حجم الصورة
+    int paperWidthMm = (image.width <= 460) ? 57 : 80;
+    double totalHeight = ((contentHeight + topPadding + bottomPadding) / 8 + 2);
+    // الإعدادات الأساسية - SIZE يعكس الارتفاع الفعلي للمحتوى فقط
+    bytes.addAll(ascii.encode(
+        "SIZE $paperWidthMm mm, ${totalHeight.toStringAsFixed(1)} mm\r\n"));
+    // ورق فواتير (متصل) - بدون فجوات دائماً
+    bytes.addAll(ascii.encode("GAP 0,0\r\n"));
+
+    // تسريع الطباعة للحد الأقصى
+    bytes.addAll(ascii.encode("SPEED 4\r\n"));
+    bytes.addAll(ascii.encode("DENSITY 8\r\n"));
+
+    bytes.addAll(ascii.encode("DIRECTION 1\r\n"));
+    bytes.addAll(ascii.encode("CLS\r\n"));
+
+    // حساب الإزاحة لتوسيط الفاتورة أفقياً
+    // عرض الورق الفعلي 57 مم = 464 نقطة، بينما الصورة 460 نقطة (أو 640 لـ 80مم)
+    int physicalWidthDots = (image.width == 460) ? (57 * 8) : (80 * 8);
+    int imageWidthDots = widthBytes * 8;
+    int offsetX = ((physicalWidthDots - imageWidthDots) / 2)
+        .clamp(0, physicalWidthDots)
+        .toInt();
+
+    // إضافة معايرة يدوية (نفس التي استخدمتها للباركود) لدفع الفاتورة لليمين أكثر
+
+    bytes.addAll(ascii
+        .encode("BITMAP $offsetX,$topPadding,$widthBytes,$contentHeight,0,"));
+
+    for (int y = topMargin; y < topMargin + contentHeight; y++) {
       for (int x = 0; x < widthBytes; x++) {
         int byte = 0;
         for (int bit = 0; bit < 8; bit++) {
           int px = x * 8 + bit;
-          if (px < width) {
+          if (px < image.width && y < image.height) {
             var pixel = image.getPixel(px, y);
-            if (pixel.luminance < 128) {
-              byte |= (128 >> bit);
+            double val = (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b);
+            if (val > 128) {
+              byte |= (0x80 >> bit);
             }
+          } else {
+            byte |= (0x80 >> bit);
           }
         }
         bytes.add(byte);
       }
     }
+
+    bytes.addAll(ascii.encode("\r\nPRINT 1,1\r\n"));
     return bytes;
   }
 
-  // Future<void> printInvoiceBluetooth() async {
-  //   try {
-  //     // تحقق من حالة الاتصال الحالية
-  //     bool isConnected = await PrintBluetoothThermal.connectionStatus;
+  List<int> _convertImageToEscPos(img.Image image) {
+    int lastContentRow = 0;
+    int firstContentRow = image.height;
 
-  //     if (!isConnected) {
-  //       // جلب الأجهزة المقترنة
-  //       final devices = await PrintBluetoothThermal.pairedBluetooths;
+    for (int y = 0; y < image.height; y++) {
+      for (int x = 0; x < image.width; x++) {
+        var pixel = image.getPixel(x, y);
+        double val = 0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b;
+        if (val < 128) {
+          if (y < firstContentRow) firstContentRow = y;
+          if (y > lastContentRow) lastContentRow = y;
+          break;
+        }
+      }
+    }
 
-  //       if (devices.isEmpty) {
-  //         Get.snackbar("error".tr, "لا يوجد أي طابعة بلوتوث مقترنة".tr,
-  //             backgroundColor: Colors.red, colorText: Colors.white);
-  //         return;
-  //       }
+    int topMargin = 0;
+    int contentHeight = image.height;
+    if (lastContentRow > 0) {
+      topMargin = (firstContentRow).clamp(0, image.height);
+      contentHeight =
+          (lastContentRow - topMargin).clamp(1, image.height - topMargin);
+    }
 
-  //       // عرض حوار لاختيار الطابعة
-  //       final selected = await Get.dialog(
-  //         AlertDialog(
-  //           backgroundColor: AppColor.white,
-  //           title: Center(child: Text("اختر الطابعة".tr)),
-  //           content: SizedBox(
-  //             width: double.maxFinite,
-  //             child: ListView.builder(
-  //               shrinkWrap: true,
-  //               itemCount: devices.length,
-  //               itemBuilder: (context, index) {
-  //                 final device = devices[index];
-  //                 return ListTile(
-  //                   leading: const Icon(Icons.print),
-  //                   title: Text(device.name),
-  //                   subtitle: Text(device.macAdress),
-  //                   onTap: () {
-  //                     Get.back(result: device.macAdress);
-  //                   },
-  //                 );
-  //               },
-  //             ),
-  //           ),
-  //         ),
-  //       );
+    int topPadding = 50;
+    int bottomPadding = 0;
 
-  //       if (selected == null) {
-  //         Get.snackbar("إلغاء".tr, "لم يتم اختيار أي طابعة".tr);
-  //         return;
-  //       }
+    Myservices myServices = Get.find();
+    int settingsWidth =
+        myServices.sharedPreferences?.getInt("printer_width") ?? 460;
 
-  //       // الاتصال بالطابعة المختارة
-  //       await PrintBluetoothThermal.connect(macPrinterAddress: selected);
-  //     }
+    List<int> bytes = [];
+    bytes.addAll([0x1B, 0x40]); // Initialize
 
-  //     // بناء نص الفاتورة للطباعة
-  //     StringBuffer buffer = StringBuffer();
-  //     buffer.writeln("فاتورة مبيعات".tr);
-  //     buffer.writeln("===========================");
-  //     buffer.writeln("${'الزبون'.tr}: ${invoices!.familyName ?? ''}");
-  //     buffer.writeln(
-  //         "${'التاريخ'.tr}: ${invoices?.date?.substring(0, 10) ?? ''}");
-  //     buffer.writeln("---------------------------");
+    // حساب عرض الورق الفيزيائي بناءً على الإعدادات (460 لـ 58مم، 640 لـ 80مم)
+    int physicalWidth = (settingsWidth <= 460) ? 460 : 640;
+    // حساب الهامش الأيسر للتوسيط باستخدام أمر GS L
+    int marginDots = ((physicalWidth - image.width) / 2).toInt();
+    if (marginDots < 0) marginDots = 0;
 
-  //     for (var p in productSale?.products ?? []) {
-  //       buffer.writeln(
-  //           "${p.productName}  x${p.quantity}  = ${p.subtotal.toStringAsFixed(2)}");
-  //     }
+    bytes.addAll([0x1D, 0x4C, marginDots % 256, marginDots ~/ 256]);
+    bytes.addAll([0x1B, 0x61, 0x01]); // Center alignment
 
-  //     buffer.writeln("---------------------------");
-  //     buffer.writeln("الإجمالي: ${invoices?.totalSales ?? 0} دج");
-  //     buffer.writeln("المدفوع: ${invoices?.paymentPrice ?? 0} دج");
-  //     buffer.writeln("الباقي: ${getRemainingAmount().toStringAsFixed(2)} دج");
-  //     buffer.writeln("===========================");
-  //     buffer.writeln("شكراً لتعاملكم معنا ❤️");
+    // إضافة الهامش العلوي للفاتورة
+    if (topPadding > 0) {
+      bytes.addAll([0x1B, 0x4A, topPadding]);
+    }
 
-  //     await PrintBluetoothThermal.writeString(
-  //       printText: PrintTextSize(
-  //         size: 2,
-  //         text: buffer.toString(),
-  //       ),
-  //     );
+    // تأكد من أن العرض من مضاعفات 8 لضمان سلامة بيانات الـ Raster
+    int width = (image.width / 8).ceil() * 8;
+    int widthBytes = width ~/ 8;
 
-  //     Get.snackbar("تم".tr, "تم إرسال الفاتورة للطابعة بنجاح".tr,
-  //         backgroundColor: Colors.green, colorText: Colors.white);
-  //   } catch (e) {
-  //     print("❌ خطأ أثناء الطباعة: $e");
-  //     Get.snackbar("error".tr, "${'حدث خطأ أثناء الطباعة'.tr}$e".tr,
-  //         backgroundColor: Colors.red, colorText: Colors.white);
-  //   }
-  // }
+    for (int y = topMargin; y < topMargin + contentHeight; y += 24) {
+      bytes.addAll([0x1D, 0x76, 0x30, 0x00]);
+      bytes.add(widthBytes % 256);
+      bytes.add(widthBytes ~/ 256);
+      int chunkHeight = (y + 24 > topMargin + contentHeight)
+          ? (topMargin + contentHeight) - y
+          : 24;
+      bytes.add(chunkHeight % 256);
+      bytes.add(chunkHeight ~/ 256);
 
-  // Future<pw.Document> buildInvoicePdf() async {
-  //   final pdf = pw.Document();
+      for (int row = 0; row < chunkHeight; row++) {
+        for (int x = 0; x < widthBytes; x++) {
+          int byte = 0;
+          for (int bit = 0; bit < 8; bit++) {
+            int px = x * 8 + bit;
+            if (px < image.width && y + row < image.height) {
+              var pixel = image.getPixel(px, y + row);
+              if (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b < 128) {
+                byte |= (128 >> bit);
+              }
+            }
+          }
+          bytes.add(byte);
+        }
+      }
+    }
 
-  //   pdf.addPage(
-  //     pw.Page(
-  //       pageFormat: PdfPageFormat.a4,
-  //       build: (context) {
-  //         return pw.Column(
-  //           crossAxisAlignment: pw.CrossAxisAlignment.start,
-  //           children: [
-  //             pw.Text(
-  //               "فاتورة مبيعات",
-  //               style:
-  //                   pw.TextStyle(fontSize: 22, fontWeight: pw.FontWeight.bold),
-  //             ),
-  //             pw.SizedBox(height: 10),
-  //             pw.Divider(),
-  //             pw.Text("الزبون: ${invoices?.familyName ?? ''}"),
-  //             pw.Text("التاريخ: ${invoices?.date?.substring(0, 10) ?? ''}"),
-  //             pw.SizedBox(height: 15),
-  //             pw.Divider(),
-  //             pw.Column(
-  //               children: [
-  //                 for (var p in productSale?.products ?? [])
-  //                   pw.Row(
-  //                     mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-  //                     children: [
-  //                       pw.Text(p.productName),
-  //                       pw.Text("x${p.quantity}"),
-  //                       pw.Text(p.subtotal.toStringAsFixed(2)),
-  //                     ],
-  //                   )
-  //               ],
-  //             ),
-  //             pw.Divider(),
-  //             pw.SizedBox(height: 10),
-  //             pw.Row(
-  //               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-  //               children: [
-  //                 pw.Text("الإجمالي"),
-  //                 pw.Text("${invoices?.totalSales ?? 0} دج"),
-  //               ],
-  //             ),
-  //             pw.Row(
-  //               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-  //               children: [
-  //                 pw.Text("المدفوع"),
-  //                 pw.Text("${invoices?.paymentPrice ?? 0} دج"),
-  //               ],
-  //             ),
-  //             pw.Row(
-  //               mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
-  //               children: [
-  //                 pw.Text("الباقي"),
-  //                 pw.Text("${getRemainingAmount().toStringAsFixed(2)} دج"),
-  //               ],
-  //             ),
-  //             pw.SizedBox(height: 20),
-  //             pw.Center(child: pw.Text("شكراً لتعاملكم معنا ❤️")),
-  //           ],
-  //         );
-  //       },
-  //     ),
-  //   );
+    // إضافة الهامش السفلي للفاتورة
+    if (bottomPadding > 0) {
+      bytes.addAll([0x1B, 0x4A, bottomPadding]);
+    }
 
-  //   return pdf;
-  // }
-
-  // Future<void> previewInvoicePdf() async {
-  //   final pdf = await buildInvoicePdf();
-
-  //   await Printing.layoutPdf(
-  //     onLayout: (PdfPageFormat format) async => pdf.save(),
-  //   );
-  // }
+    bytes.addAll([0x1B, 0x64, 0x05]); // Feed 5 lines at the end
+    bytes.addAll([0x1D, 0x56, 0x41, 0x00]); // Cut
+    return bytes;
+  }
 }

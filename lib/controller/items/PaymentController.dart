@@ -15,7 +15,7 @@ class PaymentController extends GetxController {
   String trn_uuid = '';
   String name = '';
   String familyName = '';
-  String totalprice = '';
+  double totalprice = 0.0;
   String currentDate = '';
   String selectedCustomer = '';
   int type = 0;
@@ -91,7 +91,7 @@ class PaymentController extends GetxController {
     trn_uuid = args['uuid'] ?? '';
     name = args['name'] ?? '';
     familyName = args['famlyname'] ?? '';
-    totalprice = args['totalprice']?.toString() ?? '0';
+    totalprice = double.tryParse(args['totalprice']?.toString() ?? '0') ?? 0.0;
     selectedCustomer = args['selectedCustomer']?.toString() ?? '0';
 
     if (args['type'] != null) type = args['type'];
@@ -115,7 +115,7 @@ class PaymentController extends GetxController {
   }
 
   void recalculateFinalAmount() {
-    double total = double.tryParse(totalprice) ?? 0.0;
+    double total = totalprice;
     double discount = double.tryParse(discountController.text) ?? 0.0;
 
     finalAmount = total - discount;

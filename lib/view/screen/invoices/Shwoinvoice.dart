@@ -164,9 +164,14 @@ class _PaymentState extends State<Shwoinvoice> {
                                       },
                                       onEdit: () {
                                         controller.qtyController.text =
-                                            pro.quantity.toString();
+                                            pro.quantity % 1 == 0
+                                                ? pro.quantity
+                                                    .toInt()
+                                                    .toString()
+                                                : pro.quantity.toString();
                                         Get.dialog(
                                           CustemQuantityDialog(
+                                            isDecimal: pro.type == 2,
                                             controller:
                                                 controller.qtyController,
                                             title: 'edit_quantity'.tr,
@@ -180,7 +185,9 @@ class _PaymentState extends State<Shwoinvoice> {
                                                 return;
                                               }
                                               controller.editProduct(
-                                                  pro.uuid, pro.quantity);
+                                                  pro.uuid,
+                                                  double.parse(controller
+                                                      .qtyController.text));
                                             },
                                           ),
                                         );
@@ -190,13 +197,13 @@ class _PaymentState extends State<Shwoinvoice> {
                                   );
                                 },
                                 title: pro?.productName ?? "",
-                                price: pro?.unitPrice.toString() ?? "",
+                                price: pro?.unitPrice.toStringAsFixed(0) ?? "",
                                 fontSize: 17,
                                 color: AppColor.grey,
                                 colorp: AppColor.grey,
                                 da: "DA".tr,
-                                q: pro!.quantity.toString(),
-                                value: pro.subtotal.toString(),
+                                q: pro!.quantity.toStringAsFixed(3),
+                                value: pro.subtotal.toStringAsFixed(0),
                               );
                             },
                           )),
@@ -245,29 +252,42 @@ class _PaymentState extends State<Shwoinvoice> {
                             title: "المجموع الفرعي".tr,
                             body: controller.productSale == null
                                 ? ""
-                                : controller.productSale!.sumPrice.toString(),
+                                : controller.productSale!.sumPrice
+                                    .toStringAsFixed(2),
                           ),
                           Costumcartdetailspayment(
                             title: "الخصم".tr,
-                            body: controller.productSale?.discount.toString() ??
+                            body: controller.productSale?.discount
+                                    .toStringAsFixed(2) ??
                                 "",
                           ),
                           Costumcartdetailspayment(
-                            title: "Paid".tr,
+                            title: "الإجمالي".tr,
+                            body: controller.productSale == null
+                                ? ""
+                                : (double.parse(controller.productSale!.sumPrice
+                                            .toStringAsFixed(2)) -
+                                        (controller.productSale?.discount ?? 0))
+                                    .toStringAsFixed(2),
+                          ),
+                          Costumcartdetailspayment(
+                            title: "المدفوع".tr,
                             body: controller.productSale?.paymentprice
-                                    .toString() ??
+                                    .toStringAsFixed(2) ??
                                 "",
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("الإجمالي".tr,
+                              Text("الباقي".tr,
                                   style: TextStyle(
                                       color: AppColor.black,
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold)),
                               Text(
-                                controller.getRemainingAmount().toString(),
+                                controller
+                                    .getRemainingAmount()
+                                    .toStringAsFixed(2),
                                 style: TextStyle(
                                     color: AppColor.black,
                                     fontSize: 20,

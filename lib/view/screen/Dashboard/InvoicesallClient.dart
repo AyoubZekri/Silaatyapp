@@ -171,7 +171,7 @@ class _InvoicesallState extends State<Invoicesall> with RouteAware {
                             Status: inv.debt! <= 0
                                 ? "Sincere".tr
                                 : "Not Sincere".tr,
-                            Price: "${inv.debt}",
+                            Price: "${inv.debt!.toStringAsFixed(2)}",
                             onTap: () {
                               print("================i$index");
                               print(

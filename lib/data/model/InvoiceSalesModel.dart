@@ -37,7 +37,6 @@ class InvoiceSalesData {
   final double discount;
   final double paymentprice;
 
-
   InvoiceSalesData({
     required this.products,
     required this.sumPrice,
@@ -64,20 +63,18 @@ class InvoiceSalesData {
       'sum_price': sumPrice,
       'discount': discount,
       'Payment_price': paymentprice,
-
     };
   }
 }
 
 class ProductSale {
   final String uuid;
-  final int quantity;
+  final double quantity;
   final double unitPrice;
   final double subtotal;
   final String productName;
   final double productPrice;
-
-
+  final int? type;
 
   ProductSale({
     required this.uuid,
@@ -86,7 +83,7 @@ class ProductSale {
     required this.subtotal,
     required this.productName,
     required this.productPrice,
-
+    this.type,
   });
 
   factory ProductSale.fromJson(Map<String, dynamic> json) {
@@ -94,11 +91,12 @@ class ProductSale {
       uuid: json['uuid'],
       quantity: json['quantity'] is int
           ? json['quantity']
-          : int.tryParse(json['quantity'].toString()) ?? 0,
+          : double.tryParse(json['quantity'].toString()) ?? 0,
       unitPrice: double.tryParse(json['unit_price'].toString()) ?? 0.0,
       subtotal: double.tryParse(json['subtotal'].toString()) ?? 0.0,
       productName: json['product_name'] ?? '',
       productPrice: double.tryParse(json['product_price'].toString()) ?? 0.0,
+      type: json['type'],
     );
   }
 
@@ -110,6 +108,7 @@ class ProductSale {
       'subtotal': subtotal,
       'product_name': productName,
       'product_price': productPrice,
+      'type': type,
     };
   }
 }

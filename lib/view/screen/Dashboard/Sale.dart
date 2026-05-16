@@ -118,7 +118,9 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                 onTap: () {
                                   TextEditingController qtyController =
                                       TextEditingController(
-                                    text: item['quantity'].toString(),
+                                    text: item['type_item'] == 2
+                                        ? item['quantity'].toString()
+                                        : item['quantity'].toInt().toString(),
                                   );
                                   final currentPrice = controller.type == 1
                                       ? item['price_Purchase']
@@ -126,6 +128,12 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                   TextEditingController priceController =
                                       TextEditingController(
                                     text: currentPrice.toString(),
+                                  );
+
+                                  TextEditingController totalPriceController =
+                                      TextEditingController(
+                                    text: (currentPrice * item['quantity'])
+                                        .toStringAsFixed(2),
                                   );
 
                                   Get.dialog(
@@ -143,60 +151,163 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                           ),
                                         ),
                                       ),
-                                      content: Column(
-                                        mainAxisSize: MainAxisSize.min,
-                                        children: [
-                                          TextFormField(
-                                            controller: qtyController,
-                                            keyboardType: TextInputType.number,
-                                            decoration: InputDecoration(
-                                              labelText: "الكمية".tr,
-                                              filled: true,
-                                              fillColor: Colors.grey[100],
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(30),
+                                      content: StatefulBuilder(
+                                          builder: (context, setState) {
+                                        return SingleChildScrollView(
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              TextFormField(
+                                                controller: qtyController,
+                                                keyboardType:
+                                                    item['type_item'] == 2
+                                                        ? const TextInputType
+                                                            .numberWithOptions(
+                                                            decimal: true)
+                                                        : TextInputType.number,
+                                                decoration: InputDecoration(
+                                                  labelText: "الكمية/الوزن".tr,
+                                                  filled: true,
+                                                  fillColor: Colors.grey[100],
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                    borderSide:
+                                                        const BorderSide(
+                                                            color: Colors.grey),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  suffixIcon: const Icon(
+                                                    Icons.inventory_2_outlined,
+                                                    color: AppColor
+                                                        .backgroundcolor,
+                                                  ),
+                                                ),
+                                                onChanged: (val) {
+                                                  if (item['type_item'] == 2) {
+                                                    double? weight =
+                                                        double.tryParse(val);
+                                                    double? uprice =
+                                                        double.tryParse(
+                                                            priceController
+                                                                .text);
+                                                    if (weight != null &&
+                                                        uprice != null) {
+                                                      totalPriceController
+                                                          .text = (weight *
+                                                              uprice)
+                                                          .toStringAsFixed(2);
+                                                    }
+                                                  }
+                                                },
                                               ),
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: const BorderSide(
-                                                    color: Colors.grey),
-                                                borderRadius:
-                                                    BorderRadius.circular(30),
+                                              const SizedBox(height: 12),
+                                              TextFormField(
+                                                controller: priceController,
+                                                keyboardType:
+                                                    const TextInputType
+                                                        .numberWithOptions(
+                                                        decimal: true),
+                                                decoration: InputDecoration(
+                                                  labelText: "سعر الوحدة".tr,
+                                                  filled: true,
+                                                  fillColor: Colors.grey[100],
+                                                  border: OutlineInputBorder(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  enabledBorder:
+                                                      OutlineInputBorder(
+                                                    borderSide:
+                                                        const BorderSide(
+                                                            color: Colors.grey),
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            30),
+                                                  ),
+                                                  suffixIcon: const Icon(
+                                                    Icons.attach_money,
+                                                    color: AppColor
+                                                        .backgroundcolor,
+                                                  ),
+                                                ),
+                                                onChanged: (val) {
+                                                  double? uprice =
+                                                      double.tryParse(val);
+                                                  double? qty = double.tryParse(
+                                                      qtyController.text);
+                                                  if (uprice != null &&
+                                                      qty != null) {
+                                                    totalPriceController.text =
+                                                        (uprice * qty)
+                                                            .toStringAsFixed(2);
+                                                  }
+                                                },
                                               ),
-                                              suffixIcon: const Icon(
-                                                Icons.inventory_2_outlined,
-                                                color: AppColor.backgroundcolor,
-                                              ),
-                                            ),
+                                              if (item['type_item'] == 2) ...[
+                                                const SizedBox(height: 12),
+                                                TextFormField(
+                                                  controller:
+                                                      totalPriceController,
+                                                  keyboardType:
+                                                      const TextInputType
+                                                          .numberWithOptions(
+                                                          decimal: true),
+                                                  decoration: InputDecoration(
+                                                    labelText:
+                                                        "السعر الإجمالي".tr,
+                                                    filled: true,
+                                                    fillColor: Colors.grey[100],
+                                                    border: OutlineInputBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              30),
+                                                    ),
+                                                    enabledBorder:
+                                                        OutlineInputBorder(
+                                                      borderSide:
+                                                          const BorderSide(
+                                                              color:
+                                                                  Colors.grey),
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              30),
+                                                    ),
+                                                    suffixIcon: const Icon(
+                                                      Icons.payments_outlined,
+                                                      color: AppColor
+                                                          .backgroundcolor,
+                                                    ),
+                                                  ),
+                                                  onChanged: (val) {
+                                                    double? total =
+                                                        double.tryParse(val);
+                                                    double? uprice =
+                                                        double.tryParse(
+                                                            priceController
+                                                                .text);
+                                                    if (total != null &&
+                                                        uprice != null &&
+                                                        uprice > 0) {
+                                                      qtyController.text =
+                                                          (total / uprice)
+                                                              .toStringAsFixed(
+                                                                  3);
+                                                    }
+                                                  },
+                                                ),
+                                              ],
+                                            ],
                                           ),
-                                          const SizedBox(height: 12),
-                                          TextFormField(
-                                            controller: priceController,
-                                            keyboardType: const TextInputType
-                                                .numberWithOptions(
-                                                decimal: true),
-                                            decoration: InputDecoration(
-                                              labelText: "سعر خاص".tr,
-                                              filled: true,
-                                              fillColor: Colors.grey[100],
-                                              border: OutlineInputBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(30),
-                                              ),
-                                              enabledBorder: OutlineInputBorder(
-                                                borderSide: const BorderSide(
-                                                    color: Colors.grey),
-                                                borderRadius:
-                                                    BorderRadius.circular(30),
-                                              ),
-                                              suffixIcon: const Icon(
-                                                Icons.attach_money,
-                                                color: AppColor.backgroundcolor,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
+                                        );
+                                      }),
                                       actions: [
                                         TextButton(
                                           onPressed: () => Get.back(),
@@ -204,11 +315,14 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                         ),
                                         ElevatedButton(
                                           onPressed: () {
-                                            final qty = int.tryParse(
+                                            num? qty = double.tryParse(
                                                 qtyController.text);
                                             final price = double.tryParse(
                                                 priceController.text);
                                             if (qty != null && qty > 0) {
+                                              if (item['type_item'] != 2) {
+                                                qty = qty.toInt();
+                                              }
                                               controller.updateQuantity(
                                                   item['uuid'], qty);
                                             }
@@ -256,12 +370,16 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                 color: AppColor.grey,
                                 colorp: AppColor.grey,
                                 da: "DA".tr,
-                                q: item["quantity"].toString(),
+                                q: item['type_item'] == 2
+                                    ? item["quantity"].toStringAsFixed(3)
+                                    : item["quantity"]
+                                        .toInt()
+                                        .toStringAsFixed(3),
                                 value: ((controller.type == 1
                                             ? item["price_Purchase"]
                                             : item["price"]) *
                                         item["quantity"])
-                                    .toString(),
+                                    .toStringAsFixed(0),
                               );
                             },
                           ),
@@ -292,11 +410,13 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text("DZD ${controller.totalallPrice}",
+                              Text(
+                                  "DZD ${controller.totalallPrice.toStringAsFixed(2)}",
                                   style:
                                       TextStyle(fontWeight: FontWeight.bold)),
                               Text("الإجمالي".tr),
-                              Text("${'عناصر'.tr} ${controller.totalItems}"),
+                              Text(
+                                  "${'عناصر'.tr} ${controller.totalItems.toStringAsFixed(0)}"),
                               Icon(Icons.shopping_cart_outlined),
                             ],
                           ),

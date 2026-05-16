@@ -7,18 +7,22 @@ import 'package:Silaaty/data/model/Categoris_model.dart';
 import 'package:get/get.dart';
 import 'package:Silaaty/core/functions/uploudfiler.dart';
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../core/constant/Colorapp.dart';
 import '../../core/functions/Snacpar.dart';
 import '../../core/services/Services.dart';
 
 class Additemscontroller extends GetxController {
   File? file;
-  bool? isManualBarcode;
+  int? barcodeMode; // 0: Auto, 1: Manual, 2: Scan
   int? selectedCategoryId = 1;
   String? selectedCategory;
   String? selectedtypeuuid;
   String? selectedtype;
+  int type = 1;
+
   final nameController = TextEditingController();
   final barcodeController = TextEditingController();
   final descriptionController = TextEditingController();
@@ -39,13 +43,22 @@ class Additemscontroller extends GetxController {
   List<Catdata> categories = [];
   Statusrequest statusrequest = Statusrequest.none;
 
-  void toggleBarcodeMode(bool manual) {
-    isManualBarcode = manual;
-    if (!manual) {
+  void toggleBarcodeMode(int mode, BuildContext context) {
+    barcodeMode = mode;
+    if (mode == 0) {
       barcodeController.text = generateBarcode();
-    } else {
+    } else if (mode == 1) {
       barcodeController.clear();
+    } else if (mode == 2) {
+      barcodeController.clear();
+      scanBarcode(context);
     }
+    update();
+  }
+
+  void typeProduct(int types) {
+    type = types;
+
     update();
   }
 
@@ -56,7 +69,9 @@ class Additemscontroller extends GetxController {
 
   addProduct() async {
     if (formstate.currentState!.validate()) {
-      if (int.parse(quantityController.text) < 0) {
+      if (type == 2
+          ? double.parse(quantityController.text) < 0
+          : int.parse(quantityController.text) < 0) {
         showSnackbar(
             "error".tr, "لا يمكن أن تكون الكمية أقل من 1".tr, Colors.red);
         return;
@@ -73,6 +88,7 @@ class Additemscontroller extends GetxController {
         'product_price_total': priceTotal.toString(),
         'product_price_total_purchase': priceTotalPurchase.toString(),
         'product_price_purchase': pricePurchaseController.text,
+        'type': type,
         'codepar': barcodeController.text,
         "created_at": DateTime.now().toIso8601String(),
       };
@@ -159,7 +175,9 @@ class Additemscontroller extends GetxController {
   }
 
   void calculateTotalPrice() {
-    final quantity = int.tryParse(quantityController.text) ?? 0;
+    final quantity = type == 2
+        ? double.tryParse(quantityController.text) ?? 0.0
+        : int.tryParse(quantityController.text) ?? 0;
     final price = double.tryParse(priseController.text) ?? 0.0;
     final pricePurchase = double.tryParse(pricePurchaseController.text) ?? 0.0;
 
@@ -171,8 +189,7 @@ class Additemscontroller extends GetxController {
     });
   }
 
-  void onQuantityChanged(int value) {
-    quantityController.text = value.toString();
+  void onQuantityChanged(num value) {
     calculateTotalPrice();
   }
 
@@ -188,6 +205,66 @@ class Additemscontroller extends GetxController {
   Future<void> uploadimagefile() async {
     file = await fileuploadGallery(false);
     update();
+  }
+
+  bool _isScanning = false;
+  void scanBarcode(BuildContext context) {
+    if (_isScanning) return;
+    _isScanning = true;
+
+    Get.dialog(
+      Dialog(
+        insetPadding: const EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: SizedBox(
+          height: 400,
+          child: Column(
+            children: [
+              AppBar(
+                title: Text(
+                  "امسح الباركود".tr,
+                  style: const TextStyle(color: AppColor.backgroundcolor),
+                ),
+                automaticallyImplyLeading: false,
+                backgroundColor: AppColor.primarycolor,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.close,
+                        color: AppColor.backgroundcolor),
+                    onPressed: () {
+                      _isScanning = false;
+                      Get.back();
+                    },
+                  ),
+                ],
+              ),
+              Expanded(
+                child: MobileScanner(
+                  onDetect: (capture) {
+                    final barcodes = capture.barcodes;
+                    if (barcodes.isNotEmpty && _isScanning) {
+                      final scannedCode = barcodes.first.rawValue;
+                      if (scannedCode != null) {
+                        _isScanning = false;
+                        barcodeController.text = scannedCode;
+                        update();
+                        if (Get.isDialogOpen!) {
+                          Get.back();
+                        }
+                      }
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).then((_) {
+      _isScanning = false;
+    });
   }
 
   void resetForm() {

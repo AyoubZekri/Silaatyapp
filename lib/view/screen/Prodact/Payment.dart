@@ -47,7 +47,9 @@ class _PaymentState extends State<Payment> {
                 Costumcartdetails(
                   iconData: Icons.person_2_outlined,
                   title: "العميل".tr,
-                  body:controller.selectedCustomer == "virtualCustomer".tr? controller.selectedCustomer:"${controller.name} ${controller.familyName}",
+                  body: controller.selectedCustomer == "virtualCustomer".tr
+                      ? controller.selectedCustomer
+                      : "${controller.name} ${controller.familyName}",
                 ),
                 Costumcartdetails(
                   iconData: Icons.date_range,
@@ -69,7 +71,9 @@ class _PaymentState extends State<Payment> {
                   valid: (Val) {
                     return validInput(Val!, 100, 5, "Email");
                   },
-                  enabled: controller.selectedCustomer == "virtualCustomer".tr ? false:true,
+                  enabled: controller.selectedCustomer == "virtualCustomer".tr
+                      ? false
+                      : true,
                   keyboardType: TextInputType.number,
                 ),
                 Costumtextfildpatment(
@@ -99,7 +103,7 @@ class _PaymentState extends State<Payment> {
                     children: [
                       Costumcartdetailspayment(
                         title: "المجموع الفرعي".tr,
-                        body: controller.totalprice,
+                        body: controller.totalprice.toStringAsFixed(2),
                       ),
                       Costumcartdetailspayment(
                         title: "الخصم".tr,
@@ -114,7 +118,7 @@ class _PaymentState extends State<Payment> {
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold)),
                           Text(
-                            controller.finalAmount.toString(),
+                            controller.finalAmount.toStringAsFixed(2),
                             style: TextStyle(
                                 color: AppColor.black,
                                 fontSize: 20,

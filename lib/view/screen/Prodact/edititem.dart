@@ -126,19 +126,41 @@ class _EdititemState extends State<Edititem> {
                       ),
 
                       CustemDropDownField(
-                        hintText: "Barcode Type".tr,
+                        hintText: "نوع المنتج".tr,
                         items: [
+                          DropdownMenuItem(value: 2, child: Text("ميزان".tr)),
                           DropdownMenuItem(
-                              value: false, child: Text("Auto".tr)),
-                          DropdownMenuItem(
-                              value: true, child: Text("Manual".tr)),
+                              value: 1, child: Text("غير ميزان".tr)),
                         ],
-                        value: controller.isManualBarcode,
+                        value: controller.type,
                         onChanged: (val) {
                           if (val != null) {
-                            controller.toggleBarcodeMode(val);
+                            controller.type = val;
+                            controller.update();
                           }
                         },
+                      ),
+
+                      CustemDropDownField(
+                        hintText: "Barcode Type".tr,
+                        items: [
+                          DropdownMenuItem(value: 0, child: Text("Auto".tr)),
+                          DropdownMenuItem(value: 1, child: Text("Manual".tr)),
+                          DropdownMenuItem(value: 2, child: Text("Scan".tr)),
+                        ],
+                        value: controller.barcodeMode,
+                        onChanged: (val) {
+                          if (val != null) {
+                            controller.toggleBarcodeMode(val, context);
+                          }
+                        },
+                        suffix: IconButton(
+                          icon: const Icon(Icons.qr_code_scanner,
+                              color: AppColor.backgroundcolor),
+                          onPressed: () {
+                            controller.scanBarcode(context);
+                          },
+                        ),
                       ),
 
                       Custemtextfromfild(
@@ -147,7 +169,14 @@ class _EdititemState extends State<Edititem> {
                         hintText: "Barcode".tr,
                         label: "Barcode".tr,
                         iconData: Icons.qr_code,
-                        enabled: controller.isManualBarcode ?? true,
+                        enabled: controller.barcodeMode != 0,
+                        suffix: IconButton(
+                          icon: const Icon(Icons.qr_code_scanner,
+                              color: AppColor.backgroundcolor),
+                          onPressed: () {
+                            controller.scanBarcode(context);
+                          },
+                        ),
                       ),
 
                       // CustemDropDownField(
@@ -198,13 +227,19 @@ class _EdititemState extends State<Edititem> {
                       //       return null;
                       //     }),
                       QuantityInput(
-                        initialValue:
-                            int.tryParse(controller.quantityController.text) ??
-                                1,
+                        initialValue: controller.type == 2
+                            ? (double.tryParse(
+                                    controller.quantityController.text) ??
+                                1.0)
+                            : ((int.tryParse(
+                                        controller.quantityController.text) ??
+                                    1)
+                                .toDouble()),
                         Mycontroller: controller.quantityController,
                         hintText: "Quantity".tr,
                         label: "Quantity".tr,
                         onChanged: controller.onQuantityChanged,
+                        isDecimal: controller.type == 2,
                       ),
                       Custemtextfromfild(
                         MyController: controller.priseController,

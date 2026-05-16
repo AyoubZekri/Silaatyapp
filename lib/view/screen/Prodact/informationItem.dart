@@ -122,9 +122,12 @@ class _InformationitemState extends State<Informationitem> {
                                   context: context,
                                   builder: (context) {
                                     return Customaddquntetyproductdialog(
+                                      isDecimal:
+                                          controller.InfoProduct.first.type ==
+                                              2,
                                       Mycontroller:
                                           controller.quantityController,
-                                      value: int.tryParse(
+                                      value: double.tryParse(
                                             controller.quantityController.text,
                                           ) ??
                                           1,
@@ -135,7 +138,7 @@ class _InformationitemState extends State<Informationitem> {
                                         Get.back();
                                       },
                                       title: 'إضافة كمية جديدة'.tr,
-                                      onChanged: (int p1) {
+                                      onChanged: (double p1) {
                                         controller.onQuantityChanged(p1);
                                       },
                                     );
@@ -171,20 +174,21 @@ class _InformationitemState extends State<Informationitem> {
                         const Divider(height: 30),
                         _infoRow(
                           "سعر البيع".tr,
-                          "${product.productPrice ?? "0.00"} ${'دينار'.tr}",
+                          "${product.productPrice!.toStringAsFixed(2)} ${'دينار'.tr}",
                         ),
                         _infoRow(
                           "سعر الشراء".tr,
-                          "${product.productPricePurchase ?? "0.00"} ${'دينار'.tr}",
+                          "${product.productPricePurchase!.toStringAsFixed(2)} ${'دينار'.tr}",
                         ),
-                        _infoRow("الكمية".tr, "${product.productQuantity}"),
+                        _infoRow("الكمية".tr,
+                            "${product.productQuantity}${product.type == 2 ? "Kg" : ""}"),
                         _infoRow(
                           "الإجمالي بيع".tr,
-                          "${product.productPriceTotal}",
+                          "${product.productPriceTotal!.toStringAsFixed(2)}",
                         ),
                         _infoRow(
                           "الإجمالي شراء".tr,
-                          "${product.productPriceTotalPurchase}",
+                          "${product.productPriceTotalPurchase!.toStringAsFixed(2)}",
                         ),
                         _infoRow(
                           "تاريخ الإضافة".tr,
@@ -225,11 +229,7 @@ class _InformationitemState extends State<Informationitem> {
         title: const Text("معاينة التذكرة", textAlign: TextAlign.center),
         content: RepaintBoundary(
           key: controller.ticketKey,
-          child: buildPrintableTicket(
-            name,
-            barcode,
-            price,
-          ),
+          child: buildPrintableTicket(name, barcode, price, false),
         ),
         actions: [
           TextButton(
@@ -276,15 +276,18 @@ class _InformationitemState extends State<Informationitem> {
     );
   }
 
-  Widget buildPrintableTicket(String name, String barcode, double price) {
+  Widget buildPrintableTicket(
+      String name, String barcode, double price, bool border) {
     return Container(
-      width: 320,
+      width: 380,
       height: 115,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
+      padding: EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(15),
-        border: Border.all(color: AppColor.backgroundcolor, width: 2),
+        borderRadius: BorderRadius.circular(border ? 15 : 0),
+        border: border
+            ? Border.all(color: AppColor.backgroundcolor, width: 2)
+            : Border.all(color: Colors.transparent),
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,

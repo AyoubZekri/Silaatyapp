@@ -10,12 +10,13 @@ class Customcartaddproductsale extends StatelessWidget {
   final String? imgitems;
   final String Title;
   final String Price;
-  final String Body;
+  final num Body;
 
   final bool image;
+  final int type;
   final bool isLoading;
   final bool isSelected;
-  final int quantity;
+  final num quantity;
   final VoidCallback? onIncrement;
   final VoidCallback? onDecrement;
   final VoidCallback? onTap;
@@ -34,6 +35,7 @@ class Customcartaddproductsale extends StatelessWidget {
     this.onDecrement,
     this.onTap,
     required this.Body,
+    required this.type,
   });
 
   @override
@@ -140,7 +142,9 @@ class Customcartaddproductsale extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                Body,
+                                type == 2 && Body != 0
+                                    ? Body.toStringAsFixed(3)
+                                    : Body.toStringAsFixed(0),
                                 style:
                                     Theme.of(context).textTheme.headlineLarge,
                               ),
@@ -215,7 +219,13 @@ class Customcartaddproductsale extends StatelessWidget {
                 onPressed: onDecrement,
               ),
               Text(
-                "$quantity",
+                type == 2 && quantity != 0
+                    ? quantity % 1 == 0
+                        ? quantity.toInt().toStringAsFixed(3)
+                        : quantity.toStringAsFixed(3)
+                    : quantity % 1 == 0
+                        ? quantity.toInt().toStringAsFixed(0)
+                        : quantity.toStringAsFixed(0),
                 style: const TextStyle(
                   color: AppColor.black,
                   fontWeight: FontWeight.bold,

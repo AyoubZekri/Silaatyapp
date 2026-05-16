@@ -58,8 +58,8 @@ class ProdactData {
 
   Future<bool> updateProduct(
     Map<String, Object?> data,
-    int oldQty,
-    int newQty, [
+    double oldQty,
+    double newQty, [
     File? image,
   ]) async {
     final uuid = data["uuid"] as String;
@@ -95,7 +95,7 @@ class ProdactData {
     );
 
     if (result <= 0) return false;
-    final int diff = newQty - oldQty;
+    final double diff = newQty - oldQty;
 
     if (diff != 0) {
       // جلب جميع سجلات type_sales = 3 المرتبطة بالمنتج بترتيب التاريخ تنازلي
@@ -109,7 +109,7 @@ class ProdactData {
         [uuid, id],
       );
 
-      int remainingDiff = diff.abs();
+      double remainingDiff = diff.abs();
 
       // ➕ إذا الكمية الجديدة أكبر من القديمة
       if (diff > 0) {
@@ -117,8 +117,10 @@ class ProdactData {
           // زد الفرق في آخر سجل فقط
           final sale = sales.first;
           final saleUuid = sale["uuid"] as String;
-          int saleQty = sale["quantity"] as int;
-          final unitPrice = double.tryParse(sale["unit_price"].toString()) ?? 0;
+          double saleQty =
+              double.tryParse(sale["quantity"]?.toString() ?? '0') ?? 0;
+          final unitPrice =
+              double.tryParse(sale["unit_price"]?.toString() ?? '0') ?? 0;
 
           saleQty += remainingDiff;
 
@@ -176,7 +178,8 @@ class ProdactData {
           if (remainingDiff <= 0) break;
 
           final saleUuid = sale["uuid"] as String;
-          int saleQty = int.tryParse(sale["quantity"]?.toString() ?? '0') ?? 0;
+          double saleQty =
+              double.tryParse(sale["quantity"]?.toString() ?? '0') ?? 0;
           final unitPrice =
               double.tryParse(data["product_price_purchase"].toString()) ?? 0;
 
@@ -237,7 +240,7 @@ class ProdactData {
 
       for (var s in sale12) {
         // الآن quantity موجود
-        int saleQty = int.tryParse(s["quantity"]?.toString() ?? '0') ?? 0;
+        double saleQty = double.tryParse(s["quantity"]?.toString() ?? '0') ?? 0;
 
         await sqldb.update(
           "sales",
@@ -403,8 +406,8 @@ class ProdactData {
 
       if (productRes.isEmpty) return false;
 
-      int remainingQty =
-          int.parse(productRes.first["product_quantity"].toString());
+      double remainingQty =
+          double.parse(productRes.first["product_quantity"].toString());
 
       // جلب إدخالات stock (type_sales = 3) من الأخير للأول
       final stockRows = await sqldb.readData(
@@ -423,7 +426,7 @@ class ProdactData {
         if (remainingQty <= 0) break;
 
         final stockUuid = row["uuid"] as String;
-        final stockQty = int.parse(row["quantity"].toString());
+        final stockQty = double.parse(row["quantity"].toString());
 
         if (stockQty > remainingQty) {
           final newQty = stockQty - remainingQty;

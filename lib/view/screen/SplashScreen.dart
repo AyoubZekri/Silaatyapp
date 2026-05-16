@@ -1,4 +1,5 @@
 import 'package:Silaaty/core/constant/routes.dart';
+import 'package:Silaaty/core/functions/CheckInternat.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'dart:async';
@@ -51,7 +52,15 @@ class _SplashScreenState extends State<SplashScreen>
     String? token = myServices.sharedPreferences?.getString("token");
 
     if (token != null && token.isNotEmpty) {
-      await contrller.getUser();
+      try {
+        await Future.microtask(() async {
+          if (await checkInternet()) {
+            await contrller.getUser();
+          }
+        }).timeout(const Duration(seconds: 15));
+      } catch (e) {
+        print("Timeout or no internet in SplashScreen: $e");
+      }
     }
 
     _controller.forward();

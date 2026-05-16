@@ -25,7 +25,7 @@ class Saledata {
           await txn.insert("sales", sale);
 
           final productUuid = sale["product_uuid"] as String;
-          final quantitySold = sale["quantity"] as int;
+          final quantitySold = sale["quantity"];
           final type = sale["type_sales"] as int;
 
           await txn.rawUpdate(
@@ -86,7 +86,7 @@ class Saledata {
   }
 
   Future<Map<String, dynamic>> updateSaleQuantity(
-      String uuidSale, int newQty, double RemainingAmount) async {
+      String uuidSale, double newQty, double RemainingAmount) async {
     try {
       final sale = (await db.read(
         'sales',
@@ -97,7 +97,7 @@ class Saledata {
         return {"status": 0, "error": "Sale not found"};
       }
 
-      final oldQty = sale['quantity'] as int;
+      final oldQty = sale['quantity'];
       final productUuid = sale['product_uuid'] as String;
       final invoiceUuid = sale['invoie_uuid'] as String;
       final type = sale['type_sales'] as int;
@@ -113,7 +113,7 @@ class Saledata {
       }
 
       final currentProductQty =
-          int.tryParse(product['product_quantity']?.toString() ?? "0") ?? 0;
+          double.tryParse(product['product_quantity']?.toString() ?? "0") ?? 0;
 
       final invoice = (await db.read("invoies")).firstWhere(
           (e) => e["uuid"] == invoiceUuid,
@@ -127,6 +127,9 @@ class Saledata {
           double.tryParse(invoice['Payment_price']?.toString() ?? "0") ?? 0;
 
       final diff = newQty - oldQty;
+      print("====================diff$diff");
+      print("====================newQty$newQty");
+      print("====================oldQty$oldQty");
 
       if (diff > 0) {
         final diffs = currentProductQty - (type == 1 ? 0 : diff);
@@ -146,7 +149,7 @@ class Saledata {
         [uuidSale],
       );
 
-      int newProductQty = currentProductQty - (type == 1 ? 0 : diff);
+      double newProductQty = currentProductQty - (type == 1 ? 0 : diff);
       if (diff > 0) {
         newProductQty = currentProductQty - (type == 1 ? 0 : diff);
       } else {
@@ -233,7 +236,7 @@ class Saledata {
       if (sale.isEmpty) {
         return {"status": 0, "error": "Sale not found"};
       }
-      final int qty = sale['quantity'] as int;
+      final double qty = sale['quantity'];
       final String productUuid = sale['product_uuid'];
       final String invoiceUuid = sale['invoie_uuid'];
       final int type = sale['type_sales'] as int;
@@ -308,10 +311,10 @@ class Saledata {
         }
       }
 
-      final int currentQty =
-          int.tryParse(product['product_quantity']?.toString() ?? '0') ?? 0;
+      final double currentQty =
+          double.tryParse(product['product_quantity']?.toString() ?? '0') ?? 0;
 
-      final int newProductQty = currentQty + (type == 1 ? 0 : qty);
+      final double newProductQty = currentQty + (type == 1 ? 0 : qty);
 
       /// 3. جلب الفاتورة
       final invoice = (await db.read('invoies')).firstWhere(
@@ -466,7 +469,7 @@ class Saledata {
 
       /// 3. معالجة كل منتج
       for (final sale in sales) {
-        final int qty = sale['quantity'] as int;
+        final double qty = sale['quantity'];
         final String productUuid = sale['product_uuid'];
         final int type = sale['type_sales'] as int;
 
@@ -536,10 +539,11 @@ class Saledata {
           }
         }
 
-        final int currentQty =
-            int.tryParse(product['product_quantity']?.toString() ?? '0') ?? 0;
+        final double currentQty =
+            double.tryParse(product['product_quantity']?.toString() ?? '0') ??
+                0;
 
-        final int newQty = currentQty + (type == 1 ? 0 : qty);
+        final double newQty = currentQty + (type == 1 ? 0 : qty);
 
         /// تحديث المخزون
         await db.update(
@@ -603,7 +607,7 @@ class Saledata {
     final query = data["codepar"];
 
     final result = await db.readData(
-      "SELECT * FROM products WHERE user_id = ? AND codepar = ?",
+      "SELECT * FROM products WHERE user_id = ? AND codepar = ? AND is_delete = 0",
       [id, query],
     );
     return result;

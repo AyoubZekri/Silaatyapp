@@ -10,15 +10,18 @@ class Custemtextfromfild extends StatelessWidget {
   final TextEditingController? MyController;
   final TextInputType? keyboardType;
   final bool? obscureText;
-  const Custemtextfromfild(
-      {super.key,
-      required this.hintText,
-      required this.label,
-      required this.iconData,
-      // ignore: non_constant_identifier_names
-      this.MyController,
-      this.keyboardType,
-      this.obscureText,required this.enabled});
+  final Widget? suffix;
+  const Custemtextfromfild({
+    super.key,
+    required this.hintText,
+    required this.label,
+    required this.iconData,
+    this.MyController,
+    this.keyboardType,
+    this.obscureText,
+    required this.enabled,
+    this.suffix,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -76,6 +79,7 @@ class Custemtextfromfild extends StatelessWidget {
               ],
             ),
           ),
+          if (suffix != null) suffix!,
         ],
       ),
     );

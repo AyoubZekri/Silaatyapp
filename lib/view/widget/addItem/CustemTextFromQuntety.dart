@@ -2,12 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 
+class DecimalTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text == '') return newValue;
+    if (RegExp(r'^\d*\.?\d{0,3}$').hasMatch(newValue.text)) {
+      return newValue;
+    }
+    return oldValue;
+  }
+}
+
 class QuantityInput extends StatefulWidget {
   final String label;
   final String hintText;
   final TextEditingController? Mycontroller;
-  final int initialValue;
-  final Function(int) onChanged;
+  final double initialValue;
+  final Function(double) onChanged;
+  final bool isDecimal;
 
   const QuantityInput({
     super.key,
@@ -16,6 +29,7 @@ class QuantityInput extends StatefulWidget {
     required this.onChanged,
     required this.hintText,
     this.Mycontroller,
+    this.isDecimal = false,
   });
 
   @override
@@ -24,7 +38,7 @@ class QuantityInput extends StatefulWidget {
 
 class _QuantityInputState extends State<QuantityInput> {
   late TextEditingController _controller;
-  late int _value;
+  late double _value;
 
   @override
   void initState() {
@@ -32,29 +46,29 @@ class _QuantityInputState extends State<QuantityInput> {
     _value = widget.initialValue;
 
     _controller = widget.Mycontroller ?? TextEditingController();
-    _controller.text = _value.toString();
+    _controller.text =
+        _value % 1 == 0 ? _value.toInt().toString() : _value.toString();
 
     _controller.addListener(_controllerListener);
   }
 
   void _controllerListener() {
     if (!mounted) return;
-    final parsed = int.tryParse(_controller.text);
+    final parsed = double.tryParse(_controller.text);
     if (parsed != null && parsed != _value) {
-      setState(() {
-        _value = parsed;
-      });
+      _value = parsed;
       widget.onChanged(_value);
     }
   }
 
-  void _updateValue(int newValue) {
+  void _updateValue(double newValue) {
     if (!mounted) return;
     setState(() {
       _value = newValue;
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (!mounted) return;
-        _controller.text = _value.toString();
+        _controller.text =
+            _value % 1 == 0 ? _value.toInt().toString() : _value.toString();
       });
     });
     widget.onChanged(_value);
@@ -88,8 +102,12 @@ class _QuantityInputState extends State<QuantityInput> {
           Expanded(
             child: TextFormField(
               controller: _controller,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              keyboardType: widget.isDecimal
+                  ? const TextInputType.numberWithOptions(decimal: true)
+                  : TextInputType.number,
+              inputFormatters: widget.isDecimal
+                  ? [DecimalTextInputFormatter()]
+                  : [FilteringTextInputFormatter.digitsOnly],
               decoration: InputDecoration(
                 labelText: widget.label,
                 labelStyle: TextStyle(
@@ -113,7 +131,7 @@ class _QuantityInputState extends State<QuantityInput> {
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
                 onPressed: () {
-                  if (_value > 0) _updateValue(_value - 1);
+                  if (_value >= 1) _updateValue(_value - 1);
                 },
                 icon:
                     Icon(Icons.arrow_back_ios, color: AppColor.grey, size: 16),

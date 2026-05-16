@@ -47,7 +47,7 @@ class MyApp extends StatelessWidget {
       navigatorObservers: [routeObserver],
       translations: MyTranslation(),
       debugShowCheckedModeBanner: false,
-      title: 'Flutter Demo',
+      title: 'Sillaty',
       theme: controller.themeData,
       locale: controller.language,
       initialBinding: Initialbindings(),

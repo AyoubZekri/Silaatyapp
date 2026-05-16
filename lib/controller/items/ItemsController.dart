@@ -29,14 +29,14 @@ class Itemscontroller extends GetxController {
 
   final RxSet<String> selectedUuids = <String>{}.obs;
 
-  final RxMap<String, int> quantities = <String, int>{}.obs;
+  final RxMap<String, num> quantities = <String, num>{}.obs;
 
   bool isSelected(String uuid) =>
       selectedUuids.contains(uuid) && getQuantity(uuid) > 0;
 
-  int getQuantity(String uuid) => quantities[uuid] ?? 0;
+  num getQuantity(String uuid) => quantities[uuid] ?? 0;
 
-  void toggleSelect(String uuid, int maxQuantity) {
+  void toggleSelect(String uuid, num maxQuantity) {
     if (selectedUuids.contains(uuid) || (maxQuantity == 0 && type == 0)) {
       // showSnackbar("error".tr, "غير متوفر", Colors.red);
       selectedUuids.remove(uuid);
@@ -48,10 +48,10 @@ class Itemscontroller extends GetxController {
     update();
   }
 
-  void increment(String uuid, int maxQuantity) {
+  void increment(String uuid, num maxQuantity, {num? val}) {
     final currentQty = getQuantity(uuid);
     if (currentQty < maxQuantity || type == 1) {
-      quantities[uuid] = currentQty + 1;
+      quantities[uuid] = currentQty + (val ?? 1);
     }
     selectedUuids.add(uuid);
     update();
@@ -105,6 +105,7 @@ class Itemscontroller extends GetxController {
               "price_Purchase": item.productPricePurchase,
               "quantity": quantities[uuid] ?? 1,
               "quantity_item": item.productQuantity,
+              "type_item": item.type,
             };
           }
           return {};
@@ -311,7 +312,7 @@ class Itemscontroller extends GetxController {
         final uuid = p['uuid'];
         final qty = p['quantity'] ?? 1;
         selectedUuids.add(uuid);
-        quantities[uuid] = qty;
+        quantities[uuid] = qty is int ? qty : (qty as num);
       }
     }
     super.onInit();

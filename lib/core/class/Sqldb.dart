@@ -20,14 +20,64 @@ class SQLDB {
     Database mydb = await openDatabase(
       path,
       onCreate: _onCreate,
-      version: 1,
+      version: 3,
       onUpgrade: _onUpgrade,
     );
     return mydb;
   }
 
   Future<void> _onUpgrade(Database db, int oldversion, int newVersion) async {
-    print("_onUpgrade ===============");
+    print("_onUpgrade: from v$oldversion to v$newVersion ===============");
+    if (oldversion < 2) {
+      await db
+          .execute('ALTER TABLE products ADD COLUMN type INTEGER DEFAULT 1');
+    }
+
+    if (oldversion < 3) {
+      await db.execute('''
+    CREATE TABLE sales_new (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT,
+      invoie_uuid TEXT,
+      product_uuid TEXT,
+      product_name TEXT,
+      product_price_purchase REAL DEFAULT 0,
+      user_id INTEGER NOT NULL,
+      quantity REAL DEFAULT 1,
+      unit_price REAL DEFAULT 0,
+      subtotal REAL DEFAULT 0,
+      type_sales INTEGER,
+      is_delete INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT,
+      updated_at TEXT
+    );
+  ''');
+
+      await db.execute('''
+    INSERT INTO sales_new (
+      id, uuid, invoie_uuid, product_uuid,
+      product_name, product_price_purchase,
+      user_id, quantity, unit_price,
+      subtotal, type_sales, is_delete,
+      created_at, updated_at
+    )
+    SELECT
+      id, uuid, invoie_uuid, product_uuid,
+      product_name, product_price_purchase,
+      user_id,
+      CAST(quantity AS REAL),
+      unit_price,
+      subtotal,
+      type_sales,
+      is_delete,
+      created_at,
+      updated_at
+    FROM sales;
+  ''');
+
+      await db.execute('DROP TABLE sales');
+      await db.execute('ALTER TABLE sales_new RENAME TO sales');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -100,6 +150,7 @@ class SQLDB {
       product_price_total REAL,
       codepar INTEGER,
       is_delete INTEGER NOT NULL DEFAULT 0,
+      type INTEGER DEFAULT 1,
       created_at TEXT,
       updated_at TEXT
     )
@@ -161,7 +212,7 @@ class SQLDB {
         product_name TEXT,
         product_price_purchase REAL DEFAULT 0,
         user_id INTEGER NOT NULL,
-        quantity INTEGER DEFAULT 1,
+        quantity REAL DEFAULT 1,
         unit_price REAL DEFAULT 0,
         subtotal REAL DEFAULT 0,
         type_sales INTEGER,

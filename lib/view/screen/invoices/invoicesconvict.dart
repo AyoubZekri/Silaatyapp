@@ -389,7 +389,7 @@ class _InvoicesState extends State<Invoices> with RouteAware {
                         Title: "#${inv.number ?? ''}",
                         Status: inv.isPaid ? "Sincere".tr : 'Not Sincere'.tr,
                         Price:
-                            "${((double.parse(inv.invoiceSum.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)) < 0 ? 0 : (double.parse(inv.invoiceSum.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)}",
+                            "${(((double.parse(inv.invoiceSum.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)) < 0 ? 0 : (double.parse(inv.invoiceSum!.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)).toStringAsFixed(2)}",
                         onTap: () {
                           final selectedInvoiceData = InvoiceItem(
                             id: inv.id,

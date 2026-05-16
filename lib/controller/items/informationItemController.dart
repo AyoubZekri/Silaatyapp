@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'dart:ui' as ui;
+import 'dart:convert';
 
 import 'package:Silaaty/controller/items/Edititemcontroller.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
@@ -27,6 +28,7 @@ class Informationitemcontroller extends GetxController {
   ProdactData prodactData = ProdactData(Get.find());
   Statusrequest statusrequest = Statusrequest.none;
   bool isPrinting = false;
+  int get printerWidth => 384; // Fixed 384 for labels (58mm)
   List<Data> InfoProduct = [];
   Future<void> GotoEdititem() async {
     final product = InfoProduct[0];
@@ -66,8 +68,6 @@ class Informationitemcontroller extends GetxController {
     if (result == true) {
       Get.find<RefreshService>().fire();
       Get.back(result: true);
-      // showSnackbar(
-      //     "success".tr, "product_deleted_successfully".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "error_deleting_product".tr, Colors.red);
 
@@ -77,13 +77,13 @@ class Informationitemcontroller extends GetxController {
   }
 
   Future<void> editquantityProduct() async {
-    if (int.parse(quantityController.text) < 1) {
-      showSnackbar(
-          "error".tr, "لا يمكن أن تكون الكمية أقل من 1".tr, Colors.red);
+    if (double.parse(quantityController.text) <= 0) {
+      showSnackbar("error".tr, "الكمية يجب أن تكون أكبر من 0".tr, Colors.red);
       return;
     }
-    final int quantity = int.parse(InfoProduct.first.productQuantity ?? "0") +
-        int.parse(quantityController.text);
+    final double quantity =
+        double.parse(InfoProduct.first.productQuantity ?? "0") +
+            double.parse(quantityController.text);
     final data = {
       "uuid": uuid,
       'product_quantity': quantity,
@@ -93,9 +93,10 @@ class Informationitemcontroller extends GetxController {
     Map<String, Object?> dataSale = {
       "uuid": Uuid().v4(),
       "product_uuid": uuid,
-      "quantity": int.parse(quantityController.text),
+      "product_name": InfoProduct.first.productName ?? "",
+      "quantity": double.parse(quantityController.text),
       "unit_price": InfoProduct.first.productPricePurchase ?? "0",
-      "subtotal": int.parse(quantityController.text) *
+      "subtotal": double.parse(quantityController.text) *
           double.parse(InfoProduct.first.productPricePurchase.toString()),
       "type_sales": 3, // 1 = in 2 = out 3
       "user_id": id,
@@ -109,7 +110,6 @@ class Informationitemcontroller extends GetxController {
       Get.back();
       quantityController.clear();
       getProdact();
-      // showSnackbar("success".tr, "updateSuccess".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;
@@ -118,55 +118,36 @@ class Informationitemcontroller extends GetxController {
     update();
   }
 
-  // Future<void> printProductTicket({
-  //   required String name,
-  //   required String barcode,
-  //   required double price,
-  // }) async {
-  //   try {
-  //     bool? status = await PrintBluetoothThermal.connectionStatus;
-  //     if (status != true) {
-  //       showSnackbar("error".tr, "لم يتم الاتصال بالطابعة".tr, Colors.red);
-  //       return;
-  //     }
-
-  //     await PrintBluetoothThermal.writeBytes([27, 97, 1]);
-
-  //     await PrintBluetoothThermal.writeString(
-  //       printText: PrintTextSize(
-  //         size: 2,
-  //         text: "$name\n",
-  //       ),
-  //     );
-
-  //     List<int> barcodeSetup = [
-  //       29, 72, 2,
-  //       29, 119, 3,
-  //       29, 107, 73,
-  //       barcode.length,
-  //     ];
-
-  //     List<int> barcodeBytes = barcode.codeUnits;
-  //     await PrintBluetoothThermal.writeBytes(
-  //         [...barcodeSetup, ...barcodeBytes]);
-
-  //     await PrintBluetoothThermal.writeString(
-  //         printText: PrintTextSize(text: "\n", size: 1));
-
-  //     await PrintBluetoothThermal.writeString(
-  //       printText: PrintTextSize(
-  //         size: 2,
-  //         text: "${price.toStringAsFixed(2)} ${"DA".tr}\n\n",
-  //       ),
-  //     );
-
-  //     await PrintBluetoothThermal.writeBytes([10, 10, 10]);
-
-  //     print("✅ تم إرسال الطباعة بنجاح");
-  //   } catch (e) {
-  //     showSnackbar("error".tr, "حدث خطأ أثناء الطباعة".tr, Colors.red);
-  //   }
-  // }
+  void showWidthSelectionDialog({
+    required String name,
+    required String barcode,
+    required double price,
+  }) {
+    Get.defaultDialog(
+      title: "مقاس الورق".tr,
+      middleText: "يرجى اختيار مقاس ورق الطباعة (سيتم حفظه دائماً)".tr,
+      backgroundColor: Colors.white,
+      titleStyle: const TextStyle(fontWeight: FontWeight.bold),
+      cancel: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.blue),
+        onPressed: () {
+          myservices.sharedPreferences?.setInt("printer_width", 384);
+          Get.back();
+          printUniversalTicket(name: name, barcode: barcode, price: price);
+        },
+        child: Text("58mm".tr, style: const TextStyle(color: Colors.white)),
+      ),
+      confirm: ElevatedButton(
+        style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+        onPressed: () {
+          myservices.sharedPreferences?.setInt("printer_width", 576);
+          Get.back();
+          printUniversalTicket(name: name, barcode: barcode, price: price);
+        },
+        child: Text("80mm".tr, style: const TextStyle(color: Colors.white)),
+      ),
+    );
+  }
 
   Future<void> printUniversalTicket({
     required String name,
@@ -176,9 +157,12 @@ class Informationitemcontroller extends GetxController {
     if (isPrinting) return;
     isPrinting = true;
     update();
-
     try {
-      // التحقق من حالة البلوتوث
+      int printerWidth = 384; // Fixed width for labels
+
+      bool isLabelMode =
+          myservices.sharedPreferences?.getString("printer_mode") == "label";
+
       bool bluetoothEnabled = await PrintBluetoothThermal.bluetoothEnabled;
       if (!bluetoothEnabled) {
         showSnackbar(
@@ -186,65 +170,66 @@ class Informationitemcontroller extends GetxController {
         return;
       }
 
-      // الحصول على قائمة الطابعات المقترنة
-      final List<BluetoothInfo> pairedDevices =
-          await PrintBluetoothThermal.pairedBluetooths;
+      bool isConnected = await PrintBluetoothThermal.connectionStatus;
 
-      if (pairedDevices.isEmpty) {
-        showSnackbar("تنبيه".tr, "لا توجد طابعات مقترنة".tr, Colors.orange);
-        return;
-      }
+      if (!isConnected) {
+        final List<BluetoothInfo> pairedDevices =
+            await PrintBluetoothThermal.pairedBluetooths;
 
-      // اختيار الطابعة
-      BluetoothInfo? selectedPrinter = await Get.dialog<BluetoothInfo>(
-        AlertDialog(
-          backgroundColor: Colors.white,
-          title: Text("اختر الطابعة".tr, textAlign: TextAlign.center),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: ListView.builder(
-              shrinkWrap: true,
-              itemCount: pairedDevices.length,
-              itemBuilder: (context, index) {
-                final device = pairedDevices[index];
-                return ListTile(
-                  leading:
-                      const Icon(Icons.print, color: AppColor.backgroundcolor),
-                  title: Text(device.name),
-                  subtitle: Text(device.macAdress),
-                  onTap: () => Get.back(result: device),
-                );
-              },
+        if (pairedDevices.isEmpty) {
+          showSnackbar("تنبيه".tr, "لا توجد طابعات مقترنة".tr, Colors.orange);
+          isPrinting = false;
+          update();
+          return;
+        }
+
+        BluetoothInfo? selectedPrinter = await Get.dialog<BluetoothInfo>(
+          AlertDialog(
+            backgroundColor: Colors.white,
+            title: Text("اختر الطابعة".tr, textAlign: TextAlign.center),
+            content: SizedBox(
+              width: double.maxFinite,
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: pairedDevices.length,
+                itemBuilder: (context, index) {
+                  final device = pairedDevices[index];
+                  return ListTile(
+                    leading: const Icon(Icons.print,
+                        color: AppColor.backgroundcolor),
+                    title: Text(device.name),
+                    subtitle: Text(device.macAdress),
+                    onTap: () => Get.back(result: device),
+                  );
+                },
+              ),
             ),
           ),
-        ),
-      );
+        );
 
-      if (selectedPrinter == null) return;
+        if (selectedPrinter == null) {
+          isPrinting = false;
+          update();
+          return;
+        }
 
-      // التحقق من حالة الاتصال الحالية
-      bool isConnected = await PrintBluetoothThermal.connectionStatus;
-      print("Current connection status: $isConnected");
-
-      if (isConnected) {
-        // إذا كان هناك اتصال سابق، نغلقه أولاً لضمان الاتصال بالطابعة المختارة حديثاً
+        await PrintBluetoothThermal.isPermissionBluetoothGranted;
         await PrintBluetoothThermal.disconnect;
-        await Future.delayed(
-            const Duration(milliseconds: 500)); // تأخير بسيط لضمان الإغلاق
+        await Future.delayed(const Duration(seconds: 1));
+
+        bool connectionStatus = await PrintBluetoothThermal.connect(
+                macPrinterAddress: selectedPrinter.macAdress)
+            .timeout(const Duration(seconds: 10));
+
+        if (!connectionStatus) {
+          showSnackbar("خطأ".tr, "فشل الاتصال بالطابعة".tr, Colors.red);
+          isPrinting = false;
+          update();
+          return;
+        }
+
+        await Future.delayed(const Duration(seconds: 1));
       }
-
-      // الاتصال بالطابعة المختارة
-      bool connectionStatus = await PrintBluetoothThermal.connect(
-          macPrinterAddress: selectedPrinter.macAdress);
-
-      print("result status connect: $connectionStatus");
-
-      if (!connectionStatus) {
-        showSnackbar("خطأ".tr, "فشل الاتصال بالطابعة".tr, Colors.red);
-        return;
-      }
-
-      await WidgetsBinding.instance.endOfFrame;
 
       final boundary = ticketKey.currentContext?.findRenderObject()
           as RenderRepaintBoundary?;
@@ -254,7 +239,9 @@ class Informationitemcontroller extends GetxController {
         return;
       }
 
-      final image = await boundary.toImage(pixelRatio: 2.5);
+      final image = await boundary
+          .toImage(pixelRatio: 2.0)
+          .timeout(const Duration(seconds: 5));
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
       if (byteData == null) {
@@ -270,67 +257,309 @@ class Informationitemcontroller extends GetxController {
         return;
       }
 
-      decodedImage = img.copyResize(decodedImage, width: 384);
+      decodedImage = img.copyResize(decodedImage,
+          width: printerWidth, interpolation: img.Interpolation.nearest);
 
-      final bytes = _convertImageToRaster(decodedImage);
+      List<int> bytes;
+      if (isLabelMode) {
+        bytes = convertImageToTSPL(decodedImage);
+      } else {
+        bytes = _convertImageToEscPos(decodedImage);
+      }
 
+      // إرسال البيانات كدفعة واحدة (بدون تقسيم أو تأخير)
+      // تقسيم البيانات يسبب تأخير يخدع الطابعة ويجعلها تظن أن الأمر انتهى مما يسبب التشوه
       await PrintBluetoothThermal.writeBytes(bytes);
-      await PrintBluetoothThermal.writeBytes([10, 10, 10]);
 
-      showSnackbar("نجاح".tr, "تمت الطباعة بنجاح".tr, Colors.green);
-      print("✅ تم الطباعة بنجاح");
+      // showSnackbar("نجاح".tr, "تمت الطباعة بنجاح".tr, Colors.green);
     } catch (e) {
-      showSnackbar("error".tr, "$e", Colors.red);
+      showSnackbar("error".tr, "حدث خطأ أثناء الطباعة".tr, Colors.red);
     } finally {
       isPrinting = false;
       update();
     }
   }
 
-  List<int> _convertImageToRaster(img.Image image) {
-    List<int> bytes = [];
-    int width = image.width;
-    int height = image.height;
-    int widthBytes = (width + 7) ~/ 8;
-
-    bytes.addAll([
-      29,
-      118,
-      48,
-      0,
-      widthBytes % 256,
-      widthBytes ~/ 256,
-      height % 256,
-      height ~/ 256
-    ]);
-
-    for (int y = 0; y < height; y++) {
-      for (int x = 0; x < widthBytes; x++) {
-        int byte = 0;
-        for (int bit = 0; bit < 8; bit++) {
-          int px = x * 8 + bit;
-          if (px < width) {
-            var pixel = image.getPixel(px, y);
-            if (pixel.luminance < 0.5 * 255) {
-              byte |= (128 >> bit);
-            }
-          }
-        }
-        bytes.add(byte);
-      }
-    }
-    return bytes;
-  }
-
-  void onQuantityChanged(int value) {
-    quantityController.text = value.toString();
+  void onQuantityChanged(double value) {
+    update();
   }
 
   @override
   void onInit() {
     super.onInit();
     uuid = Get.arguments['uuid'];
-
     getProdact();
+  }
+
+  List<int> convertImageToTSPL(img.Image image) {
+    // 1. جعل العرض يقبل القسمة على 8 (Padding)
+    int width = (image.width / 8).ceil() * 8;
+    int widthBytes = width ~/ 8;
+
+    List<int> bytes = [];
+
+    // قراءة نوع الورق من الإعدادات
+    Myservices myServices = Get.find();
+    String paperType =
+        myServices.sharedPreferences?.getString("barcode_paper_type") ??
+            "receipt";
+
+    int contentHeight = image.height;
+    int topMargin = 0;
+
+    // نبحث عن أول وآخر سطر فيه محتوى (غير أبيض)
+    // لقص الفراغ الزائد - يعمل على كلا نوعي الورق
+    int lastContentRow = 0;
+    int firstContentRow = image.height;
+
+    for (int y = 0; y < image.height; y++) {
+      for (int x = 0; x < image.width; x++) {
+        var pixel = image.getPixel(x, y);
+        double val = 0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b;
+        if (val < 128) {
+          if (y < firstContentRow) firstContentRow = y;
+          if (y > lastContentRow) lastContentRow = y;
+          break;
+        }
+      }
+    }
+
+    if (lastContentRow > 0) {
+      // قص الصورة بحيث نأخذ المحتوى الفعلي فقط
+      topMargin = (firstContentRow).clamp(0, image.height);
+      contentHeight =
+          (lastContentRow - topMargin).clamp(1, image.height - topMargin);
+    }
+
+    int marginDots = 0;
+    if (paperType == "receipt") {
+      marginDots = 80;
+    }
+
+    if (paperType == "label") {
+      bytes.addAll(ascii.encode("SIZE 47.5 mm, 20 mm\r\n"));
+      bytes.addAll(ascii.encode("GAP 3 mm,0\r\n"));
+    } else {
+      // ورق فواتير: المقاس الفعلي للمحتوى + الهامش من الأعلى والأسفل
+      double totalHeightMm = (contentHeight + (marginDots * 2)) / 8;
+      bytes.addAll(ascii
+          .encode("SIZE 57 mm, ${totalHeightMm.toStringAsFixed(1)} mm\r\n"));
+      bytes.addAll(ascii.encode("GAP 0,0\r\n"));
+    }
+
+    bytes.addAll(ascii.encode("REFERENCE 0,0\r\n"));
+    // تسريع الطباعة للحد الأقصى مع الحفاظ على وضوح الحبر
+    bytes.addAll(ascii.encode("SPEED 4\r\n"));
+    bytes.addAll(ascii.encode("DENSITY 8\r\n"));
+    bytes.addAll(ascii.encode("DIRECTION 1\r\n"));
+    bytes.addAll(ascii.encode("CLS\r\n"));
+
+    // حساب الإزاحة لتوسيط الباركود أفقياً
+    // حساب عرض الورق الحقيقي بالنقاط حسب النوع
+    int paperWidthDots;
+
+    if (paperType == "label") {
+      // 40mm
+      paperWidthDots = 40 * 8;
+    } else {
+      // 58mm
+      paperWidthDots = 58 * 8;
+    }
+    int imageWidthDots = widthBytes * 8;
+    int offsetX = ((paperWidthDots - imageWidthDots) / 2)
+        .clamp(0, paperWidthDots)
+        .toInt();
+
+    int offsetY = 0;
+    if (paperType == "label") {
+      // الارتفاع الفعلي للتيكي هو 20 ملم = 160 نقطة (20 * 8)
+      int labelHeightDots = 20 * 8;
+      // توسيط المحتوى عمودياً تماماً داخل مساحة التيكي
+      offsetY = ((labelHeightDots - contentHeight) / 2)
+          .clamp(0, labelHeightDots)
+          .toInt();
+    } else if (paperType == "receipt") {
+      // في حالة الورق المتصل، نبدأ الطباعة بعد الهامش العلوي
+      offsetY = marginDots;
+    }
+
+    // أرسل BITMAP للمحتوى فقط
+    bytes.addAll(
+        ascii.encode("BITMAP $offsetX,$offsetY,$widthBytes,$contentHeight,0,"));
+
+    for (int y = topMargin; y < topMargin + contentHeight; y++) {
+      for (int x = 0; x < widthBytes; x++) {
+        int byte = 0;
+        for (int bit = 0; bit < 8; bit++) {
+          int px = x * 8 + bit;
+          if (px < image.width && y < image.height) {
+            var pixel = image.getPixel(px, y);
+            double val = (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b);
+            if (val > 128) {
+              byte |= (0x80 >> bit);
+            }
+          } else {
+            byte |= (0x80 >> bit);
+          }
+        }
+        bytes.add(byte);
+      }
+    }
+
+    bytes.addAll(ascii.encode("\r\nPRINT 1,1\r\n"));
+    return bytes;
+  }
+
+  List<int> _convertImageToEscPos(img.Image image) {
+    Myservices myServices = Get.find();
+
+    String paperType =
+        myServices.sharedPreferences?.getString("barcode_paper_type") ??
+            "receipt";
+
+    // =========================
+    // إعدادات الورق
+    // =========================
+
+    int paperWidthDots;
+    int topBottomMargin;
+
+    if (paperType == "label") {
+      paperWidthDots = 320;
+      topBottomMargin = 0;
+    } else {
+      paperWidthDots = 464;
+      topBottomMargin = 80;
+    }
+
+    // =========================
+    // قص الفراغ الأبيض
+    // =========================
+
+    int lastContentRow = 0;
+    int firstContentRow = image.height;
+
+    for (int y = 0; y < image.height; y++) {
+      for (int x = 0; x < image.width; x++) {
+        var pixel = image.getPixel(x, y);
+
+        double val = 0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b;
+
+        if (val < 128) {
+          if (y < firstContentRow) firstContentRow = y;
+          if (y > lastContentRow) lastContentRow = y;
+          break;
+        }
+      }
+    }
+
+    int topMargin = 0;
+    int contentHeight = image.height;
+
+    if (lastContentRow > 0) {
+      topMargin = firstContentRow.clamp(0, image.height);
+
+      contentHeight =
+          (lastContentRow - topMargin + 1).clamp(1, image.height - topMargin);
+    }
+
+    // =========================
+    // توسيط أفقي
+    // =========================
+
+    int offsetX =
+        ((paperWidthDots - image.width) / 2).clamp(0, paperWidthDots).toInt();
+
+    // ESC/POS alignment center
+    // إذا الصورة أصغر من الورق
+    // =========================
+
+    List<int> bytes = [];
+
+    // Initialize
+    bytes.addAll([0x1B, 0x40]);
+
+    // Center
+    bytes.addAll([0x1B, 0x61, 0x01]);
+
+    // هامش علوي للفواتير
+    if (topBottomMargin > 0) {
+      bytes.addAll([0x1B, 0x4A, topBottomMargin]);
+    }
+
+    // =========================
+    // إنشاء Canvas بعرض الورق
+    // =========================
+
+    img.Image centeredImage = img.Image(
+      width: paperWidthDots,
+      height: contentHeight,
+    );
+
+    img.fill(
+      centeredImage,
+      color: img.ColorRgb8(255, 255, 255),
+    );
+
+    img.compositeImage(
+      centeredImage,
+      image,
+      dstX: offsetX,
+      dstY: -topMargin,
+    );
+
+    int widthBytes = (centeredImage.width + 7) ~/ 8;
+
+    // =========================
+    // طباعة الصورة
+    // =========================
+
+    for (int y = 0; y < centeredImage.height; y += 24) {
+      bytes.addAll([0x1D, 0x76, 0x30, 0x00]);
+
+      bytes.add(widthBytes % 256);
+      bytes.add(widthBytes ~/ 256);
+
+      int chunkHeight =
+          (y + 24 > centeredImage.height) ? centeredImage.height - y : 24;
+
+      bytes.add(chunkHeight % 256);
+      bytes.add(chunkHeight ~/ 256);
+
+      for (int row = 0; row < chunkHeight; row++) {
+        for (int x = 0; x < widthBytes; x++) {
+          int byte = 0;
+
+          for (int bit = 0; bit < 8; bit++) {
+            int px = x * 8 + bit;
+
+            if (px < centeredImage.width && y + row < centeredImage.height) {
+              var pixel = centeredImage.getPixel(px, y + row);
+
+              double val = 0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b;
+
+              if (val < 128) {
+                byte |= (0x80 >> bit);
+              }
+            }
+          }
+
+          bytes.add(byte);
+        }
+      }
+    }
+
+    // هامش سفلي للفواتير
+    if (topBottomMargin > 0) {
+      bytes.addAll([0x1B, 0x4A, topBottomMargin]);
+    }
+
+    // Feed
+    bytes.addAll([0x1B, 0x64, 0x05]);
+
+    // Cut
+    bytes.addAll([0x1D, 0x56, 0x41, 0x00]);
+
+    return bytes;
   }
 }

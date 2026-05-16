@@ -1,12 +1,27 @@
-import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+
+import '../../../core/constant/Colorapp.dart';
+
+class DecimalTextInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+      TextEditingValue oldValue, TextEditingValue newValue) {
+    if (newValue.text == '') return newValue;
+    if (RegExp(r'^\d*\.?\d{0,3}$').hasMatch(newValue.text)) {
+      return newValue;
+    }
+    return oldValue;
+  }
+}
 
 class CustemQuantityDialog extends StatefulWidget {
   final TextEditingController controller;
   final Function() onConfirm;
   final Function() onCancel;
   final String title;
+  final bool isDecimal;
 
   const CustemQuantityDialog({
     super.key,
@@ -14,6 +29,7 @@ class CustemQuantityDialog extends StatefulWidget {
     required this.onConfirm,
     required this.onCancel,
     required this.title,
+    this.isDecimal = false,
   });
 
   @override
@@ -43,7 +59,12 @@ class _CustemQuantityDialogState extends State<CustemQuantityDialog> {
         key: _formKey,
         child: TextFormField(
           controller: widget.controller,
-          keyboardType: TextInputType.number,
+          keyboardType: widget.isDecimal
+              ? const TextInputType.numberWithOptions(decimal: true)
+              : TextInputType.number,
+          inputFormatters: widget.isDecimal
+              ? [DecimalTextInputFormatter()]
+              : [FilteringTextInputFormatter.digitsOnly],
           decoration: InputDecoration(
             labelText: "الكمية الجديدة",
             filled: true,
@@ -64,7 +85,8 @@ class _CustemQuantityDialogState extends State<CustemQuantityDialog> {
             if (value == null || value.isEmpty) {
               return "أدخل الكمية";
             }
-            if (int.tryParse(value) == null || int.parse(value) <= 0) {
+            if (double.tryParse(value) == null ||
+                double.parse(value) <= 0) {
               return "الكمية غير صالحة";
             }
             return null;

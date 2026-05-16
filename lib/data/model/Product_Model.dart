@@ -47,6 +47,7 @@ class Data {
   double? productPricePurchase;
   double? productPriceTotalPurchase;
   double? productPriceTotal;
+  int ? type;
   int? codepar;
   String? createdAt;
   String? updatedAt;
@@ -67,6 +68,7 @@ class Data {
     this.productPriceTotalPurchase,
     this.productPriceTotal,
     this.codepar,
+    this.type,
     this.createdAt,
     this.updatedAt,
   });
@@ -85,6 +87,7 @@ class Data {
     productPrice = _toDouble(json['product_price']);
     productPricePurchase = _toDouble(json['product_price_purchase']);
     productPriceTotalPurchase = _toDouble(json['product_price_total_purchase']);
+    type = json['type'];
     productPriceTotal = _toDouble(json['product_price_total']);    codepar = json['codepar'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
@@ -106,6 +109,7 @@ class Data {
     data['product_price_purchase'] = this.productPricePurchase;
     data['product_price_total_purchase'] = this.productPriceTotalPurchase;
     data['product_price_total'] = this.productPriceTotal;
+    data['type'] = this.type;
     data['codepar'] = this.codepar;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;

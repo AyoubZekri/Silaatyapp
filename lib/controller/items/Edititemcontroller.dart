@@ -3,18 +3,20 @@ import 'package:Silaaty/core/functions/uploudfiler.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 import 'package:Silaaty/data/model/Product_Model.dart' as Prodact;
 import 'package:flutter/material.dart';
+import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:get/get.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/services/Services.dart';
 import 'package:Silaaty/data/datasource/Remote/Categoris_data.dart';
 import 'package:Silaaty/data/model/Categoris_model.dart';
 
+import '../../core/constant/Colorapp.dart';
 import '../../core/functions/Snacpar.dart';
 
 class Edititemcontroller extends GetxController {
   File? file;
   String? imageUrl;
-  bool? isManualBarcode = false;
+  int? barcodeMode; // 0: Auto, 1: Manual, 2: Scan
   int? selectedCategoryId = 1;
   String? oldquantity;
   String? selectedCategory;
@@ -39,12 +41,16 @@ class Edititemcontroller extends GetxController {
   List<Catdata> categories = [];
   Statusrequest statusrequest = Statusrequest.none;
   String? uuid;
+  int? type;
 
   Myservices myservices = Get.find();
   late int? id = myservices.sharedPreferences?.getInt("id");
 
-  void toggleBarcodeMode(bool manual) {
-    isManualBarcode = manual;
+  void toggleBarcodeMode(int mode, BuildContext context) {
+    barcodeMode = mode;
+    if (mode == 2) {
+      scanBarcode(context);
+    }
     update();
   }
 
@@ -74,8 +80,8 @@ class Edititemcontroller extends GetxController {
   EditProduct() async {
     if (!formstate.currentState!.validate()) return;
 
-    final newQty = int.parse(quantityController.text);
-    final oldQty = int.parse(oldquantity!);
+    final newQty = double.tryParse(quantityController.text) ?? 0;
+    final oldQty = double.tryParse(oldquantity!) ?? 0.0;
 
     if (newQty < 0) {
       showSnackbar("error".tr, "كمية غير صالحة".tr, Colors.red);
@@ -122,7 +128,9 @@ class Edititemcontroller extends GetxController {
   }
 
   void calculateTotalPrice() {
-    final quantity = int.tryParse(quantityController.text) ?? 0;
+    final quantity = type == 2
+        ? double.tryParse(quantityController.text) ?? 0.0
+        : int.tryParse(quantityController.text) ?? 0;
     final price = double.tryParse(priseController.text) ?? 0.0;
     final pricePurchase = double.tryParse(pricePurchaseController.text) ?? 0.0;
 
@@ -133,8 +141,7 @@ class Edititemcontroller extends GetxController {
     });
   }
 
-  void onQuantityChanged(int value) {
-    quantityController.text = value.toString();
+  void onQuantityChanged(num value) {
     calculateTotalPrice();
   }
 
@@ -164,8 +171,69 @@ class Edititemcontroller extends GetxController {
     uuid = product.uuid;
     imageUrl = product.productImage ?? "";
     oldquantity = product.productQuantity ?? "";
+    type = product.type ?? 1;
 
     print("============================$selectedtypeuuId");
+  }
+
+  bool _isScanning = false;
+  void scanBarcode(BuildContext context) {
+    if (_isScanning) return;
+    _isScanning = true;
+
+    Get.dialog(
+      Dialog(
+        insetPadding: const EdgeInsets.all(20),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: SizedBox(
+          height: 400,
+          child: Column(
+            children: [
+              AppBar(
+                title: Text(
+                  "امسح الباركود".tr,
+                  style: const TextStyle(color: AppColor.backgroundcolor),
+                ),
+                automaticallyImplyLeading: false,
+                backgroundColor: AppColor.primarycolor,
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.close,
+                        color: AppColor.backgroundcolor),
+                    onPressed: () {
+                      _isScanning = false;
+                      Get.back();
+                    },
+                  ),
+                ],
+              ),
+              Expanded(
+                child: MobileScanner(
+                  onDetect: (capture) {
+                    final barcodes = capture.barcodes;
+                    if (barcodes.isNotEmpty && _isScanning) {
+                      final scannedCode = barcodes.first.rawValue;
+                      if (scannedCode != null) {
+                        _isScanning = false;
+                        barcodeController.text = scannedCode;
+                        update();
+                        if (Get.isDialogOpen!) {
+                          Get.back();
+                        }
+                      }
+                    }
+                  },
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ).then((_) {
+      _isScanning = false;
+    });
   }
 
   @override

@@ -63,6 +63,12 @@ class _SettengState extends State<Setteng> {
                         iconData: Icons.language),
                     Custemcartbutton(
                         ontap: () {
+                          contrller.showPrinterSettingsSheet(context);
+                        },
+                        Title: "Printer Settings".tr,
+                        iconData: Icons.print_outlined),
+                    Custemcartbutton(
+                        ontap: () {
                           contrller.GotoProfaile();
                         },
                         Title: "إعدادات المتجر".tr,

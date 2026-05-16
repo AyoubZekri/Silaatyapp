@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/class/Statusrequest.dart';
+import '../../core/constant/Colorapp.dart';
 import '../../core/constant/routes.dart';
 import '../../core/functions/Snacpar.dart';
 import '../../data/datasource/Remote/SaleData.dart';
@@ -40,11 +41,14 @@ class SaleController extends GetxController {
     update();
   }
 
-  void updateQuantity(String uuid, int newQuantity) {
+  void updateQuantity(String uuid, num newQuantity) {
     final index = selectedProducts.indexWhere((item) => item['uuid'] == uuid);
     if (index != -1) {
       var item = selectedProducts[index];
-      if (newQuantity <= int.parse(item["quantity_item"])) {
+      // Convert to num to safely compare
+      num maxQty = num.tryParse(item["quantity_item"].toString()) ?? 0;
+
+      if (newQuantity <= maxQty || type == 1) {
         item['quantity'] = newQuantity;
 
         final price = type == 1
@@ -99,6 +103,164 @@ class SaleController extends GetxController {
     );
   }
 
+  void showWeightDialog(Map<String, dynamic> productData,
+      {int? existingIndex}) {
+    TextEditingController weightController = TextEditingController();
+    TextEditingController totalPriceController = TextEditingController();
+    final unitPrice = type == 1
+        ? double.tryParse(productData['product_price_purchase'].toString()) ??
+            0.0
+        : double.tryParse(productData['product_price'].toString()) ?? 0.0;
+
+    Get.dialog(
+      AlertDialog(
+        backgroundColor: AppColor.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(15),
+        ),
+        title: Center(
+          child: Text(
+            "تعديل الوزن/السعر".tr,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              color: AppColor.backgroundcolor,
+            ),
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                productData['product_name'] ?? "",
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: weightController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                autofocus: true,
+                decoration: InputDecoration(
+                  labelText: "الوزن".tr,
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  suffixIcon: const Icon(
+                    Icons.scale_outlined,
+                    color: AppColor.backgroundcolor,
+                  ),
+                ),
+                onChanged: (val) {
+                  if (unitPrice > 0) {
+                    double? weight = double.tryParse(val);
+                    if (weight != null) {
+                      totalPriceController.text =
+                          (weight * unitPrice).toStringAsFixed(2);
+                    } else {
+                      totalPriceController.clear();
+                    }
+                  }
+                },
+              ),
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: totalPriceController,
+                keyboardType:
+                    const TextInputType.numberWithOptions(decimal: true),
+                decoration: InputDecoration(
+                  labelText: "السعر الإجمالي".tr,
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  suffixIcon: const Icon(
+                    Icons.payments_outlined,
+                    color: AppColor.backgroundcolor,
+                  ),
+                ),
+                onChanged: (val) {
+                  if (unitPrice > 0) {
+                    double? price = double.tryParse(val);
+                    if (price != null) {
+                      weightController.text =
+                          (price / unitPrice).toStringAsFixed(3);
+                    } else {
+                      weightController.clear();
+                    }
+                  }
+                },
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text("Cancel".tr),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              double? weight = double.tryParse(weightController.text);
+              if (weight != null && weight > 0) {
+                final uuid = productData['uuid'] ?? productData['id'] ?? '';
+                final name = productData['product_name'] ?? '';
+                final price = type == 1
+                    ? double.tryParse(
+                            productData['product_price_purchase'].toString()) ??
+                        0.0
+                    : double.tryParse(
+                            productData['product_price'].toString()) ??
+                        0.0;
+
+                if (existingIndex != null) {
+                  selectedProducts[existingIndex]['quantity'] += weight;
+                  selectedProducts[existingIndex]['total'] = (type == 1
+                          ? selectedProducts[existingIndex]['price_Purchase']
+                          : selectedProducts[existingIndex]['price']) *
+                      selectedProducts[existingIndex]['quantity'];
+                  selectedProducts[existingIndex] = Map<String, dynamic>.from(
+                      selectedProducts[existingIndex]);
+                } else {
+                  selectedProducts.add({
+                    "uuid": uuid,
+                    "name": name,
+                    type == 1 ? "price_Purchase" : "price": price,
+                    "quantity": weight,
+                    "total": price * weight,
+                    "type_item": 2,
+                    "quantity_item": productData['product_quantity'],
+                  });
+                }
+                _calculateTotals();
+                update();
+                Get.back();
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColor.backgroundcolor,
+            ),
+            child: Text(
+              "Add".tr,
+              style: const TextStyle(color: AppColor.white),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   double get totalPrice => selectedProducts.fold(
         0.0,
         (sum, p) =>
@@ -147,9 +309,19 @@ class SaleController extends GetxController {
     await Future.delayed(const Duration(milliseconds: 200));
     update();
     String cleaned = codepar.replaceAll(RegExp(r'[^\d]'), '');
+    print(cleaned);
+    double? scaleWeight;
 
-    if (cleaned.length <= 9) {
-      cleaned = cleaned.substring(1);
+    // Logic for Scale Barcode (EAN-13 starting with 2)
+    // Common format: 2 (1 digit) + Product Code (5 digits) + Weight/Price (5 digits) + Check (1 digit)
+    if (cleaned.length == 13 && cleaned.startsWith('2')) {
+      // searchCode =
+      //     cleaned.substring(1, 7); // Extract product code (e.g. 5 or 6 digits)
+      String weightPart = cleaned.substring(7, 12); // Extract weight
+      scaleWeight = double.tryParse(weightPart) != null
+          ? double.parse(weightPart) / 1000.0 // Assuming grams to kg
+          : null;
+      print("⚖️  Weight $scaleWeight");
     }
 
     Map<String, Object?> data = {
@@ -162,33 +334,46 @@ class SaleController extends GetxController {
     print("🔍 Search Response: $result");
 
     if (result.isNotEmpty) {
-      Map<String, dynamic> product;
+      Map<String, dynamic> productData;
+      productData = Map<String, dynamic>.from(result.first);
 
-      product = Map<String, dynamic>.from(result.first);
-
-      final uuid = product['uuid'] ?? product['id'] ?? '';
-      final name = product['product_name'] ?? '';
+      final uuid = productData['uuid'] ?? productData['id'] ?? '';
+      final name = productData['product_name'] ?? '';
       final price = type == 1
-          ? double.tryParse(product['product_price_purchase'].toString()) ?? 0.0
-          : double.tryParse(product['product_price'].toString()) ?? 0.0;
+          ? double.tryParse(productData['product_price_purchase'].toString()) ??
+              0.0
+          : double.tryParse(productData['product_price'].toString()) ?? 0.0;
+      final typeItem = productData['type'];
 
       final existingIndex =
           selectedProducts.indexWhere((item) => item['uuid'] == uuid);
 
+      if (typeItem == 2 && scaleWeight == null) {
+        showWeightDialog(productData,
+            existingIndex: existingIndex != -1 ? existingIndex : null);
+        return;
+      }
+
+      double addedQuantity =
+          (typeItem == 2 && scaleWeight != null) ? scaleWeight : 1.0;
+
       if (existingIndex != -1) {
-        selectedProducts[existingIndex]['quantity'] += 1;
-        selectedProducts[existingIndex]['total'] =
-            (type == 1
+        selectedProducts[existingIndex]['quantity'] += addedQuantity;
+        selectedProducts[existingIndex]['total'] = (type == 1
                 ? selectedProducts[existingIndex]['price_Purchase']
                 : selectedProducts[existingIndex]['price']) *
             selectedProducts[existingIndex]['quantity'];
+        selectedProducts[existingIndex] =
+            Map<String, dynamic>.from(selectedProducts[existingIndex]);
       } else {
         selectedProducts.add({
           "uuid": uuid,
           "name": name,
           type == 1 ? "price_Purchase" : "price": price,
-          "quantity": 1,
-          "total": price,
+          "quantity": addedQuantity,
+          "total": price * addedQuantity,
+          "type_item": typeItem,
+          "quantity_item": productData['product_quantity'],
         });
       }
 
