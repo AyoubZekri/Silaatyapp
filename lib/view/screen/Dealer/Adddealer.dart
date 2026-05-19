@@ -71,14 +71,15 @@ class _AddDealerState extends State<AddDealer> {
                           text: "Add".tr,
                           onPressed: () {
                             if (!validInputsnak(controller.nameController.text,
-                                1, 10, "Name".tr)) {
+                                1, 50, "Name".tr)) {
                               return;
                             }
                             if (!validInputsnak(
                                 controller.familyNameController.text,
-                                1,
-                                10,
-                                "FrsetName".tr)) {
+                                0,
+                                50,
+                                "FrsetName".tr,
+                                empty: false)) {
                               return;
                             }
                             if (!validInputsnak(controller.phoneController.text,

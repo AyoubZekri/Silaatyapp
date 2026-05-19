@@ -1094,6 +1094,9 @@ class Shwoinvoicecontroller extends GetxController {
   }
 
   List<int> _convertImageToEscPos(img.Image image) {
+    // =========================
+    // قص الفراغ الأبيض الزائد
+    // =========================
     int lastContentRow = 0;
     int firstContentRow = image.height;
 
@@ -1114,7 +1117,7 @@ class Shwoinvoicecontroller extends GetxController {
     if (lastContentRow > 0) {
       topMargin = (firstContentRow).clamp(0, image.height);
       contentHeight =
-          (lastContentRow - topMargin).clamp(1, image.height - topMargin);
+          (lastContentRow - topMargin + 1).clamp(1, image.height - topMargin);
     }
 
     int topPadding = 50;
@@ -1124,16 +1127,45 @@ class Shwoinvoicecontroller extends GetxController {
     int settingsWidth =
         myServices.sharedPreferences?.getInt("printer_width") ?? 460;
 
+    // حساب عرض الورق الفيزيائي بناءً على الإعدادات (460 لـ 58مم، 640 لـ 80مم)
+    int physicalWidthDots = (settingsWidth <= 460) ? 460 : 640;
+
+    // =========================
+    // إنشاء Canvas بعرض الورق وتوسيط الصورة فيه
+    // =========================
+    
+    // حساب الإزاحة لتوسيط الفاتورة أفقياً داخل الكانفاس
+    int offsetX = ((physicalWidthDots - image.width) / 2)
+        .clamp(0, physicalWidthDots)
+        .toInt();
+
+    img.Image centeredImage = img.Image(
+      width: physicalWidthDots,
+      height: contentHeight,
+    );
+
+    // ملء الخلفية باللون الأبيض
+    img.fill(
+      centeredImage,
+      color: img.ColorRgb8(255, 255, 255),
+    );
+
+    // لصق الفاتورة الأصلية في منتصف الـ Canvas
+    img.compositeImage(
+      centeredImage,
+      image,
+      dstX: offsetX,
+      dstY: -topMargin, // نلغي الهامش العلوي الزائد هنا
+    );
+
+    int widthBytes = (centeredImage.width + 7) ~/ 8;
+
+    // =========================
+    // تحويل الـ Canvas إلى أوامر ESC/POS
+    // =========================
+
     List<int> bytes = [];
     bytes.addAll([0x1B, 0x40]); // Initialize
-
-    // حساب عرض الورق الفيزيائي بناءً على الإعدادات (460 لـ 58مم، 640 لـ 80مم)
-    int physicalWidth = (settingsWidth <= 460) ? 460 : 640;
-    // حساب الهامش الأيسر للتوسيط باستخدام أمر GS L
-    int marginDots = ((physicalWidth - image.width) / 2).toInt();
-    if (marginDots < 0) marginDots = 0;
-
-    bytes.addAll([0x1D, 0x4C, marginDots % 256, marginDots ~/ 256]);
     bytes.addAll([0x1B, 0x61, 0x01]); // Center alignment
 
     // إضافة الهامش العلوي للفاتورة
@@ -1141,17 +1173,15 @@ class Shwoinvoicecontroller extends GetxController {
       bytes.addAll([0x1B, 0x4A, topPadding]);
     }
 
-    // تأكد من أن العرض من مضاعفات 8 لضمان سلامة بيانات الـ Raster
-    int width = (image.width / 8).ceil() * 8;
-    int widthBytes = width ~/ 8;
-
-    for (int y = topMargin; y < topMargin + contentHeight; y += 24) {
+    for (int y = 0; y < centeredImage.height; y += 24) {
       bytes.addAll([0x1D, 0x76, 0x30, 0x00]);
       bytes.add(widthBytes % 256);
       bytes.add(widthBytes ~/ 256);
-      int chunkHeight = (y + 24 > topMargin + contentHeight)
-          ? (topMargin + contentHeight) - y
+      
+      int chunkHeight = (y + 24 > centeredImage.height)
+          ? centeredImage.height - y
           : 24;
+          
       bytes.add(chunkHeight % 256);
       bytes.add(chunkHeight ~/ 256);
 
@@ -1160,10 +1190,11 @@ class Shwoinvoicecontroller extends GetxController {
           int byte = 0;
           for (int bit = 0; bit < 8; bit++) {
             int px = x * 8 + bit;
-            if (px < image.width && y + row < image.height) {
-              var pixel = image.getPixel(px, y + row);
-              if (0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b < 128) {
-                byte |= (128 >> bit);
+            if (px < centeredImage.width && y + row < centeredImage.height) {
+              var pixel = centeredImage.getPixel(px, y + row);
+              double val = 0.299 * pixel.r + 0.587 * pixel.g + 0.114 * pixel.b;
+              if (val < 128) {
+                byte |= (0x80 >> bit);
               }
             }
           }
@@ -1181,4 +1212,5 @@ class Shwoinvoicecontroller extends GetxController {
     bytes.addAll([0x1D, 0x56, 0x41, 0x00]); // Cut
     return bytes;
   }
+
 }

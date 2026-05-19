@@ -30,8 +30,8 @@ validInput(String val, int max, int min, String type) {
   }
 }
 
-bool validInputsnak(String val, int min, int max, String type) {
-  if (val.isEmpty) {
+bool validInputsnak(String val, int min, int max, String type, {bool empty = true}) {
+  if (val.isEmpty && empty) {
     showSnackbar("error".tr, "لا يمكن أن يكون الحقل فارغًا".tr, Colors.red);
     return false;
   }

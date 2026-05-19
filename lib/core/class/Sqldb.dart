@@ -176,7 +176,7 @@ class SQLDB {
       uuid TEXT UNIQUE,
       user_id INTEGER NOT NULL,
       name TEXT NOT NULL,
-      family_name TEXT NOT NULL,
+      family_name TEXT,
       phone_number TEXT NOT NULL,
       transactions INTEGER NOT NULL,
       is_delete INTEGER NOT NULL DEFAULT 0,

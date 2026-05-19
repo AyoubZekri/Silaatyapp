@@ -425,10 +425,10 @@ class Informationitemcontroller extends GetxController {
     int topBottomMargin;
 
     if (paperType == "label") {
-      paperWidthDots = 320;
+      paperWidthDots = 320; // 40mm
       topBottomMargin = 0;
     } else {
-      paperWidthDots = 464;
+      paperWidthDots = 464; // 58mm
       topBottomMargin = 80;
     }
 
@@ -464,25 +464,21 @@ class Informationitemcontroller extends GetxController {
     }
 
     // =========================
-    // توسيط أفقي
+    // توسيط أفقي (داخل الكانفاس برمجياً)
     // =========================
 
     int offsetX =
         ((paperWidthDots - image.width) / 2).clamp(0, paperWidthDots).toInt();
-
-    // ESC/POS alignment center
-    // إذا الصورة أصغر من الورق
-    // =========================
 
     List<int> bytes = [];
 
     // Initialize
     bytes.addAll([0x1B, 0x40]);
 
-    // Center
+    // Center alignment (ESC a 1)
     bytes.addAll([0x1B, 0x61, 0x01]);
 
-    // هامش علوي للفواتير
+    // هامش علوي للفواتير (لورق الاستلام فقط)
     if (topBottomMargin > 0) {
       bytes.addAll([0x1B, 0x4A, topBottomMargin]);
     }
@@ -496,16 +492,18 @@ class Informationitemcontroller extends GetxController {
       height: contentHeight,
     );
 
+    // تلوين الخلفية باللون الأبيض تماماً
     img.fill(
       centeredImage,
       color: img.ColorRgb8(255, 255, 255),
     );
 
+    // لصق الباركود في منتصف الورقة برمجياً
     img.compositeImage(
       centeredImage,
       image,
       dstX: offsetX,
-      dstY: -topMargin,
+      dstY: -topMargin, // إزالة الهامش العلوي الزائد
     );
 
     int widthBytes = (centeredImage.width + 7) ~/ 8;
@@ -549,7 +547,7 @@ class Informationitemcontroller extends GetxController {
       }
     }
 
-    // هامش سفلي للفواتير
+    // هامش سفلي للورق المتصل (لورق الاستلام فقط)
     if (topBottomMargin > 0) {
       bytes.addAll([0x1B, 0x4A, topBottomMargin]);
     }
