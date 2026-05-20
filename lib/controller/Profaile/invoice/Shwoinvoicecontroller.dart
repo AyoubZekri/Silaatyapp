@@ -650,6 +650,7 @@ class Shwoinvoicecontroller extends GetxController {
           await screenshotController.captureFromWidget(
         receiptWidget,
         delay: Duration.zero,
+        pixelRatio: 3.0,
       );
 
       if (imageBytes != null) {
@@ -659,7 +660,7 @@ class Shwoinvoicecontroller extends GetxController {
           decodedImage = img.copyResize(
             decodedImage,
             width: printerWidth,
-            interpolation: img.Interpolation.nearest,
+            interpolation: img.Interpolation.cubic,
           );
 
           List<int> bytes;
@@ -695,9 +696,9 @@ class Shwoinvoicecontroller extends GetxController {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("$label: ", style: TextStyle(fontSize: 14)),
+          Text("$label: ", style: const TextStyle(fontSize: 14, fontFamily: 'Cairo', color: Colors.black)),
           Text(value,
-              textAlign: TextAlign.right, style: const TextStyle(fontSize: 14)),
+              textAlign: TextAlign.right, style: const TextStyle(fontSize: 14, fontFamily: 'Cairo', color: Colors.black)),
         ],
       ),
     );
@@ -805,24 +806,24 @@ class Shwoinvoicecontroller extends GetxController {
                         Text(
                           address,
                           style: const TextStyle(
-                              fontSize: 16, color: Colors.black),
+                              fontSize: 16, color: Colors.black, fontFamily: 'Cairo'),
                           textAlign: TextAlign.center,
                         ),
                         if (phoneNumber.isNotEmpty)
                           Text(
                             phoneNumber,
                             style: const TextStyle(
-                                fontSize: 15, color: Colors.black),
+                                fontSize: 15, color: Colors.black, fontFamily: 'Cairo'),
                           ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 10),
-                  const SizedBox(height: 10),
-                  Text("-" * (width ~/ 5).toInt(),
-                      maxLines: 1,
-                      style: const TextStyle(
-                          color: Colors.black, overflow: TextOverflow.clip)),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    height: 1.5,
+                    color: Colors.black,
+                  ),
                   const SizedBox(height: 10),
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -830,7 +831,7 @@ class Shwoinvoicecontroller extends GetxController {
                       Text(
                         "${'التاريخ'.tr}: ${invoices.date!.substring(0, 10)}",
                         style:
-                            const TextStyle(fontSize: 14, color: Colors.black),
+                            const TextStyle(fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
                       ),
                       const SizedBox(width: 5),
                       Text(
@@ -838,7 +839,7 @@ class Shwoinvoicecontroller extends GetxController {
                             ? invoices.date!.substring(11, 19)
                             : "",
                         style:
-                            const TextStyle(fontSize: 14, color: Colors.black),
+                            const TextStyle(fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
                       ),
                     ],
                   ),
@@ -849,23 +850,24 @@ class Shwoinvoicecontroller extends GetxController {
                       Text(
                         "${'رقم الفتورة'.tr}: ${invoices.number}",
                         style:
-                            const TextStyle(fontSize: 14, color: Colors.black),
+                            const TextStyle(fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
                       ),
                       const SizedBox(height: 5),
                       Text(
                         "${'الزبون'.tr}: $safeCustomerName",
                         style: const TextStyle(
-                            fontSize: 14, color: Color.fromRGBO(0, 0, 0, 1)),
+                            fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
                         textAlign: TextAlign.start,
                         overflow: TextOverflow.ellipsis,
                       ),
                     ],
                   ),
                   const SizedBox(height: 10),
-                  Text("-" * (width ~/ 5).toInt(),
-                      maxLines: 1,
-                      style: const TextStyle(
-                          color: Colors.black, overflow: TextOverflow.clip)),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    height: 1.5,
+                    color: Colors.black,
+                  ),
                   const SizedBox(height: 10),
                   Row(
                     children: [
@@ -873,33 +875,34 @@ class Shwoinvoicecontroller extends GetxController {
                           flex: 2,
                           child: Text("المنتج".tr,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13))),
+                                  fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
                       Expanded(
                           flex: 1,
                           child: Text('QTY'.tr,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13))),
+                                  fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
                       Expanded(
                           flex: 2,
                           child: Text("سعر الوحدة".tr,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13),
+                                  fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo', color: Colors.black),
                               textAlign:
                                   isArabic ? TextAlign.left : TextAlign.right)),
                       Expanded(
                           flex: 2,
                           child: Text('السعر الإجمالي'.tr,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13),
+                                  fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo', color: Colors.black),
                               textAlign:
                                   isArabic ? TextAlign.left : TextAlign.right)),
                     ],
                   ),
                   const SizedBox(height: 5),
-                  Text("-" * (width ~/ 5).toInt(),
-                      maxLines: 1,
-                      style: const TextStyle(
-                          color: Colors.black, overflow: TextOverflow.clip)),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    height: 1.5,
+                    color: Colors.black,
+                  ),
                   const SizedBox(height: 10),
                   ...productsList.map((p) => Padding(
                         padding: const EdgeInsets.symmetric(vertical: 4),
@@ -909,33 +912,34 @@ class Shwoinvoicecontroller extends GetxController {
                             Expanded(
                                 flex: 2,
                                 child: Text(p.productName,
-                                    style: const TextStyle(fontSize: 13))),
+                                    style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
                             Expanded(
                                 flex: 1,
                                 child: Text("${p.quantity}",
-                                    style: const TextStyle(fontSize: 13))),
+                                    style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
                             Expanded(
                                 flex: 2,
                                 child: Text("${p.unitPrice.toStringAsFixed(2)}",
                                     textAlign: isArabic
                                         ? TextAlign.left
                                         : TextAlign.right,
-                                    style: const TextStyle(fontSize: 13))),
+                                    style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
                             Expanded(
                                 flex: 2,
                                 child: Text("${p.subtotal.toStringAsFixed(2)}",
                                     textAlign: isArabic
                                         ? TextAlign.left
                                         : TextAlign.right,
-                                    style: const TextStyle(fontSize: 13))),
+                                    style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
                           ],
                         ),
                       )),
                   const SizedBox(height: 15),
-                  Text("-" * (width ~/ 5).toInt(),
-                      maxLines: 1,
-                      style: const TextStyle(
-                          color: Colors.black, overflow: TextOverflow.clip)),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    height: 1.5,
+                    color: Colors.black,
+                  ),
                   const SizedBox(height: 10),
                   _buildAmountRow(
                       "المجموع الفرعي".tr, "${invoices.totalSales} ${'DA'.tr}"),
@@ -945,10 +949,11 @@ class Shwoinvoicecontroller extends GetxController {
                   _buildAmountRow("المدفوع".tr,
                       "${double.tryParse(productSale?.paymentprice.toString() ?? "0") ?? 0} ${'DA'.tr}"),
                   const SizedBox(height: 5),
-                  Text("-" * (width ~/ 5).toInt(),
-                      maxLines: 1,
-                      style: const TextStyle(
-                          color: Colors.black, overflow: TextOverflow.clip)),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    height: 1.5,
+                    color: Colors.black,
+                  ),
                   const SizedBox(height: 5),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -956,20 +961,21 @@ class Shwoinvoicecontroller extends GetxController {
                       Text(
                         "الباقي".tr,
                         style: const TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold),
+                            fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: Colors.black),
                       ),
                       Text(
                         "${getRemainingAmount().toStringAsFixed(2)} ${'DA'.tr}",
                         style: const TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold),
+                            fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: Colors.black),
                       ),
                     ],
                   ),
                   const SizedBox(height: 15),
-                  Text("-" * (width ~/ 5).toInt(),
-                      maxLines: 1,
-                      style: const TextStyle(
-                          color: Colors.black, overflow: TextOverflow.clip)),
+                  Container(
+                    margin: const EdgeInsets.symmetric(vertical: 8),
+                    height: 1.5,
+                    color: Colors.black,
+                  ),
                   const SizedBox(height: 15),
                   Center(
                     child: Column(
@@ -977,7 +983,7 @@ class Shwoinvoicecontroller extends GetxController {
                         Text(
                           "*** ${'THANK YOU'.tr} ***",
                           style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold),
+                              fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: Colors.black),
                         ),
                         const SizedBox(height: 20),
                         if (invoices.uuid != null)
@@ -1127,8 +1133,8 @@ class Shwoinvoicecontroller extends GetxController {
     int settingsWidth =
         myServices.sharedPreferences?.getInt("printer_width") ?? 460;
 
-    // حساب عرض الورق الفيزيائي بناءً على الإعدادات (460 لـ 58مم، 640 لـ 80مم)
-    int physicalWidthDots = (settingsWidth <= 460) ? 460 : 640;
+    // حساب عرض الورق الفيزيائي بناءً على إعدادات المستخدم مباشرة لتفادي الإزاحة
+    int physicalWidthDots = settingsWidth;
 
     // =========================
     // إنشاء Canvas بعرض الورق وتوسيط الصورة فيه

@@ -281,7 +281,7 @@ class _InformationitemState extends State<Informationitem> {
     return Container(
       width: 380,
       height: 115,
-      padding: EdgeInsets.symmetric(horizontal: 20),
+      padding: const EdgeInsets.symmetric(horizontal: 20),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(border ? 15 : 0),
@@ -299,7 +299,8 @@ class _InformationitemState extends State<Informationitem> {
               style: const TextStyle(
                   fontSize: 17,
                   fontWeight: FontWeight.w700,
-                  color: Colors.black),
+                  color: Colors.black,
+                  fontFamily: 'Cairo'),
               textAlign: TextAlign.center,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
@@ -312,9 +313,14 @@ class _InformationitemState extends State<Informationitem> {
             width: 180,
             height: 45,
             drawText: true,
+            style: const TextStyle(
+              fontSize: 12,
+              fontFamily: 'Cairo',
+              color: Colors.black,
+            ),
           ),
           Text("${price.toStringAsFixed(2)} ${"DA".tr}",
-              style: const TextStyle(fontSize: 20, color: Colors.black)),
+              style: const TextStyle(fontSize: 20, color: Colors.black, fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
         ],
       ),
     );

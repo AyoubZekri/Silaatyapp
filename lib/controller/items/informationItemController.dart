@@ -240,7 +240,7 @@ class Informationitemcontroller extends GetxController {
       }
 
       final image = await boundary
-          .toImage(pixelRatio: 2.0)
+          .toImage(pixelRatio: 3.0)
           .timeout(const Duration(seconds: 5));
       final byteData = await image.toByteData(format: ui.ImageByteFormat.png);
 
@@ -258,7 +258,7 @@ class Informationitemcontroller extends GetxController {
       }
 
       decodedImage = img.copyResize(decodedImage,
-          width: printerWidth, interpolation: img.Interpolation.nearest);
+          width: printerWidth, interpolation: img.Interpolation.cubic);
 
       List<int> bytes;
       if (isLabelMode) {
