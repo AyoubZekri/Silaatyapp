@@ -66,6 +66,10 @@ class Applink {
   static const String deleteNotification = "$server/Notification/delete";
 
 
+  static const String getpay = "$server/payments/invoice";
 
+
+  static const String chargilycreate = "$server/payments/chargily/create";
+  // static const String getpay = "$server/payments/invoice";
 
 }

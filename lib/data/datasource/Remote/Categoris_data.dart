@@ -17,7 +17,6 @@ class CategorisData {
 
   CategorisData(this.crud);
 
-  /// ✅ عرض البيانات من SQLite
   viewdata() async {
     try {
       if (id == null) {

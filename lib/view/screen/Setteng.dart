@@ -57,6 +57,12 @@ class _SettengState extends State<Setteng> {
                         iconData: Icons.person),
                     Custemcartbutton(
                         ontap: () {
+                          contrller.gotoSubscriptionPay();
+                        },
+                        Title: "دفع الاشتراك / التجديد".tr,
+                        iconData: Icons.payment_outlined),
+                    Custemcartbutton(
+                        ontap: () {
                           contrller.showLanguageSheet(context);
                         },
                         Title: "Langugs".tr,

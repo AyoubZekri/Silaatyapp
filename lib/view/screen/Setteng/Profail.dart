@@ -86,7 +86,7 @@ class _ProfailState extends State<Profail> {
                           child: Column(
                             children: [
                               Customditails(
-                                Title: "الإشتراك".tr,
+                                Title: "التفعيل".tr,
                                 body: controller.Supscription == 2
                                     ? "Free".tr
                                     : "Paid".tr,

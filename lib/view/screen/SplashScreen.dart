@@ -72,25 +72,53 @@ class _SplashScreenState extends State<SplashScreen>
 
     if (token != null && token.isNotEmpty) {
       String? experimentDateString =
-          myServices.sharedPreferences!.getString("date_experiment") ?? "";
-      print("=========================$experimentDateString");
-      int? status = myServices.sharedPreferences!.getInt("Status");
-      if (experimentDateString.isNotEmpty) {
-        DateTime experimentDate = DateTime.parse(experimentDateString);
+          myServices.sharedPreferences?.getString("date_experiment");
 
-        DateTime currentDate = DateTime.now();
-        DateTime today =
-            DateTime(currentDate.year, currentDate.month, currentDate.day);
+      int status = myServices.sharedPreferences?.getInt("Status") ?? 0;
 
-        if ((today.isAfter(experimentDate) && status! <= 2 ||
-            today.isAtSameMomentAs(experimentDate) && status! <= 2)) {
-          Get.offAllNamed(Approutes.subscriptionExpiredPage);
-        } else {
-          Get.offAllNamed(Approutes.HomeScreen);
-        }
-      } else {
+      // الحالة 4 يدخل مباشرة
+      if (status == 4) {
         Get.offAllNamed(Approutes.HomeScreen);
+
+        return;
       }
+
+      // الحالات 2 و 3 لازم تاريخ صالح
+      if (status == 2 || status == 3) {
+        if (experimentDateString != null && experimentDateString.isNotEmpty) {
+          DateTime experimentDate = DateTime.parse(experimentDateString);
+
+          DateTime now = DateTime.now();
+
+          DateTime today = DateTime(now.year, now.month, now.day);
+
+          DateTime expireDate = DateTime(
+            experimentDate.year,
+            experimentDate.month,
+            experimentDate.day,
+          );
+
+          bool isValid = today.isBefore(expireDate);
+
+          if (isValid) {
+            Get.offAllNamed(Approutes.HomeScreen);
+          } else {
+            Get.offAllNamed(
+              Approutes.activationExpiredPage,
+            );
+          }
+        } else {
+          Get.offAllNamed(
+            Approutes.activationExpiredPage,
+          );
+        }
+
+        return;
+      }
+
+      Get.offAllNamed(
+        Approutes.activationExpiredPage,
+      );
     } else {
       Get.offAllNamed(Approutes.Login);
     }

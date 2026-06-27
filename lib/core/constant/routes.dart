@@ -75,6 +75,6 @@ class Approutes {
 
 
 
-
+  static const String subscriptionPay = "/subscriptionPay";
 
 }

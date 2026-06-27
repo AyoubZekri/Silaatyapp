@@ -81,6 +81,7 @@ dependencies:
   auto_size_text: ^3.0.0
   flutter_image_compress: ^2.4.0
   pos_universal_printer: ^0.2.10
+  webview_flutter: ^4.7.0
 
 
 
