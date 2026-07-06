@@ -57,6 +57,11 @@ class Profailedata extends StatelessWidget {
                     child: Column(
                       children: [
                         Custemcartbutton(
+                          ontap: () => controller.GotoSellers(),
+                          Title: 'إدارة البائعين'.tr,
+                          iconData: Icons.manage_accounts_outlined,
+                        ),
+                        Custemcartbutton(
                           ontap: () => controller.GotoStok(),
                           Title: 'المخزون'.tr,
                           iconData: Icons.inventory_2_outlined,

@@ -16,6 +16,7 @@ import '../../data/model/Product_Model.dart';
 
 class Itemscontroller extends GetxController {
   int type = 0;
+  int saleType = 1;
   CategorisData categorisData = CategorisData(Get.find());
   ProdactData prodactData = ProdactData(Get.find());
   Myservices myservices = Get.find();
@@ -101,7 +102,7 @@ class Itemscontroller extends GetxController {
             return {
               "uuid": item.uuid,
               "name": item.productName,
-              "price": item.productPrice,
+              "price": getSalePrice(item),
               "price_Purchase": item.productPricePurchase,
               "quantity": quantities[uuid] ?? 1,
               "quantity_item": item.productQuantity,
@@ -118,6 +119,24 @@ class Itemscontroller extends GetxController {
     final selected = getSelectedProducts();
     print("==============================$selected");
     Get.back(result: selected);
+  }
+
+  double getSalePrice(Prodact.Data item) {
+    if (type == 1) {
+      return item.productPricePurchase?.toDouble() ?? 0.0;
+    }
+
+    double retailPrice = item.productPrice?.toDouble() ?? 0.0;
+
+    if (saleType == 3) {
+      double wholesalePrice = item.productPriceWholesale?.toDouble() ?? 0.0;
+      return wholesalePrice > 0 ? wholesalePrice : retailPrice;
+    } else if (saleType == 2) {
+      double halfWholesalePrice = item.productPriceHalfWholesale?.toDouble() ?? 0.0;
+      return halfWholesalePrice > 0 ? halfWholesalePrice : retailPrice;
+    }
+
+    return retailPrice;
   }
 
   getCategoris() async {
@@ -307,7 +326,8 @@ class Itemscontroller extends GetxController {
       final List<Map<String, dynamic>> selected =
           List<Map<String, dynamic>>.from(args['selectedProducts']);
       type = args["type"] ?? 0;
-      print("=============================type$type");
+      saleType = args["sale_type"] ?? 1;
+      print("=============================type$type, saleType$saleType");
       for (var p in selected) {
         final uuid = p['uuid'];
         final qty = p['quantity'] ?? 1;

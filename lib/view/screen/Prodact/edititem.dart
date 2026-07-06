@@ -8,6 +8,7 @@ import 'package:Silaaty/view/widget/addItem/CustemTextFromQuntety.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 import '../../../core/functions/Snacpar.dart';
 import '../../../core/functions/valiedinput.dart';
@@ -46,9 +47,7 @@ class _EdititemState extends State<Edititem> {
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
           child: Form(
             key: controller.formstate,
-            child: HandlingviewAuth(
-              statusrequest: controller.statusrequest,
-              widget: ListView(
+            child: ListView(
                 children: [
                   Column(
                     children: [
@@ -244,8 +243,24 @@ class _EdititemState extends State<Edititem> {
                       Custemtextfromfild(
                         MyController: controller.priseController,
                         keyboardType: TextInputType.number,
-                        hintText: "Selling Price".tr,
-                        label: "Selling Prise".tr,
+                        hintText: "سعر التجزئة".tr,
+                        label: "سعر التجزئة".tr,
+                        iconData: Icons.attach_money,
+                        enabled: true,
+                      ),
+                      Custemtextfromfild(
+                        MyController: controller.priseHalfWholesaleController,
+                        keyboardType: TextInputType.number,
+                        hintText: "سعر النصف جملة".tr,
+                        label: "سعر النصف جملة".tr,
+                        iconData: Icons.attach_money,
+                        enabled: true,
+                      ),
+                      Custemtextfromfild(
+                        MyController: controller.priseWholesaleController,
+                        keyboardType: TextInputType.number,
+                        hintText: "سعر الجملة".tr,
+                        label: "سعر الجملة".tr,
                         iconData: Icons.attach_money,
                         enabled: true,
                       ),
@@ -278,6 +293,7 @@ class _EdititemState extends State<Edititem> {
                       ),
                       Custembutton(
                         text: "Edit".tr,
+                        isLoading: controller.statusrequest == Statusrequest.loadeng,
                         onPressed: () {
                           if (!validInputsnak(controller.nameController.text, 1,
                               20, "Name".tr)) {
@@ -298,7 +314,6 @@ class _EdititemState extends State<Edititem> {
                     ],
                   ),
                 ],
-              ),
             ),
           ),
         );

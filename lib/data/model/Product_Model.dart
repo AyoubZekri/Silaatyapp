@@ -44,6 +44,8 @@ class Data {
   String? productDescription;
   String? productQuantity;
   double? productPrice;
+  double? productPriceHalfWholesale;
+  double? productPriceWholesale;
   double? productPricePurchase;
   double? productPriceTotalPurchase;
   double? productPriceTotal;
@@ -64,6 +66,8 @@ class Data {
     this.productDescription,
     this.productQuantity,
     this.productPrice,
+    this.productPriceHalfWholesale,
+    this.productPriceWholesale,
     this.productPricePurchase,
     this.productPriceTotalPurchase,
     this.productPriceTotal,
@@ -85,6 +89,8 @@ class Data {
     productDescription = json['product_description'];
     productQuantity = json['product_quantity'];
     productPrice = _toDouble(json['product_price']);
+    productPriceHalfWholesale = _toDouble(json['product_price_half_wholesale']);
+    productPriceWholesale = _toDouble(json['product_price_wholesale']);
     productPricePurchase = _toDouble(json['product_price_purchase']);
     productPriceTotalPurchase = _toDouble(json['product_price_total_purchase']);
     type = json['type'];
@@ -106,6 +112,8 @@ class Data {
     data['product_description'] = this.productDescription;
     data['product_quantity'] = this.productQuantity;
     data['product_price'] = this.productPrice;
+    data['product_price_half_wholesale'] = this.productPriceHalfWholesale;
+    data['product_price_wholesale'] = this.productPriceWholesale;
     data['product_price_purchase'] = this.productPricePurchase;
     data['product_price_total_purchase'] = this.productPriceTotalPurchase;
     data['product_price_total'] = this.productPriceTotal;

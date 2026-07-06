@@ -39,7 +39,7 @@ class _ShwonotificationState extends State<Shwonotification> {
             child: Lottie.asset(Appimageassets.loading, width: 150),
           );
         }
-        return HandlingviewAuth(
+        return Handlingview(
           statusrequest: controller.statusrequest,
           widget: ListView(
             children: [

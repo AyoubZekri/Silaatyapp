@@ -8,6 +8,7 @@ import 'package:Silaaty/view/widget/auth/CustemTexTbodyauth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 
 class Forgenpasswordsetting extends StatelessWidget {
@@ -31,9 +32,7 @@ class Forgenpasswordsetting extends StatelessWidget {
           centerTitle: true,
         ),
         body: GetBuilder<ForgenControllerImp>(
-            builder: (controller) => HandlingviewAuth(
-                  statusrequest: controller.statusrequest,
-                  widget: Container(
+            builder: (controller) => Container(
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 35),
@@ -66,6 +65,7 @@ class Forgenpasswordsetting extends StatelessWidget {
                             keyboardType: TextInputType.emailAddress,
                           ),
                           Custembuttonauth(
+                            isLoading: controller.statusrequest == Statusrequest.loadeng,
                             onPressed: () {
                               controller.CheckEmail("VerFiyCodeSetteng");
                             },
@@ -77,7 +77,6 @@ class Forgenpasswordsetting extends StatelessWidget {
                         ],
                       ),
                     ),
-                  ),
-                )));
+                  )));
   }
 }

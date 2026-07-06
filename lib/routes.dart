@@ -33,7 +33,6 @@ import 'package:Silaaty/view/screen/Setteng/Notification/ShwoNotification.dart';
 import 'package:Silaaty/view/screen/Setteng/Privacypolicy.dart';
 import 'package:Silaaty/view/screen/Setteng/Profail.dart';
 import 'package:Silaaty/view/screen/Setteng/profaile.dart';
-import 'package:Silaaty/view/screen/Setteng/activationPayScreen.dart';
 import 'package:Silaaty/view/screen/categoris/Addcat.dart';
 import 'package:Silaaty/view/screen/categoris/Editcat.dart';
 import 'package:Silaaty/view/screen/categoris/ShwoCat.dart';
@@ -49,6 +48,7 @@ import 'view/screen/Dealer/Editdealer.dart';
 import 'view/screen/RessetPassword/ForgenPassWordSetting.dart';
 import 'view/screen/RessetPassword/ResetPasswordSetting.dart';
 import 'view/screen/RessetPassword/Resset.dart';
+import 'view/screen/Sellers/SellerScreen.dart';
 import 'view/screen/SplashScreen.dart';
 import 'view/screen/Statistice/PublicFinance.dart';
 import 'view/screen/Statistice/StatisticeReports.dart';
@@ -128,6 +128,6 @@ List<GetPage<dynamic>> routes = [
   GetPage(name: Approutes.stockbalance, page: () => Stockbalance()),
   GetPage(name: Approutes.stockvalue, page: () => Stockvalue()),
   GetPage(name: Approutes.supplierreports, page: () => Supplierreports()),
-  GetPage(name: Approutes.activationExpiredPage, page: () => activationExpiredPage()),
-  GetPage(name: Approutes.activationPay, page: () => const activationPayScreen()),
+  GetPage(name: Approutes.activationExpiredPage, page: () => const activationExpiredPage()),
+  GetPage(name: Approutes.sellers, page: () => const SellerScreen()),
 ];

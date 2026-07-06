@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import 'package:shimmer/shimmer.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/constant/imageassets.dart';
@@ -219,13 +220,7 @@ class Customcartaddproductsale extends StatelessWidget {
                 onPressed: onDecrement,
               ),
               Text(
-                type == 2 && quantity != 0
-                    ? quantity % 1 == 0
-                        ? quantity.toInt().toStringAsFixed(3)
-                        : quantity.toStringAsFixed(3)
-                    : quantity % 1 == 0
-                        ? quantity.toInt().toStringAsFixed(0)
-                        : quantity.toStringAsFixed(0),
+                formatQuantity(quantity),
                 style: const TextStyle(
                   color: AppColor.black,
                   fontWeight: FontWeight.bold,

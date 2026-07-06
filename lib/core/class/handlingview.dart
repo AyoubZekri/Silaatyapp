@@ -1,6 +1,7 @@
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/constant/imageassets.DART';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:shimmer/shimmer.dart';
 
@@ -8,168 +9,146 @@ import '../constant/Colorapp.dart';
 
 class Handlingview extends StatelessWidget {
   final Statusrequest statusrequest;
-  final IconData iconData;
-  final String title;
-
+  final String? title;
+  final IconData? iconData;
   final Widget widget;
+  final Future<void> Function()? onRefresh;
 
   const Handlingview({
     super.key,
     required this.statusrequest,
     required this.widget,
-    required this.iconData,
-    required this.title,
+    this.title,
+    this.iconData,
+    this.onRefresh,
   });
 
   @override
   Widget build(BuildContext context) {
+    Widget content;
     switch (statusrequest) {
       case Statusrequest.loadeng:
       case Statusrequest.none:
-        return Center(child: Lottie.asset(Appimageassets.loading, width: 190));
-      case Statusrequest.serverfailure:
-        return Center(child: Lottie.asset(Appimageassets.server, width: 190));
-      case Statusrequest.offlinefailure:
-        return Center(child: Lottie.asset(Appimageassets.offline, width: 190));
-      case Statusrequest.failure:
-        return Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                iconData,
-                color: AppColor.backgroundcolor,
-                size: 50,
-              ),
-              SizedBox(height: 10),
-              Text(
-                title,
-                style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: AppColor.grey),
-              ),
-            ],
+        content = Center(
+          child: SizedBox(
+            width: 50,
+            height: 50,
+            child: CircularProgressIndicator(
+              strokeWidth: 6,
+              backgroundColor: AppColor.backgroundcolor.withOpacity(0.1),
+              valueColor:
+                  const AlwaysStoppedAnimation(AppColor.backgroundcolor),
+            ),
           ),
         );
-      default:
-        return widget;
-    }
-  }
-}
+        break;
 
-class Handlingviewfrom extends StatelessWidget {
-  final Statusrequest statusrequest;
-  final Widget widget;
-
-  const Handlingviewfrom({
-    super.key,
-    required this.statusrequest,
-    required this.widget,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    switch (statusrequest) {
-      case Statusrequest.loadeng:
-        return Center(child: Lottie.asset(Appimageassets.loading, width: 190));
-      case Statusrequest.offlinefailure:
-        return Center(child: Lottie.asset(Appimageassets.offline, width: 190));
       case Statusrequest.serverfailure:
-        return Center(child: Lottie.asset(Appimageassets.server, width: 190));
+        content = _errorView(
+          icon: Icons.dns_rounded,
+          message: "خطأ في الخادم".tr,
+        );
+        break;
+
+      case Statusrequest.offlinefailure:
+        content = _errorView(
+          icon: Icons.wifi_off_rounded,
+          message: "لا يوجد اتصال بالإنترنت".tr,
+        );
+        break;
+
       case Statusrequest.failure:
-        return Center(child: Lottie.asset(Appimageassets.nodata, width: 190));
+        content = _errorView(
+          icon: iconData ?? Icons.folder_open_rounded,
+          message: title ?? 'لا توجد بيانات لعرضها'.tr,
+        );
+        break;
       default:
-        return widget;
+        content = widget;
     }
-  }
-}
 
-class HandlingviewAuth extends StatelessWidget {
-  final Statusrequest statusrequest;
-  final Widget widget;
-
-  const HandlingviewAuth({
-    super.key,
-    required this.statusrequest,
-    required this.widget,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    switch (statusrequest) {
-      case Statusrequest.loadeng:
-        return Center(child: Lottie.asset(Appimageassets.loading, width: 190));
-      case Statusrequest.offlinefailure:
-        return Center(child: Lottie.asset(Appimageassets.offline, width: 190));
-      case Statusrequest.serverfailure:
-        return Center(child: Lottie.asset(Appimageassets.server, width: 190));
-      default:
-        return widget;
+    if (onRefresh != null) {
+      return RefreshIndicator(
+        onRefresh: onRefresh!,
+        color: AppColor.backgroundcolor,
+        child: content,
+      );
     }
+    return content;
   }
-}
 
-class Handlingviewhome extends StatelessWidget {
-  final Statusrequest statusrequest;
-  final Widget widget;
-
-  const Handlingviewhome({
-    super.key,
-    required this.statusrequest,
-    required this.widget,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    switch (statusrequest) {
-      case Statusrequest.loadeng:
-      case Statusrequest.none:
-        return ListView.builder(
-          padding: const EdgeInsets.all(16),
-          itemCount: 6,
-          itemBuilder: (context, index) => Shimmer.fromColors(
-            baseColor: Colors.grey.shade300,
-            highlightColor: Colors.grey.shade100,
-            child: Container(
-              margin: const EdgeInsets.only(bottom: 16),
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
+  Widget _errorView({
+    required IconData icon,
+    required String message,
+  }) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return SingleChildScrollView(
+          physics:
+              const AlwaysScrollableScrollPhysics(), // 🔹 مهم للـ RefreshIndicator
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight: constraints.maxHeight, // يشغل كل مساحة الشاشة
+            ),
+            child: Center(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  // Folder card with pulse animation style
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        width: 150,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: AppColor.backgroundcolor.withOpacity(0.05),
+                        ),
+                      ),
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(40),
+                          border: Border.all(
+                            color: AppColor.backgroundcolor.withOpacity(0.1),
+                            width: 1,
+                          ),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColor.backgroundcolor.withOpacity(0.2),
+                              blurRadius: 20,
+                              spreadRadius: 5,
+                            ),
+                          ],
+                        ),
+                        child: Icon(
+                          icon,
+                          size: 80,
+                          color: AppColor.backgroundcolor,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  // Text
+                  Text(
+                    message,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ],
               ),
             ),
           ),
         );
-
-      case Statusrequest.serverfailure:
-        return ListView(
-          children: [
-            const SizedBox(height: 100),
-            Center(child: Lottie.asset(Appimageassets.server, width: 190)),
-          ],
-        );
-
-      case Statusrequest.failure:
-        return ListView(
-          children: [
-            const SizedBox(height: 100),
-            Center(child: Lottie.asset(Appimageassets.nodata, width: 190)),
-          ],
-        );
-
-      case Statusrequest.offlinefailure:
-        return ListView(
-          children: [
-            const SizedBox(height: 100),
-            Center(child: Lottie.asset(Appimageassets.offline, width: 190)),
-          ],
-        );
-
-      default:
-        return widget;
-    }
+      },
+    );
   }
 }
+

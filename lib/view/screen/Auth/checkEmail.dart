@@ -4,6 +4,7 @@ import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/functions/valiedinput.dart';
 import '../../widget/Auth/CustemTextTitleauth.dart';
 import '../../widget/Auth/login/Custemtextformauth.dart';
@@ -29,9 +30,7 @@ class CheckEmail extends StatelessWidget {
                   .copyWith(color: AppColor.grey)),
         ),
         body: GetBuilder<CheckEmailControllerImp>(
-            builder: (controller) => HandlingviewAuth(
-                  statusrequest: controller.statusrequest,
-                  widget: Container(
+            builder: (controller) => Container(
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 30),
                     child: ListView(children: [
@@ -54,15 +53,16 @@ class CheckEmail extends StatelessWidget {
                         },
                         keyboardType: TextInputType.emailAddress,
                       ),
-                      Custembuttonauth(
-                        onPressed: () {
-                          controller.goToSuccessSignUp();
-                        },
-                        Textname: 'check',
-                      ),
+                          Custembuttonauth(
+                              isLoading: controller.statusrequest == Statusrequest.loadeng,
+                              onPressed: () {
+                                controller.goToSuccessSignUp();
+                              },
+                              Textname: 'check',
+                            ),
                       const SizedBox(height: 40),
                     ]),
-                  ),
-                )));
+                    ),
+                  ));
   }
 }

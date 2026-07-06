@@ -9,6 +9,7 @@ import '../../data/datasource/Remote/transactiondata.dart';
 
 class SaleController extends GetxController {
   int? type;
+  RxInt saleType = 1.obs; // 1 = Retail, 2 = Half Wholesale, 3 = Wholesale
   RxString selectedCustomer = ''.obs;
   List<String> get customers => [
         if (type != 1) "virtualCustomer".tr,
@@ -92,6 +93,24 @@ class SaleController extends GetxController {
     }
   }
 
+  double _getSalePrice(Map<String, dynamic> productData) {
+    if (type == 1) {
+      return double.tryParse(productData['product_price_purchase'].toString()) ?? 0.0;
+    }
+    
+    double retailPrice = double.tryParse(productData['product_price'].toString()) ?? 0.0;
+    
+    if (saleType.value == 3) {
+      double wholesalePrice = double.tryParse(productData['product_price_wholesale'].toString()) ?? 0.0;
+      return wholesalePrice > 0 ? wholesalePrice : retailPrice;
+    } else if (saleType.value == 2) {
+      double halfWholesalePrice = double.tryParse(productData['product_price_half_wholesale'].toString()) ?? 0.0;
+      return halfWholesalePrice > 0 ? halfWholesalePrice : retailPrice;
+    }
+    
+    return retailPrice;
+  }
+
   void _calculateTotals() {
     totalItems = selectedProducts.length;
     totalallPrice = selectedProducts.fold(
@@ -107,10 +126,7 @@ class SaleController extends GetxController {
       {int? existingIndex}) {
     TextEditingController weightController = TextEditingController();
     TextEditingController totalPriceController = TextEditingController();
-    final unitPrice = type == 1
-        ? double.tryParse(productData['product_price_purchase'].toString()) ??
-            0.0
-        : double.tryParse(productData['product_price'].toString()) ?? 0.0;
+    final unitPrice = _getSalePrice(productData);
 
     Get.dialog(
       AlertDialog(
@@ -216,13 +232,7 @@ class SaleController extends GetxController {
               if (weight != null && weight > 0) {
                 final uuid = productData['uuid'] ?? productData['id'] ?? '';
                 final name = productData['product_name'] ?? '';
-                final price = type == 1
-                    ? double.tryParse(
-                            productData['product_price_purchase'].toString()) ??
-                        0.0
-                    : double.tryParse(
-                            productData['product_price'].toString()) ??
-                        0.0;
+                final price = _getSalePrice(productData);
 
                 if (existingIndex != null) {
                   selectedProducts[existingIndex]['quantity'] += weight;
@@ -339,10 +349,7 @@ class SaleController extends GetxController {
 
       final uuid = productData['uuid'] ?? productData['id'] ?? '';
       final name = productData['product_name'] ?? '';
-      final price = type == 1
-          ? double.tryParse(productData['product_price_purchase'].toString()) ??
-              0.0
-          : double.tryParse(productData['product_price'].toString()) ?? 0.0;
+      final price = _getSalePrice(productData);
       final typeItem = productData['type'];
 
       final existingIndex =
@@ -390,7 +397,7 @@ class SaleController extends GetxController {
   void gotoaddproductNewSale() async {
     final result = await Get.toNamed(
       Approutes.addProductSale,
-      arguments: {"selectedProducts": selectedProducts, "type": type},
+      arguments: {"selectedProducts": selectedProducts, "type": type, "sale_type": saleType.value},
     );
     if (result != null && result is List) {
       final updatedList = List<Map<String, dynamic>>.from(result);
@@ -431,6 +438,7 @@ class SaleController extends GetxController {
       "uuid": selectedUuid.value,
       "name": selectedName.value,
       "type": type,
+      "sale_type": saleType.value,
       "famlyname": selectedFamilyName.value,
       "totalprice": totalallPrice,
       "selectedCustomer": selectedCustomer.value
@@ -451,9 +459,35 @@ class SaleController extends GetxController {
     selectedName.value = '';
     selectedFamilyName.value = '';
     selectedProducts.clear();
+    saleType.value = 1;
     totalallPrice = 0.0;
     totalItems = 0;
     update();
+  }
+
+  void changeSaleType(int newType) {
+    if (saleType.value == newType) return;
+    
+    if (selectedProducts.isNotEmpty) {
+      Get.defaultDialog(
+        title: "تنبيه".tr,
+        middleText: "تغيير نوع البيع سيؤدي إلى إفراغ القائمة. هل توافق؟".tr,
+        onConfirm: () {
+          saleType.value = newType;
+          selectedProducts.clear();
+          _calculateTotals();
+          update();
+          Get.back();
+        },
+        onCancel: () {},
+        textConfirm: "نعم".tr,
+        textCancel: "لا".tr,
+        confirmTextColor: AppColor.white,
+      );
+    } else {
+      saleType.value = newType;
+      update();
+    }
   }
 
   @override

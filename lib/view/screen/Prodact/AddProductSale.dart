@@ -276,7 +276,7 @@ class _AddProductSaleState extends State<AddProductSale> {
                           ),
                         ),
                       Expanded(
-                        child: Handlingviewhome(
+                        child: Handlingview(
                           statusrequest: controller.statusrequest,
                           widget: controller.product.isEmpty
                               ? ListView(
@@ -350,7 +350,7 @@ class _AddProductSaleState extends State<AddProductSale> {
                                         Body: num.tryParse(
                                                 item.productQuantity ?? '0') ??
                                             0,
-                                        Price: item.productPrice.toString(),
+                                        Price: controller.getSalePrice(item).toStringAsFixed(2),
                                         uuid: item.uuid!,
                                       ),
                                     );

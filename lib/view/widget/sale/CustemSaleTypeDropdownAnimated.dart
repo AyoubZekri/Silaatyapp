@@ -2,16 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 
-class Custemdropdawnanimated extends StatelessWidget {
-  final List<String> customers;
-  final RxString selectedCustomer;
-  final Function(String) onSelect;
+class CustemSaleTypeDropdownAnimated extends StatelessWidget {
+  final RxInt selectedSaleType;
+  final Function(int) onSelect;
   final RxBool isExpanded = false.obs;
 
-  Custemdropdawnanimated({
+  final Map<int, String> saleTypes = {
+    1: "تجزئة".tr,
+    2: "نصف جملة".tr,
+    3: "جملة".tr,
+  };
+
+  CustemSaleTypeDropdownAnimated({
     super.key,
-    required this.customers,
-    required this.selectedCustomer,
+    required this.selectedSaleType,
     required this.onSelect,
   });
 
@@ -35,13 +39,11 @@ class Custemdropdawnanimated extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      selectedCustomer.value,
-                      style: TextStyle(
+                      saleTypes[selectedSaleType.value] ?? "",
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: selectedCustomer.value == "العميل"
-                            ? AppColor.grey
-                            : Colors.black,
+                        color: Colors.black,
                       ),
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -58,7 +60,7 @@ class Custemdropdawnanimated extends StatelessWidget {
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            height: isExpanded.value ? customers.length * 55 : 0,
+            height: isExpanded.value ? saleTypes.length * 55.0 : 0.0,
             margin: const EdgeInsets.only(top: 8),
             decoration: BoxDecoration(
               color: Colors.white,
@@ -77,11 +79,11 @@ class Custemdropdawnanimated extends StatelessWidget {
               child: ListView(
                 physics: const NeverScrollableScrollPhysics(),
                 padding: EdgeInsets.zero,
-                children: customers.map((value) {
+                children: saleTypes.entries.map((entry) {
                   return ListTile(
-                    title: Text(value),
+                    title: Text(entry.value),
                     onTap: () {
-                      onSelect(value);
+                      onSelect(entry.key);
                       isExpanded.value = false;
                     },
                   );

@@ -43,7 +43,7 @@ class _InformationitemState extends State<Informationitem> {
 
           final product = controller.InfoProduct[0];
 
-          return HandlingviewAuth(
+          return Handlingview(
             statusrequest: controller.statusrequest,
             widget: ListView(
               padding: const EdgeInsets.all(16),

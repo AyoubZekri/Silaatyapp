@@ -2,6 +2,7 @@ import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controller/auth/Signupcontroller.dart';
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 import '../../../core/functions/alertExitApp.dart';
 import '../../../core/functions/valiedinput.dart';
@@ -39,9 +40,7 @@ class _SignupState extends State<Signup> {
         body: WillPopScope(
             onWillPop: alertExitApp,
             child: GetBuilder<SignupControllerImp>(
-              builder: (controller) => HandlingviewAuth(
-                statusrequest: controller.statusrequest,
-                widget: Container(
+              builder: (controller) => Container(
                   color: Colors.white,
                   padding:
                       const EdgeInsets.symmetric(vertical: 15, horizontal: 35),
@@ -139,11 +138,12 @@ class _SignupState extends State<Signup> {
                           ),
                         ),
                         Custembuttonauth(
-                          onPressed: () {
-                            controller.SignUp();
-                          },
-                          Textname: "Sign Up".tr,
-                        ),
+                                isLoading: controller.statusrequest == Statusrequest.loadeng,
+                                onPressed: () {
+                                  controller.SignUp();
+                                },
+                                Textname: "Sign Up".tr,
+                              ),
                         const SizedBox(
                           height: 30,
                         ),
@@ -158,6 +158,6 @@ class _SignupState extends State<Signup> {
                   ),
                 ),
               ),
-            )));
+            ));
   }
 }

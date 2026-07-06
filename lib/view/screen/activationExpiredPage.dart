@@ -11,8 +11,7 @@ class activationExpiredPage extends StatefulWidget {
   const activationExpiredPage({super.key});
 
   @override
-  State<activationExpiredPage> createState() =>
-      _activationExpiredPageState();
+  State<activationExpiredPage> createState() => _activationExpiredPageState();
 }
 
 class _activationExpiredPageState extends State<activationExpiredPage> {
@@ -92,7 +91,7 @@ class _activationExpiredPageState extends State<activationExpiredPage> {
                     ),
 
                     Text(
-                      "انتهى اشتراكك".tr,
+                      "انتهى تفعيلك".tr,
                       style: TextStyle(
                         color: Color(0xFF221610),
                         fontSize: 28,
@@ -104,7 +103,7 @@ class _activationExpiredPageState extends State<activationExpiredPage> {
                     const SizedBox(height: 20),
 
                     Text(
-                      "لقد انتهت فترة صلاحية اشتراكك الحالي. يرجى التجديد للاستمرار في استخدام التطبيق ."
+                      "لقد انتهت فترة صلاحية تفعيلك الحالي. يرجى التجديد للاستمرار في استخدام التطبيق ."
                           .tr,
                       style: TextStyle(
                         color: Colors.grey[600],
@@ -181,38 +180,9 @@ class _activationExpiredPageState extends State<activationExpiredPage> {
                         ],
                       ),
                     ),
-
                     // Call to Action Buttons
                     Column(
                       children: [
-                        OutlinedButton.icon(
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                                color:
-                                    AppColor.backgroundcolor.withOpacity(0.3),
-                                width: 2),
-                            minimumSize: const Size.fromHeight(56),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(16),
-                            ),
-                          ),
-                          onPressed: () async {
-                            Get.toNamed(Approutes.activationPay);
-                          },
-                          icon: const Icon(FontAwesomeIcons.creditCard,
-                              color: Color(0xFF4850E5)),
-                          label: Text(
-                            "تجديد الاشتراك".tr,
-                            style: TextStyle(
-                              color: AppColor.backgroundcolor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 18,
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 20,
-                        ),
                         OutlinedButton.icon(
                           style: OutlinedButton.styleFrom(
                             side: BorderSide(

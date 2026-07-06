@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:get/get.dart';
 
+import '../../../../core/class/Statusrequest.dart';
 import '../../../../core/class/handlingview.dart';
 
 class Verifiycode extends StatelessWidget {
@@ -29,9 +30,7 @@ class Verifiycode extends StatelessWidget {
           centerTitle: true,
         ),
         body: GetBuilder<VeriFyCodeControllerImp>(
-            builder: (controller) => HandlingviewAuth(
-                  statusrequest: controller.statusrequest,
-                  widget: Container(
+            builder: (controller) => Container(
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 35),
@@ -59,22 +58,28 @@ class Verifiycode extends StatelessWidget {
                         // ),
                         Directionality(
                           textDirection: TextDirection.ltr,
-                          child: OtpTextField(
-                            borderRadius: BorderRadius.circular(10),
-                            numberOfFields: 5,
-                            borderColor: const Color(0xFF512DA8),
-                            //set to true to show as box or false to show as dash
-                            showFieldAsBox: true,
-                            //runs when a code is typed in
-                            onCodeChanged: (String code) {
-                              //handle validation or checks here
-                            },
-                            //runs when every textfield is filled
-                            onSubmit: (String verificationCode) {
-                              controller.GoToresetPasswored(
-                                  verificationCode, "resePassword");
-                            }, // end onSubmit
-                          ),
+                          child: controller.statusrequest == Statusrequest.loadeng
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    color: AppColor.backgroundcolor,
+                                  ),
+                                )
+                              : OtpTextField(
+                                  borderRadius: BorderRadius.circular(10),
+                                  numberOfFields: 5,
+                                  borderColor: const Color(0xFF512DA8),
+                                  //set to true to show as box or false to show as dash
+                                  showFieldAsBox: true,
+                                  //runs when a code is typed in
+                                  onCodeChanged: (String code) {
+                                    //handle validation or checks here
+                                  },
+                                  //runs when every textfield is filled
+                                  onSubmit: (String verificationCode) {
+                                    controller.GoToresetPasswored(
+                                        verificationCode, "resePassword");
+                                  }, // end onSubmit
+                                ),
                         ),
                         InkWell(
                             onTap: () {
@@ -92,7 +97,6 @@ class Verifiycode extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
-                )));
+                  )));
   }
 }

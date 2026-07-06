@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../LinkApi.dart';
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 
 class Editcat extends StatefulWidget {
@@ -38,9 +39,7 @@ class _EditcatState extends State<Editcat> {
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
           child: Form(
             key: controller.formstate,
-            child: HandlingviewAuth(
-              statusrequest: controller.statusrequest,
-              widget: ListView(
+            child: ListView(
                 children: [
                   Column(
                     children: [
@@ -109,24 +108,24 @@ class _EditcatState extends State<Editcat> {
                         enabled: true,
                         iconData: Icons.description,
                       ),
-                      Custembutton(
-                        text: "Add".tr,
-                        onPressed: () {
-                          if (!validInputsnak(controler.nameController.text, 1,
-                              20, "Name Categoris".tr)) return;
-                          if (!validInputsnak(controler.nameController.text, 1,
-                              20, "Name Categoris fr".tr)) return;
+                          Custembutton(
+                              isLoading: controller.statusrequest == Statusrequest.loadeng,
+                              text: "Add".tr,
+                              onPressed: () {
+                                if (!validInputsnak(controler.nameController.text, 1,
+                                    20, "Name Categoris".tr)) return;
+                                if (!validInputsnak(controler.nameController.text, 1,
+                                    20, "Name Categoris fr".tr)) return;
 
-                          controller.Editcat();
-                        },
-                        vertical: 10,
-                        horizontal: 10,
-                        paddingvertical: 15,
-                      )
+                                controller.Editcat();
+                              },
+                              vertical: 10,
+                              horizontal: 10,
+                              paddingvertical: 15,
+                            )
                     ],
                   ),
                 ],
-              ),
             ),
           ),
         );

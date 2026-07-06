@@ -6,6 +6,7 @@ import 'package:Silaaty/view/widget/addItem/CustemTextFromFild.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 
 class Addcat extends StatefulWidget {
@@ -37,9 +38,7 @@ class _AddcatState extends State<Addcat> {
           padding:const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
           child: Form(
             key: controller.formstate,
-            child: HandlingviewAuth(
-              statusrequest: controller.statusrequest,
-              widget: ListView(
+            child: ListView(
                 children: [
                   Column(
                     children: [
@@ -105,27 +104,27 @@ class _AddcatState extends State<Addcat> {
                                                 enabled: true,
 
                       ),
-                      Custembutton(
-                        text: "Add".tr,
-                        onPressed: () {
-                          if (!validInputsnak(controler.nameController.text, 1, 20,
-                              "Name Categoris".tr)) {
-                            return;
-                          }
-                          if (!validInputsnak(controler.nameFrController.text, 1, 20,
-                              "Name Categoris fr".tr)) {
-                            return;
-                          }
-                          controller.addcat();
-                        },
-                        vertical: 10,
-                        horizontal: 10,
-                        paddingvertical: 15,
-                      )
+                          Custembutton(
+                              isLoading: controller.statusrequest == Statusrequest.loadeng,
+                              text: "Add".tr,
+                              onPressed: () {
+                                if (!validInputsnak(controler.nameController.text, 1, 20,
+                                    "Name Categoris".tr)) {
+                                  return;
+                                }
+                                if (!validInputsnak(controler.nameFrController.text, 1, 20,
+                                    "Name Categoris fr".tr)) {
+                                  return;
+                                }
+                                controller.addcat();
+                              },
+                              vertical: 10,
+                              horizontal: 10,
+                              paddingvertical: 15,
+                            )
                     ],
                   ),
                 ],
-              ),
             ),
           ),
         );

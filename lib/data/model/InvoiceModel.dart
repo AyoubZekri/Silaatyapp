@@ -182,6 +182,7 @@ class InvoiceItem {
   String? paymentDate;
   double? paymentPrice;
   double? discount;
+  int? saleType;
   double? totalSales;
   double? debt;
   double? invoiceSum;
@@ -200,6 +201,7 @@ class InvoiceItem {
     this.paymentDate,
     this.paymentPrice,
     this.discount,
+    this.saleType,
     this.totalSales,
     this.debt,
     this.invoiceSum,
@@ -220,6 +222,7 @@ class InvoiceItem {
       paymentDate: json['invoies_payment_date'],
       paymentPrice: double.tryParse(json['Payment_price']?.toString() ?? '0'),
       discount: double.tryParse(json['discount']?.toString() ?? '0'),
+      saleType: json['sale_type'] != null ? int.tryParse(json['sale_type'].toString()) : 1,
       totalSales: double.tryParse(json['total_sales']?.toString() ?? '0'),
       debt: double.tryParse(json['debt']?.toString() ?? '0'),
       invoiceSum: double.tryParse(json['invoice_sum']?.toString() ?? '0'),
@@ -240,6 +243,7 @@ class InvoiceItem {
         'invoies_payment_date': paymentDate,
         'Payment_price': paymentPrice,
         'discount': discount,
+        'sale_type': saleType,
         'total_sales': totalSales,
         'debt': debt,
         'invoice_sum': invoiceSum,

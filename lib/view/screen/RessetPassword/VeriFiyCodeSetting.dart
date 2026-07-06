@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 
 class Verifiycodesetting extends StatelessWidget {
@@ -29,9 +30,7 @@ class Verifiycodesetting extends StatelessWidget {
           centerTitle: true,
         ),
         body: GetBuilder<VeriFyCodeControllerImp>(
-            builder: (controller) => HandlingviewAuth(
-                  statusrequest: controller.statusrequest,
-                  widget: Container(
+            builder: (controller) => Container(
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 35),
@@ -57,29 +56,35 @@ class Verifiycodesetting extends StatelessWidget {
                         //   label: "Email",
                         //   iconData: Icons.person_2_outlined,
                         // ),
-                        Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: OtpTextField(
-                              numberOfFields: 5,
-                              borderRadius: BorderRadius.circular(10),
-                              borderColor: const Color(0xFF512DA8),
-                              showFieldAsBox: true,
-
-                              fieldWidth: 45, // صغّر العرض باش يقل padding
-
-                              styles: List.generate(
-                                5,
-                                (index) => const TextStyle(
-                                  fontSize: 18,
-                                  height: 1, // مهم باش ينقص الارتفاع الداخلي
+                        controller.statusrequest == Statusrequest.loadeng
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColor.backgroundcolor,
                                 ),
-                              ),
+                              )
+                            : Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: OtpTextField(
+                                  numberOfFields: 5,
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderColor: const Color(0xFF512DA8),
+                                  showFieldAsBox: true,
 
-                              onSubmit: (verificationCode) {
-                                controller.GoToresetPasswored(
-                                    verificationCode, "resePasswordsetting");
-                              },
-                            )),
+                                  fieldWidth: 45, // صغّر العرض باش يقل padding
+
+                                  styles: List.generate(
+                                    5,
+                                    (index) => const TextStyle(
+                                      fontSize: 18,
+                                      height: 1, // مهم باش ينقص الارتفاع الداخلي
+                                    ),
+                                  ),
+
+                                  onSubmit: (verificationCode) {
+                                    controller.GoToresetPasswored(
+                                        verificationCode, "resePasswordsetting");
+                                  },
+                                )),
                         SizedBox(
                           height: 30,
                         ),
@@ -100,7 +105,6 @@ class Verifiycodesetting extends StatelessWidget {
                         ),
                       ],
                     ),
-                  ),
-                )));
+                  )));
   }
 }

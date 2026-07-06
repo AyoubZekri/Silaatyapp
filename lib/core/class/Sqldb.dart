@@ -20,7 +20,7 @@ class SQLDB {
     Database mydb = await openDatabase(
       path,
       onCreate: _onCreate,
-      version: 3,
+      version: 5,
       onUpgrade: _onUpgrade,
     );
     return mydb;
@@ -78,6 +78,22 @@ class SQLDB {
       await db.execute('DROP TABLE sales');
       await db.execute('ALTER TABLE sales_new RENAME TO sales');
     }
+
+    if (oldversion < 4) {
+      await db.execute(
+          'ALTER TABLE products ADD COLUMN product_price_half_wholesale REAL DEFAULT 0.00');
+      await db.execute(
+          'ALTER TABLE products ADD COLUMN product_price_wholesale REAL DEFAULT 0.00');
+      await db.execute(
+          'ALTER TABLE invoies ADD COLUMN sale_type INTEGER DEFAULT 1');
+    }
+
+    if (oldversion < 5) {
+      await db.execute(
+          'ALTER TABLE invoies ADD COLUMN seller_id INTEGER DEFAULT NULL');
+      await db.execute(
+          'ALTER TABLE sales ADD COLUMN seller_id INTEGER DEFAULT NULL');
+    }
   }
 
   Future<void> _onCreate(Database db, int version) async {
@@ -110,6 +126,8 @@ class SQLDB {
       invoies_payment_date TEXT NOT NULL,
       Payment_price INTEGER NOT NULL DEFAULT 0,
       discount REAL DEFAULT 0,
+      sale_type INTEGER DEFAULT 1,
+      seller_id INTEGER DEFAULT NULL,
       is_delete INTEGER NOT NULL DEFAULT 0,
       created_at TEXT,
       updated_at TEXT
@@ -145,6 +163,8 @@ class SQLDB {
       product_description TEXT,
       product_quantity TEXT NOT NULL,
       product_price REAL DEFAULT 0.00,
+      product_price_half_wholesale REAL DEFAULT 0.00,
+      product_price_wholesale REAL DEFAULT 0.00,
       product_price_purchase REAL DEFAULT 0.00,
       product_price_total_purchase REAL,
       product_price_total REAL,
@@ -216,6 +236,7 @@ class SQLDB {
         unit_price REAL DEFAULT 0,
         subtotal REAL DEFAULT 0,
         type_sales INTEGER,
+        seller_id INTEGER DEFAULT NULL,
         is_delete INTEGER NOT NULL DEFAULT 0,
         created_at TEXT,
         updated_at TEXT

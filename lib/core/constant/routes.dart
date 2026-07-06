@@ -8,9 +8,7 @@ class Approutes {
   static const String Additemsne = "/Additemsne";
   static const String Edititemsen = "/Edititemsen";
   static const String splashScreen = "/SplashScreen";
-  static const String subscriptionExpiredPage = "/SubscriptionExpiredPage";
-
-
+  static const String activationExpiredPage = "/activationExpiredPage";
 
   static const String profaile = "/Profaile";
   static const String notification = "/notification";
@@ -27,7 +25,6 @@ class Approutes {
   static const String EditConvict = "/EditConvict";
   static const String invoice = "/invoice";
   static const String shwoinvoice = "/shwoinvoice";
-
 
   static const String shwocat = "/shwocat";
   static const String addcat = "/addcat";
@@ -50,9 +47,6 @@ class Approutes {
   static const String resetpasswordsetting = "/resetpasswordsetting";
   static const String verifiycodesetting = "/verifiycodesetting";
 
-
-
-
   static const String invoicesall = "/Invoicesall";
   static const String newSale = "/NewSale";
   static const String profail = "/profail";
@@ -64,17 +58,10 @@ class Approutes {
   static const String publicfinance = "/publicfinance";
   static const String customersales = "/Customersales";
   static const String lowstock = "/Lowstock";
+  static const String sellers = "/Sellers";
   static const String stockbalance = "/Stockbalance";
   static const String stockvalue = "/Stockvalue";
   static const String supplierreports = "/Supplierreports";
 
-
-
-
-
-
-
-
-  static const String subscriptionPay = "/subscriptionPay";
-
+  static const String activationPay = "/activationPay";
 }

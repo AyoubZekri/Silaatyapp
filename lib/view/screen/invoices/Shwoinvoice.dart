@@ -1,9 +1,10 @@
 import 'package:Silaaty/controller/Profaile/invoice/Shwoinvoicecontroller.dart';
+import 'package:Silaaty/core/class/handlingview.dart';
 import 'package:Silaaty/view/widget/Bills/CustemEditpayment.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 
-import '../../../core/class/handlingviewShimmer.dart';
 import '../../../core/constant/Colorapp.dart';
 import '../../../core/functions/valiedinput.dart';
 import '../../widget/Bills/CostumCartdetails.dart';
@@ -107,6 +108,16 @@ class _PaymentState extends State<Shwoinvoice> {
                       body:
                           controller.invoices!.date.toString().substring(0, 10),
                     ),
+                    if (controller.invoices?.saleType != null)
+                      Costumcartdetails(
+                        iconData: Icons.category_outlined,
+                        title: "نوع البيع".tr,
+                        body: controller.invoices?.saleType == 3
+                            ? "جملة".tr
+                            : (controller.invoices?.saleType == 2
+                                ? "نصف جملة".tr
+                                : "تجزئة".tr),
+                      ),
                     Container(
                       height: 50,
                     ),
@@ -130,7 +141,9 @@ class _PaymentState extends State<Shwoinvoice> {
                     ),
                     SizedBox(
                       height: 250,
-                      child: HandlingviewShimmer(
+                      child: Handlingview(
+                          iconData: Icons.error,
+                          title: "لا يوجد منتجات في الفاتورة".tr,
                           statusrequest: controller.statusrequest,
                           widget: ListView.builder(
                             itemCount: controller.productSale?.products.length,
@@ -164,11 +177,7 @@ class _PaymentState extends State<Shwoinvoice> {
                                       },
                                       onEdit: () {
                                         controller.qtyController.text =
-                                            pro.quantity % 1 == 0
-                                                ? pro.quantity
-                                                    .toInt()
-                                                    .toString()
-                                                : pro.quantity.toString();
+                                            formatQuantity(pro.quantity);
                                         Get.dialog(
                                           CustemQuantityDialog(
                                             isDecimal: pro.type == 2,
@@ -202,7 +211,7 @@ class _PaymentState extends State<Shwoinvoice> {
                                 color: AppColor.grey,
                                 colorp: AppColor.grey,
                                 da: "DA".tr,
-                                q: pro!.quantity.toStringAsFixed(3),
+                                q: formatQuantity(pro!.quantity),
                                 value: pro.subtotal.toStringAsFixed(0),
                               );
                             },

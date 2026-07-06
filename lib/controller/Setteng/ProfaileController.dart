@@ -45,6 +45,10 @@ class Profailecontroller extends GetxController {
     });
   }
 
+  GotoSellers() {
+    Get.toNamed(Approutes.sellers);
+  }
+
   String? name = Get.find<Myservices>().sharedPreferences?.getString("name");
   String? email = Get.find<Myservices>().sharedPreferences?.getString("email");
 }

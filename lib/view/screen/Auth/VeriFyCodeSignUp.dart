@@ -3,6 +3,7 @@ import 'package:flutter_otp_text_field/flutter_otp_text_field.dart';
 import 'package:get/get.dart';
 
 import '../../../controller/auth/VerifiycodeSignUp_Controller.dart';
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 import '../../../core/constant/Colorapp.dart';
 import '../../widget/Auth/CustemTextTitleauth.dart';
@@ -29,9 +30,7 @@ class VerifiycodeSignUp extends StatelessWidget {
           centerTitle: true,
         ),
         body: GetBuilder<VerifiycodesignupControllerImp>(
-            builder: (controller) => HandlingviewAuth(
-                  statusrequest: controller.statusrequest,
-                  widget: Container(
+            builder: (controller) => Container(
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 35),
@@ -51,28 +50,34 @@ class VerifiycodeSignUp extends StatelessWidget {
                         const SizedBox(
                           height: 55,
                         ),
-                        Directionality(
-                            textDirection: TextDirection.ltr,
-                            child: OtpTextField(
-                              numberOfFields: 5,
-                              borderRadius: BorderRadius.circular(10),
-                              borderColor: const Color(0xFF512DA8),
-                              showFieldAsBox: true,
-
-                              fieldWidth: 45, // صغّر العرض باش يقل padding
-
-                              styles: List.generate(
-                                5,
-                                (index) => const TextStyle(
-                                  fontSize: 18,
-                                  height: 1, // مهم باش ينقص الارتفاع الداخلي
+                        controller.statusrequest == Statusrequest.loadeng
+                            ? const Center(
+                                child: CircularProgressIndicator(
+                                  color: AppColor.backgroundcolor,
                                 ),
-                              ),
+                              )
+                            : Directionality(
+                                textDirection: TextDirection.ltr,
+                                child: OtpTextField(
+                                  numberOfFields: 5,
+                                  borderRadius: BorderRadius.circular(10),
+                                  borderColor: const Color(0xFF512DA8),
+                                  showFieldAsBox: true,
 
-                              onSubmit: (code) {
-                                controller.GoToSuccessSignup(code);
-                              },
-                            )),
+                                  fieldWidth: 45, // صغّر العرض باش يقل padding
+
+                                  styles: List.generate(
+                                    5,
+                                    (index) => const TextStyle(
+                                      fontSize: 18,
+                                      height: 1, // مهم باش ينقص الارتفاع الداخلي
+                                    ),
+                                  ),
+
+                                  onSubmit: (code) {
+                                    controller.GoToSuccessSignup(code);
+                                  },
+                                )),
                         const SizedBox(
                           height: 30,
                         ),
@@ -90,6 +95,6 @@ class VerifiycodeSignUp extends StatelessWidget {
                       ],
                     ),
                   ),
-                )));
+                ));
   }
 }

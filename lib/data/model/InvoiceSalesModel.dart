@@ -36,12 +36,14 @@ class InvoiceSalesData {
   final double sumPrice;
   final double discount;
   final double paymentprice;
+  final int? saleType;
 
   InvoiceSalesData({
     required this.products,
     required this.sumPrice,
     required this.discount,
     required this.paymentprice,
+    this.saleType,
   });
 
   factory InvoiceSalesData.fromJson(Map<String, dynamic> json) {
@@ -54,6 +56,7 @@ class InvoiceSalesData {
       sumPrice: double.tryParse(json['sum_price'].toString()) ?? 0.0,
       discount: double.tryParse(json['discount'].toString()) ?? 0.0,
       paymentprice: double.tryParse(json['Payment_price'].toString()) ?? 0.0,
+      saleType: json['sale_type'] != null ? int.tryParse(json['sale_type'].toString()) : 1,
     );
   }
 
@@ -63,6 +66,7 @@ class InvoiceSalesData {
       'sum_price': sumPrice,
       'discount': discount,
       'Payment_price': paymentprice,
+      'sale_type': saleType,
     };
   }
 }

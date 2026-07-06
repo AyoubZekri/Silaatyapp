@@ -32,39 +32,39 @@ class _ShworeportState extends State<Shworeport> {
         ),
       ),
       body: GetBuilder<Shworeportcontroller>(builder: (controller) {
-              if (controller.report.isEmpty) {
-      return Center(
-        child: Lottie.asset(Appimageassets.loading, width: 150),
-      );
-              }
-              return HandlingviewAuth(
-      statusrequest: controller.statusrequest,
-      widget: ListView(
-        children: [
-          Container(
-            margin: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Custembody(
-                  body: controller.report[0].report ?? "",
+        if (controller.report.isEmpty) {
+          return Center(
+            child: Lottie.asset(Appimageassets.loading, width: 150),
+          );
+        }
+        return Handlingview(
+          statusrequest: controller.statusrequest,
+          widget: ListView(
+            children: [
+              Container(
+                margin: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Custembody(
+                      body: controller.report[0].report ?? "",
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    Custembody(
+                        body:
+                            "${'Date'.tr} :${controller.report[0].createdAt?.substring(0, 10) ?? ""}")
+                  ],
                 ),
-                const SizedBox(
-                  height: 20,
-                ),
-                const SizedBox(
-                  height: 20,
-                ),
-                Custembody(
-                    body:
-                        "${'Date'.tr} :${controller.report[0].createdAt?.substring(0, 10) ?? ""}")
-              ],
-            ),
-          )
-        ],
-      ),
-              );
-            }),
+              )
+            ],
+          ),
+        );
+      }),
     );
   }
 }

@@ -6,6 +6,7 @@ import 'package:Silaaty/view/widget/addItem/CustemTextFromFild.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 
 class AddDealer extends StatefulWidget {
@@ -37,9 +38,7 @@ class _AddDealerState extends State<AddDealer> {
         child: GetBuilder<AddTransactionController>(builder: (controller) {
           return Form(
               key: controller.formKey,
-              child: HandlingviewAuth(
-                statusrequest: controller.statusRequest,
-                widget: ListView(
+              child: ListView(
                   children: [
                     Column(
                       children: [
@@ -69,6 +68,7 @@ class _AddDealerState extends State<AddDealer> {
                         ),
                         Custembutton(
                           text: "Add".tr,
+                          isLoading: controller.statusRequest == Statusrequest.loadeng,
                           onPressed: () {
                             if (!validInputsnak(controller.nameController.text,
                                 1, 50, "Name".tr)) {
@@ -97,7 +97,6 @@ class _AddDealerState extends State<AddDealer> {
                       ],
                     ),
                   ],
-                ),
               ));
         }),
       ),

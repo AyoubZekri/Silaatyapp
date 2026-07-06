@@ -8,6 +8,7 @@ import 'package:Silaaty/view/widget/auth/CustemTexTbodyauth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 
 class Resset extends StatelessWidget {
@@ -32,9 +33,7 @@ class Resset extends StatelessWidget {
           centerTitle: true,
         ),
         body: GetBuilder<ResetpasswordcontrolerImp>(
-            builder: (controller) => HandlingviewAuth(
-                  statusrequest: controller.statusrequest,
-                  widget: Container(
+            builder: (controller) => Container(
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 35),
@@ -125,6 +124,7 @@ class Resset extends StatelessWidget {
                             height: 30,
                           ),
                           Custembuttonauth(
+                            isLoading: controller.statusrequest == Statusrequest.loadeng,
                             onPressed: () {
                               controller.Resetpasswordsetting();
                             },
@@ -137,6 +137,6 @@ class Resset extends StatelessWidget {
                       ),
                     ),
                   ),
-                )));
+                ));
   }
 }

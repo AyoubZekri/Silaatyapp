@@ -6,6 +6,7 @@ import 'package:Silaaty/view/widget/addItem/CustemTextFromFild.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 
 class AddConvict extends StatefulWidget {
@@ -38,71 +39,69 @@ class _AddConvictState extends State<AddConvict> {
           child: GetBuilder<AddTransactionController>(builder: (controller) {
             return Form(
                 key: controller.formKey,
-                child: HandlingviewAuth(
-                  statusrequest: controller.statusRequest,
-                  widget: ListView(
-                    children: [
-                      Column(
-                        children: [
-                          Custemtextfromfild(
-                            MyController: controller.nameController,
-                            keyboardType: TextInputType.name,
-                            hintText: "Name".tr,
-                            label: "Name".tr,
-                            iconData: Icons.person_outline,
-                            enabled: true,
-                          ),
-                          Custemtextfromfild(
-                            enabled: true,
-                            MyController: controller.familyNameController,
-                            keyboardType: TextInputType.name,
-                            hintText: "FrsetName".tr,
-                            label: "FrsetName".tr,
-                            iconData: Icons.family_restroom,
-                          ),
-                          Custemtextfromfild(
-                            enabled: true,
-                            MyController: controller.phoneController,
-                            keyboardType: TextInputType.name,
-                            hintText: "Phone Numper".tr,
-                            label: "Phone Numper".tr,
-                            iconData: Icons.phone_outlined,
-                          ),
-                          Custembutton(
-                            text: "Add".tr,
-                            onPressed: () {
-                              if (!validInputsnak(
-                                  controller.nameController.text,
-                                  1,
-                                  10,
-                                  "Name".tr)) {
-                                return;
-                              }
-                              if (!validInputsnak(
-                                  controller.familyNameController.text,
-                                  1,
-                                  10,
-                                  "FrsetName".tr)) {
-                                return;
-                              }
-                              if (!validInputsnak(
-                                  controller.phoneController.text,
-                                  10,
-                                  12,
-                                  "Phone Numper".tr)) {
-                                return;
-                              }
-                              controller.type = 2;
-                              controller.addTransaction();
-                            },
-                            vertical: 10,
-                            horizontal: 10,
-                            paddingvertical: 15,
-                          )
-                        ],
-                      ),
-                    ],
-                  ),
+                child: ListView(
+                  children: [
+                    Column(
+                      children: [
+                        Custemtextfromfild(
+                          MyController: controller.nameController,
+                          keyboardType: TextInputType.name,
+                          hintText: "Name".tr,
+                          label: "Name".tr,
+                          iconData: Icons.person_outline,
+                          enabled: true,
+                        ),
+                        Custemtextfromfild(
+                          enabled: true,
+                          MyController: controller.familyNameController,
+                          keyboardType: TextInputType.name,
+                          hintText: "FrsetName".tr,
+                          label: "FrsetName".tr,
+                          iconData: Icons.family_restroom,
+                        ),
+                        Custemtextfromfild(
+                          enabled: true,
+                          MyController: controller.phoneController,
+                          keyboardType: TextInputType.name,
+                          hintText: "Phone Numper".tr,
+                          label: "Phone Numper".tr,
+                          iconData: Icons.phone_outlined,
+                        ),
+                        Custembutton(
+                          text: "Add".tr,
+                          isLoading: controller.statusRequest == Statusrequest.loadeng,
+                          onPressed: () {
+                            if (!validInputsnak(
+                                controller.nameController.text,
+                                1,
+                                10,
+                                "Name".tr)) {
+                              return;
+                            }
+                            if (!validInputsnak(
+                                controller.familyNameController.text,
+                                1,
+                                10,
+                                "FrsetName".tr)) {
+                              return;
+                            }
+                            if (!validInputsnak(
+                                controller.phoneController.text,
+                                10,
+                                12,
+                                "Phone Numper".tr)) {
+                              return;
+                            }
+                            controller.type = 2;
+                            controller.addTransaction();
+                          },
+                          vertical: 10,
+                          horizontal: 10,
+                          paddingvertical: 15,
+                        )
+                      ],
+                    ),
+                  ],
                 ));
           })),
     );

@@ -34,7 +34,7 @@ class _ProfaileState extends State<Profaile> {
           ),
         ),
         body: GetBuilder<Updateusercontroller>(builder: (controller) {
-          return HandlingviewAuth(
+          return Handlingview(
             statusrequest: controller.statusrequest,
             widget: ListView(
               children: [

@@ -6,6 +6,7 @@ import 'package:Silaaty/view/widget/addItem/CustemTextFromFild.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
 
 class EditConvict extends StatefulWidget {
@@ -37,9 +38,7 @@ class _EditConvictState extends State<EditConvict> {
         child: Form(
             key: controller.formKey,
             child: GetBuilder<EditTransactionController>(builder: (controller) {
-              return HandlingviewAuth(
-                statusrequest: controller.statusrequest,
-                widget: ListView(
+              return ListView(
                   children: [
                     Column(
                       children: [
@@ -69,6 +68,7 @@ class _EditConvictState extends State<EditConvict> {
                         ),
                         Custembutton(
                           text: "Edit".tr,
+                          isLoading: controller.statusrequest == Statusrequest.loadeng,
                           onPressed: () {
                             if (!validInputsnak(controller.nameController.text,
                                 1, 10, "Name".tr)) {
@@ -94,7 +94,6 @@ class _EditConvictState extends State<EditConvict> {
                       ],
                     ),
                   ],
-                ),
               );
             })),
       ),

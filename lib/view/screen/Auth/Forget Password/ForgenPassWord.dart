@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../core/class/handlingview.dart';
+import '../../../../core/class/Statusrequest.dart';
 
 class ForgenPassword extends StatelessWidget {
   const ForgenPassword({super.key});
@@ -31,9 +32,7 @@ class ForgenPassword extends StatelessWidget {
           centerTitle: true,
         ),
         body: GetBuilder<ForgenControllerImp>(
-            builder: (controller) => HandlingviewAuth(
-                  statusrequest: controller.statusrequest,
-                  widget: Container(
+            builder: (controller) => Container(
                     color: Colors.white,
                     padding: const EdgeInsets.symmetric(
                         vertical: 15, horizontal: 35),
@@ -66,6 +65,7 @@ class ForgenPassword extends StatelessWidget {
                             keyboardType: TextInputType.emailAddress,
                           ),
                           Custembuttonauth(
+                            isLoading: controller.statusrequest == Statusrequest.loadeng,
                             onPressed: () {
                               controller.CheckEmail("VerFiyCode");
                             },
@@ -78,6 +78,6 @@ class ForgenPassword extends StatelessWidget {
                       ),
                     ),
                   ),
-                )));
+                ));
   }
 }

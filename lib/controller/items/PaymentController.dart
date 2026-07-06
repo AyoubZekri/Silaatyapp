@@ -19,6 +19,7 @@ class PaymentController extends GetxController {
   String currentDate = '';
   String selectedCustomer = '';
   int type = 0;
+  int saleType = 1;
 
   late TextEditingController paymentController;
   late TextEditingController discountController;
@@ -44,7 +45,9 @@ class PaymentController extends GetxController {
       "discount": discountController.text,
       "invoies_payment_date": DateTime.now().toIso8601String(),
       "created_at": DateTime.now().toIso8601String(),
-      "Payment_price": paymentController.text
+      "Payment_price": paymentController.text,
+      "sale_type": saleType,
+      "seller_id": id,
     };
 
     List<Map<String, Object?>> dataSale = products.map((item) {
@@ -59,6 +62,7 @@ class PaymentController extends GetxController {
         "invoie_uuid": uuidinvoice,
         "type_sales": (type == 1 ? 1 : 2), // 1 = in 2 = on 3
         "user_id": id,
+        "seller_id": id,
         "created_at": DateTime.now().toIso8601String(),
         "product_price_purchase": item["price_Purchase"],
         "product_name": item["name"],
@@ -95,6 +99,7 @@ class PaymentController extends GetxController {
     selectedCustomer = args['selectedCustomer']?.toString() ?? '0';
 
     if (args['type'] != null) type = args['type'];
+    if (args['sale_type'] != null) saleType = args['sale_type'];
 
     currentDate = DateFormat('yyyy-MM-dd').format(DateTime.now());
 

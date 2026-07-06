@@ -25,6 +25,8 @@ class Edititemcontroller extends GetxController {
   final nameController = TextEditingController();
   final descriptionController = TextEditingController();
   final priseController = TextEditingController();
+  final priseHalfWholesaleController = TextEditingController();
+  final priseWholesaleController = TextEditingController();
   final barcodeController = TextEditingController();
   final pricePurchaseController = TextEditingController();
   final quantityController = TextEditingController();
@@ -94,6 +96,8 @@ class Edititemcontroller extends GetxController {
       'product_description': descriptionController.text,
       'product_quantity': newQty,
       'product_price': priseController.text,
+      'product_price_half_wholesale': priseHalfWholesaleController.text.isNotEmpty ? priseHalfWholesaleController.text : "0",
+      'product_price_wholesale': priseWholesaleController.text.isNotEmpty ? priseWholesaleController.text : "0",
       'categorie_id': selectedCategoryId.toString(),
       'categoris_uuid': selectedtypeuuId.toString(),
       'product_price_total': priceTotal.toString(),
@@ -163,6 +167,8 @@ class Edititemcontroller extends GetxController {
     nameController.text = product.productName ?? "";
     descriptionController.text = product.productDescription ?? "";
     priseController.text = product.productPrice.toString();
+    priseHalfWholesaleController.text = product.productPriceHalfWholesale?.toString() ?? "0";
+    priseWholesaleController.text = product.productPriceWholesale?.toString() ?? "0";
     pricePurchaseController.text = product.productPricePurchase.toString();
     barcodeController.text = product.codepar.toString();
     selectedCategoryId = product.categorieId;
@@ -241,6 +247,8 @@ class Edititemcontroller extends GetxController {
     nameController.dispose();
     descriptionController.dispose();
     priseController.dispose();
+    priseHalfWholesaleController.dispose();
+    priseWholesaleController.dispose();
     quantityController.dispose();
     super.onClose();
   }

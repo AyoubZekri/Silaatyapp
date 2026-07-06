@@ -8,6 +8,8 @@ import '../../../controller/Dashpord/Salecontroller.dart';
 import '../../widget/Zacat/CustemRowProdact.dart';
 import '../../widget/sale/CostumDealogEditProduct.dart';
 import '../../widget/sale/CustemdropdawnAnimated.dart';
+import '../../widget/sale/CustemSaleTypeDropdownAnimated.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 
 class NewSale extends StatefulWidget {
   const NewSale({super.key});
@@ -53,19 +55,43 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.only(top: 15),
-                    child: Text("العميل".tr, style: TextStyle(fontSize: 16)),
+                  Expanded(
+                    flex: 3,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text("العميل".tr, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                        const SizedBox(height: 5),
+                        Custemdropdawnanimated(
+                          customers: controller.customers,
+                          selectedCustomer: controller.selectedCustomer,
+                          onSelect: (value) {
+                            controller.selectCustomer(value);
+                            print("===================$controller.selectedCustomer");
+                          },
+                        ),
+                      ],
+                    ),
                   ),
-                  const SizedBox(width: 20),
-                  Custemdropdawnanimated(
-                    customers: controller.customers,
-                    selectedCustomer: controller.selectedCustomer,
-                    onSelect: (value) {
-                      controller.selectCustomer(value);
-                      print("===================$controller.selectedCustomer");
-                    },
-                  ),
+                  if (controller.type != 1) ...[
+                    const SizedBox(width: 10),
+                    Expanded(
+                      flex: 2,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text("نوع البيع".tr, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
+                          const SizedBox(height: 5),
+                          CustemSaleTypeDropdownAnimated(
+                            selectedSaleType: controller.saleType,
+                            onSelect: (val) {
+                              controller.changeSaleType(val);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -118,9 +144,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                 onTap: () {
                                   TextEditingController qtyController =
                                       TextEditingController(
-                                    text: item['type_item'] == 2
-                                        ? item['quantity'].toString()
-                                        : item['quantity'].toInt().toString(),
+                                    text: formatQuantity(item['quantity']),
                                   );
                                   final currentPrice = controller.type == 1
                                       ? item['price_Purchase']
@@ -370,11 +394,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                 color: AppColor.grey,
                                 colorp: AppColor.grey,
                                 da: "DA".tr,
-                                q: item['type_item'] == 2
-                                    ? item["quantity"].toStringAsFixed(3)
-                                    : item["quantity"]
-                                        .toInt()
-                                        .toStringAsFixed(3),
+                                q: formatQuantity(item["quantity"]),
                                 value: ((controller.type == 1
                                             ? item["price_Purchase"]
                                             : item["price"]) *

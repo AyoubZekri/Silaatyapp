@@ -352,6 +352,19 @@ class Shwoinvoicecontroller extends GetxController {
                   ),
                 ),
               ),
+              if (invoices!.saleType != null) ...[
+                pw.SizedBox(height: 5),
+                pw.Directionality(
+                  textDirection: pw.TextDirection.rtl,
+                  child: pw.Text(
+                    "${'نوع البيع'.tr}: ${invoices!.saleType == 3 ? 'جملة'.tr : (invoices!.saleType == 2 ? 'نصف جملة'.tr : 'تجزئة'.tr)}",
+                    style: pw.TextStyle(
+                      font: Get.locale?.languageCode == "ar" ? arabicFont : englishFont,
+                      fontSize: 12,
+                    ),
+                  ),
+                ),
+              ],
               pw.SizedBox(height: 15),
               pw.Table(
                 border: pw.TableBorder.all(
@@ -860,6 +873,15 @@ class Shwoinvoicecontroller extends GetxController {
                         textAlign: TextAlign.start,
                         overflow: TextOverflow.ellipsis,
                       ),
+                      if (invoices.saleType != null) ...[
+                        const SizedBox(height: 5),
+                        Text(
+                          "${'نوع البيع'.tr}: ${invoices.saleType == 3 ? 'جملة'.tr : (invoices.saleType == 2 ? 'نصف جملة'.tr : 'تجزئة'.tr)}",
+                          style: const TextStyle(
+                              fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
+                          textAlign: TextAlign.start,
+                        ),
+                      ],
                     ],
                   ),
                   const SizedBox(height: 10),

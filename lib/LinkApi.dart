@@ -18,6 +18,12 @@ class Applink {
   static const String logout = "$server/User/logout";
   static const String getUser = "$server/User/get";
 
+  // Sellers Management
+  static const String sellerGet = "$server/seller-user";
+  static const String sellerAdd = "$server/seller-user/add";
+  static const String sellerUpdate = "$server/seller-user/update";
+  static const String sellerDelete = "$server/seller-user/delete";
+
 
   static const String CategoriesGet = "$server/categories";
   static const String AddProdact = "$server/products/create";
@@ -68,8 +74,5 @@ class Applink {
 
   static const String getpay = "$server/payments/invoice";
 
-
-  static const String chargilycreate = "$server/payments/chargily/create";
-  // static const String getpay = "$server/payments/invoice";
 
 }

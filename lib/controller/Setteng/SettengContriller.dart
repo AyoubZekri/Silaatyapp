@@ -35,9 +35,6 @@ class Settengcontriller extends GetxController {
     Get.toNamed(Approutes.profail);
   }
 
-  gotoSubscriptionPay() {
-    Get.toNamed(Approutes.subscriptionPay);
-  }
 
   ChangePassword() {
     Get.toNamed(Approutes.reset);

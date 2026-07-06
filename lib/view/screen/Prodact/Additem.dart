@@ -1,4 +1,5 @@
 import 'package:Silaaty/controller/items/AdditemsController.dart';
+import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/class/handlingview.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/functions/Snacpar.dart';
@@ -45,9 +46,7 @@ class _AdditemState extends State<Additem> {
           padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 5),
           child: Form(
             key: controller.formstate,
-            child: HandlingviewAuth(
-              statusrequest: controller.statusrequest,
-              widget: ListView(
+            child: ListView(
                 children: [
                   Column(
                     children: [
@@ -236,8 +235,24 @@ class _AdditemState extends State<Additem> {
                       Custemtextfromfild(
                         MyController: controller.priseController,
                         keyboardType: TextInputType.number,
-                        hintText: "Selling Price".tr,
-                        label: "Selling Price".tr,
+                        hintText: "سعر التجزئة".tr,
+                        label: "سعر التجزئة".tr,
+                        iconData: Icons.attach_money,
+                        enabled: true,
+                      ),
+                      Custemtextfromfild(
+                        MyController: controller.priseHalfWholesaleController,
+                        keyboardType: TextInputType.number,
+                        hintText: "سعر النصف جملة".tr,
+                        label: "سعر النصف جملة".tr,
+                        iconData: Icons.attach_money,
+                        enabled: true,
+                      ),
+                      Custemtextfromfild(
+                        MyController: controller.priseWholesaleController,
+                        keyboardType: TextInputType.number,
+                        hintText: "سعر الجملة".tr,
+                        label: "سعر الجملة".tr,
                         iconData: Icons.attach_money,
                         enabled: true,
                       ),
@@ -268,30 +283,30 @@ class _AdditemState extends State<Additem> {
                         iconData: Icons.attach_money,
                         enabled: true,
                       ),
-                      Custembutton(
-                        text: "Add".tr,
-                        onPressed: () {
-                          if (!validInputsnak(controller.nameController.text, 1,
-                              20, "Name".tr)) {
-                            return;
-                          }
+                          Custembutton(
+                              isLoading: controller.statusrequest == Statusrequest.loadeng,
+                              text: "Add".tr,
+                              onPressed: () {
+                                if (!validInputsnak(controller.nameController.text, 1,
+                                    20, "Name".tr)) {
+                                  return;
+                                }
 
-                          if (!validInputsnak(controller.barcodeController.text,
-                              8, 13, "Barcode".tr)) {
-                            return;
-                          }
+                                if (!validInputsnak(controller.barcodeController.text,
+                                    8, 13, "Barcode".tr)) {
+                                  return;
+                                }
 
-                          controller.addProduct();
-                          Get.back(result: true);
-                        },
-                        vertical: 10,
-                        horizontal: 10,
-                        paddingvertical: 15,
-                      )
+                                controller.addProduct();
+                                Get.back(result: true);
+                              },
+                              vertical: 10,
+                              horizontal: 10,
+                              paddingvertical: 15,
+                            )
                     ],
                   ),
                 ],
-              ),
             ),
           ),
         );

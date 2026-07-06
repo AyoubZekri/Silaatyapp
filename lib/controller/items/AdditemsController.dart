@@ -27,6 +27,8 @@ class Additemscontroller extends GetxController {
   final barcodeController = TextEditingController();
   final descriptionController = TextEditingController();
   final priseController = TextEditingController();
+  final priseHalfWholesaleController = TextEditingController();
+  final priseWholesaleController = TextEditingController();
   final pricePurchaseController = TextEditingController();
   final quantityController = TextEditingController();
 
@@ -83,6 +85,8 @@ class Additemscontroller extends GetxController {
         'product_description': descriptionController.text,
         'product_quantity': quantityController.text,
         'product_price': priseController.text,
+        'product_price_half_wholesale': priseHalfWholesaleController.text.isNotEmpty ? priseHalfWholesaleController.text : "0",
+        'product_price_wholesale': priseWholesaleController.text.isNotEmpty ? priseWholesaleController.text : "0",
         'categorie_id': selectedCategoryId.toString(),
         'categoris_uuid': selectedtypeuuid,
         'product_price_total': priceTotal.toString(),
@@ -270,6 +274,8 @@ class Additemscontroller extends GetxController {
   void resetForm() {
     nameController.clear();
     priseController.clear();
+    priseHalfWholesaleController.clear();
+    priseWholesaleController.clear();
     pricePurchaseController.clear();
     quantityController.text = "1";
     getCategoris();
