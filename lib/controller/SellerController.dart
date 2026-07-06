@@ -48,7 +48,7 @@ class SellerController extends GetxController {
     update();
     var response = await sellerData.getSellers();
     statusrequest = handlingData(response);
-    
+
     if (Statusrequest.success == statusrequest) {
       if (response['status'] == 1) {
         sellers = response['data']['sellers'] ?? [];
@@ -61,20 +61,19 @@ class SellerController extends GetxController {
 
   addSeller() async {
     if (!formState.currentState!.validate()) return;
-    
+
     statusrequest = Statusrequest.loadeng;
     update();
-    
+
     var response = await sellerData.addSeller(
       nameController.text,
       emailController.text,
       passwordController.text,
     );
-    
+
     statusrequest = handlingData(response);
     if (Statusrequest.success == statusrequest) {
       if (response['status'] == 1) {
-        showSnackbar("نجاح".tr, "تمت إضافة البائع بنجاح".tr, Colors.green);
         Get.back();
         getSellers();
         nameController.clear();
@@ -104,7 +103,6 @@ class SellerController extends GetxController {
     statusrequest = handlingData(response);
     if (Statusrequest.success == statusrequest) {
       if (response['status'] == 1) {
-        showSnackbar("نجاح".tr, "تم تعديل البائع بنجاح".tr, Colors.green);
         Get.back();
         getSellers();
       } else {
@@ -124,7 +122,6 @@ class SellerController extends GetxController {
     statusrequest = handlingData(response);
     if (Statusrequest.success == statusrequest) {
       if (response['status'] == 1) {
-        showSnackbar("نجاح".tr, "تم حذف البائع بنجاح".tr, Colors.green);
         getSellers();
       } else {
         statusrequest = Statusrequest.failure;

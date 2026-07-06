@@ -149,9 +149,11 @@ class Statisticsdata {
     DateTime? from,
     DateTime? to,
     String? filter,
+    int? sellerId,
   }) async {
+    final queryId = sellerId ?? id;
     final result = getDateRangeClause(
-      id,
+      queryId,
       filter: filter,
       t: "i",
       from: from,
@@ -159,7 +161,7 @@ class Statisticsdata {
     );
 
     final result2 = getDateRangeClause(
-      id,
+      queryId,
       filter: filter,
       t: "s",
       from: from,
@@ -298,8 +300,8 @@ class Statisticsdata {
     ORDER BY period DESC;
       ''',
         isSingleDay
-            ? [id, start.toIso8601String()]
-            : [id, start.toIso8601String(), end.toIso8601String()]);
+            ? [queryId, start.toIso8601String()]
+            : [queryId, start.toIso8601String(), end.toIso8601String()]);
 
     return {
       "status": 1,
@@ -663,16 +665,18 @@ class Statisticsdata {
     DateTime? to,
     String? filter,
     int? type,
+    int? sellerId,
   }) async {
+    final queryId = sellerId ?? id;
     final result = getDateRangeClause(
-      id,
+      queryId,
       filter: filter,
       t: "s",
       from: from,
       to: to,
     );
     final result2 = getDateRangeClause(
-      id,
+      queryId,
       filter: filter,
       t: "i",
       from: from,

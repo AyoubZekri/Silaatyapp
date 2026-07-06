@@ -20,7 +20,7 @@ class Statisticereportescontroller extends GetxController {
     "last_year": "السنة الماضية".tr,
   };
 
-  gotoPublicFinance() {
+  gotoPublicFinance({int? sellerId}) {
     // نضرة مالية عامة
     if (filterController == null &&
         (customStartDate == null || customEndDate == null)) {
@@ -30,8 +30,8 @@ class Statisticereportescontroller extends GetxController {
     Get.toNamed(
       Approutes.publicfinance,
       arguments: filterController == "custom"
-          ? {"from": customStartDate, "to": customEndDate}
-          : {"filter": filterController},
+          ? {"from": customStartDate, "to": customEndDate, "seller_id": sellerId}
+          : {"filter": filterController, "seller_id": sellerId},
     );
     filterController = null;
     customStartDate = null;
@@ -84,7 +84,7 @@ class Statisticereportescontroller extends GetxController {
     customEndDate = null;
   }
 
-  gotoCustomerSales() {
+  gotoCustomerSales({int? sellerId}) {
     // مبيعات العملاء
     if (filterController == null &&
         (customStartDate == null || customEndDate == null)) {
@@ -94,15 +94,15 @@ class Statisticereportescontroller extends GetxController {
     Get.toNamed(
       Approutes.customersales,
       arguments: filterController == "custom"
-          ? {"from": customStartDate, "to": customEndDate}
-          : {"filter": filterController},
+          ? {"from": customStartDate, "to": customEndDate, "seller_id": sellerId}
+          : {"filter": filterController, "seller_id": sellerId},
     );
     filterController = null;
     customStartDate = null;
     customEndDate = null;
   }
 
-  gotoSupplierReports() {
+  gotoSupplierReports({int? sellerId}) {
     // تقارير الموردون
     if (filterController == null &&
         (customStartDate == null || customEndDate == null)) {
@@ -112,8 +112,8 @@ class Statisticereportescontroller extends GetxController {
     Get.toNamed(
       Approutes.supplierreports,
       arguments: filterController == "custom"
-          ? {"from": customStartDate, "to": customEndDate}
-          : {"filter": filterController},
+          ? {"from": customStartDate, "to": customEndDate, "seller_id": sellerId}
+          : {"filter": filterController, "seller_id": sellerId},
     );
     filterController = null;
     customStartDate = null;

@@ -9,6 +9,7 @@ class Customersalescontroller extends GetxController {
   String? filter;
   DateTime? from;
   DateTime? to;
+  int? sellerId;
   FinanceReport? data;
   Statusrequest statusrequest = Statusrequest.none;
   Statisticsdata statisticsdata = Statisticsdata();
@@ -16,7 +17,7 @@ class Customersalescontroller extends GetxController {
   getdata() async {
     update();
     var result = await statisticsdata.transactionsSales(
-        from: from, to: to, filter: filter, type: 2);
+        from: from, to: to, filter: filter, type: 2, sellerId: sellerId);
     print("===================================$result");
     if (result["status"] == 1) {
       data = FinanceReport.fromJson(result);
@@ -99,6 +100,7 @@ class Customersalescontroller extends GetxController {
     filter = args?["filter"];
     from = args?["from"];
     to = args?["to"];
+    sellerId = args?["seller_id"];
     getdata();
     super.onInit();
   }

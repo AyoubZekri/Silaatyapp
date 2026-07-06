@@ -63,5 +63,7 @@ class Approutes {
   static const String stockvalue = "/Stockvalue";
   static const String supplierreports = "/Supplierreports";
 
+  static const String sellerInvoices = "/SellerInvoices";
+  static const String sellerReports = "/SellerReports";
   static const String activationPay = "/activationPay";
 }

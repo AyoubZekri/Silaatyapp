@@ -50,20 +50,24 @@ class SellerScreen extends StatelessWidget {
             itemCount: controller.sellers.length,
             itemBuilder: (context, index) {
               var seller = controller.sellers[index];
-              return Container(
-                margin: const EdgeInsets.only(bottom: 16),
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(20),
-                  boxShadow: [
-                    BoxShadow(
-                      color: AppColor.backgroundcolor.withOpacity(0.08),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
+              return InkWell(
+                onTap: () {
+                  Get.toNamed('/SellerInvoices', arguments: seller);
+                },
+                child: Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(20),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColor.backgroundcolor.withOpacity(0.08),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
                 child: Row(
                   children: [
                     Container(
@@ -152,6 +156,23 @@ class SellerScreen extends StatelessWidget {
                           width: 40,
                           height: 40,
                           decoration: BoxDecoration(
+                            color: Colors.green.withOpacity(0.08),
+                            shape: BoxShape.circle,
+                          ),
+                          child: IconButton(
+                            padding: EdgeInsets.zero,
+                            icon: const Icon(Icons.bar_chart_rounded,
+                                color: Colors.green, size: 20),
+                            onPressed: () {
+                              Get.toNamed('/SellerReports', arguments: seller);
+                            },
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
                             color: Colors.blue.withOpacity(0.08),
                             shape: BoxShape.circle,
                           ),
@@ -203,7 +224,7 @@ class SellerScreen extends StatelessWidget {
                     )
                   ],
                 ),
-              );
+              ));
             },
           ),
         );

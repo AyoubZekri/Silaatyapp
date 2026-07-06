@@ -9,6 +9,7 @@ class Publicfinancecontroller extends GetxController {
   String? filter;
   DateTime? from;
   DateTime? to;
+  int? sellerId;
   FinanceReport? data;
   Statusrequest statusrequest = Statusrequest.none;
   Statisticsdata statisticsdata = Statisticsdata();
@@ -16,7 +17,7 @@ class Publicfinancecontroller extends GetxController {
   getdata() async {
     update();
     var result = await statisticsdata.loadFinanceData(
-        from: from, to: to, filter: filter);
+        from: from, to: to, filter: filter, sellerId: sellerId);
     print("===================================$result");
     if (result["status"] == 1) {
       data = FinanceReport.fromJson(result);
@@ -88,6 +89,7 @@ String formatSmartDate(String input) {
     filter = args?["filter"];
     from = args?["from"];
     to = args?["to"];
+    sellerId = args?["seller_id"];
     getdata();
     super.onInit();
   }

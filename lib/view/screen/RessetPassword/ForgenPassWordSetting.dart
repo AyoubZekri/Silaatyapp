@@ -9,7 +9,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../core/class/Statusrequest.dart';
-import '../../../core/class/handlingview.dart';
 
 class Forgenpasswordsetting extends StatelessWidget {
   const Forgenpasswordsetting({super.key});

@@ -49,6 +49,8 @@ import 'view/screen/RessetPassword/ForgenPassWordSetting.dart';
 import 'view/screen/RessetPassword/ResetPasswordSetting.dart';
 import 'view/screen/RessetPassword/Resset.dart';
 import 'view/screen/Sellers/SellerScreen.dart';
+import 'view/screen/Sellers/SellerInvoices.dart';
+import 'view/screen/Sellers/SellerReports.dart';
 import 'view/screen/SplashScreen.dart';
 import 'view/screen/Statistice/PublicFinance.dart';
 import 'view/screen/Statistice/StatisticeReports.dart';
@@ -130,4 +132,6 @@ List<GetPage<dynamic>> routes = [
   GetPage(name: Approutes.supplierreports, page: () => Supplierreports()),
   GetPage(name: Approutes.activationExpiredPage, page: () => const activationExpiredPage()),
   GetPage(name: Approutes.sellers, page: () => const SellerScreen()),
+  GetPage(name: Approutes.sellerInvoices, page: () => const SellerInvoices()),
+  GetPage(name: Approutes.sellerReports, page: () => const SellerReports()),
 ];
