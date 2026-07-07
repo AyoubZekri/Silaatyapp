@@ -96,12 +96,14 @@ class Logincontroller extends GetxController {
               "email": Email.text,
             });
             reset();
-          } else if (status > 2) {
-            Get.offNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
-          } else if (
-              experimentDate != null &&today.isBefore(experimentDate)&&
-              response['data']["user"]["user"]['Status'] >= 2) {
-            Get.offNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
+          } else if (status == 5 || status == 6) {
+            Get.offAllNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
+          } else if ((status == 2 || status == 3 || status == 4) &&
+              experimentDate != null &&
+              today.isBefore(experimentDate)) {
+            Get.offAllNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
+          } else if (status == 2 || status == 3 || status == 4) {
+            Get.offAllNamed(Approutes.activationExpiredPage);
           } else {
             showSnackbar("error".tr, "contact_admin".tr, Colors.red);
           }

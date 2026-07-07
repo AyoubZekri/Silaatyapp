@@ -56,11 +56,12 @@ class Profailedata extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        Custemcartbutton(
-                          ontap: () => controller.GotoSellers(),
-                          Title: 'إدارة البائعين'.tr,
-                          iconData: Icons.manage_accounts_outlined,
-                        ),
+                        if (controller.status != 3 && controller.status != 5)
+                          Custemcartbutton(
+                            ontap: () => controller.GotoSellers(),
+                            Title: 'إدارة البائعين'.tr,
+                            iconData: Icons.manage_accounts_outlined,
+                          ),
                         Custemcartbutton(
                           ontap: () => controller.GotoStok(),
                           Title: 'المخزون'.tr,

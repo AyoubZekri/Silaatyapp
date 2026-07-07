@@ -38,6 +38,38 @@ class _HomeState extends State<Home> {
           color: AppColor.white,
           child: ListView(
             children: [
+              if (controller.showExpirationWarning)
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withOpacity(0.1),
+                    border: Border.all(color: Colors.orange, width: 1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Text(
+                          "قريبا انتهاء تفعيلك".tr,
+                          style: const TextStyle(
+                            color: Colors.orange,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () {
+                          controller.dismissWarning();
+                        },
+                        icon: const Icon(Icons.close, color: Colors.orange),
+                      ),
+                    ],
+                  ),
+                ),
               Custemtitle(title: "إحصائيات اليوم".tr),
               const SizedBox(height: 20),
               Column(

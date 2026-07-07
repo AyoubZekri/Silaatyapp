@@ -125,7 +125,7 @@ class _SellerInvoicesState extends State<SellerInvoices> with RouteAware {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    controller.seller['name'] ?? 'بائع',
+                                    controller.seller['name'] ?? 'بائع'.tr,
                                     style: const TextStyle(
                                       color: Colors.white,
                                       fontSize: 22,
@@ -263,6 +263,7 @@ class _SellerInvoicesState extends State<SellerInvoices> with RouteAware {
                             paymentDate: inv.paymentDate,
                             paymentPrice: inv.paymentPrice,
                             discount: inv.discount,
+                            saleType: inv.saleType,
                             totalSales: inv.totalSales,
                             debt: inv.debt,
                             invoiceSum: inv.invoiceSum,

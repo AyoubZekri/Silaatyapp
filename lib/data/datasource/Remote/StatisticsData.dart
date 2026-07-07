@@ -151,9 +151,8 @@ class Statisticsdata {
     String? filter,
     int? sellerId,
   }) async {
-    final queryId = sellerId ?? id;
     final result = getDateRangeClause(
-      queryId,
+      id,
       filter: filter,
       t: "i",
       from: from,
@@ -161,7 +160,7 @@ class Statisticsdata {
     );
 
     final result2 = getDateRangeClause(
-      queryId,
+      id,
       filter: filter,
       t: "s",
       from: from,
@@ -188,7 +187,7 @@ class Statisticsdata {
         SUM(CASE WHEN s.type_sales = 2 THEN (s.unit_price - s.product_price_purchase) * s.quantity ELSE 0 END) AS invoice_profit
       FROM invoies i
       JOIN sales s ON s.invoie_uuid = i.uuid
-      WHERE i.user_id = ? $whereClause2 AND s.is_delete = 0
+      WHERE i.user_id = ? ${sellerId != null ? 'AND i.seller_id = $sellerId' : ''} $whereClause2 AND s.is_delete = 0
       GROUP BY i.uuid
     )
   ''', args);
@@ -197,7 +196,7 @@ class Statisticsdata {
     final totalRevenue = await db.readData('''
     SELECT IFNULL(SUM(s.unit_price * s.quantity), 0) as total_revenue
     FROM sales s
-    WHERE s.user_id = ? AND s.type_sales = 3 $whereClause2 AND s.is_delete = 0
+    WHERE s.user_id = ? ${sellerId != null ? 'AND s.seller_id = $sellerId' : ''} AND s.type_sales = 3 $whereClause2 AND s.is_delete = 0
   ''', args);
 
     // 🔹 المصروفات
@@ -205,7 +204,7 @@ class Statisticsdata {
     SELECT IFNULL(SUM(Payment_price - discount), 0) as total_expenses
     FROM invoies i
     JOIN transactions t ON i.Transaction_uuid = t.uuid
-    WHERE i.user_id = ? AND t.transactions = 1 $whereClause 
+    WHERE i.user_id = ? ${sellerId != null ? 'AND i.seller_id = $sellerId' : ''} AND t.transactions = 1 $whereClause 
   ''', args);
 
     // 🔹 عدد الفواتير
@@ -213,7 +212,7 @@ class Statisticsdata {
     SELECT COUNT(*) as total_invoices
     FROM invoies i
     LEFT JOIN transactions t ON i.Transaction_uuid = t.uuid 
-    WHERE i.user_id = ?  $whereClause AND (t.transactions IS NULL OR t.transactions = 2)
+    WHERE i.user_id = ? ${sellerId != null ? 'AND i.seller_id = $sellerId' : ''} $whereClause AND (t.transactions IS NULL OR t.transactions = 2)
 
 
   ''', args);
@@ -292,6 +291,7 @@ class Statisticsdata {
         LEFT JOIN invoies i ON s.invoie_uuid = i.uuid
         LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
         WHERE s.user_id = ?
+          ${sellerId != null ? 'AND s.seller_id = $sellerId' : ''}
           AND s.is_delete = 0
           AND $dateCondition
         GROUP BY i.uuid
@@ -300,8 +300,8 @@ class Statisticsdata {
     ORDER BY period DESC;
       ''',
         isSingleDay
-            ? [queryId, start.toIso8601String()]
-            : [queryId, start.toIso8601String(), end.toIso8601String()]);
+            ? [id, start.toIso8601String()]
+            : [id, start.toIso8601String(), end.toIso8601String()]);
 
     return {
       "status": 1,
@@ -667,16 +667,15 @@ class Statisticsdata {
     int? type,
     int? sellerId,
   }) async {
-    final queryId = sellerId ?? id;
     final result = getDateRangeClause(
-      queryId,
+      id,
       filter: filter,
       t: "s",
       from: from,
       to: to,
     );
     final result2 = getDateRangeClause(
-      queryId,
+      id,
       filter: filter,
       t: "i",
       from: from,
@@ -696,6 +695,7 @@ class Statisticsdata {
         IFNULL(SUM(s.subtotal), 0) AS total_sales
       FROM sales s
       WHERE s.user_id = ? 
+        ${sellerId != null ? 'AND s.seller_id = $sellerId' : ''}
         AND s.type_sales = $type $whereClause
         AND s.is_delete = 0
   ''';
@@ -722,6 +722,7 @@ class Statisticsdata {
       FROM invoies i
       JOIN transactions t ON i.Transaction_uuid = t.uuid
       WHERE i.user_id = ? AND t.transactions = $type
+        ${sellerId != null ? 'AND i.seller_id = $sellerId' : ''}
         $whereClause2
     );
     ''';
@@ -753,6 +754,7 @@ class Statisticsdata {
         JOIN transactions t ON i.Transaction_uuid = t.uuid
         WHERE i.user_id = ? 
         AND t.transactions = $type
+        ${sellerId != null ? 'AND i.seller_id = $sellerId' : ''}
         $whereClause2
       )
       GROUP BY family_name, name;

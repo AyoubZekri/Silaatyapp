@@ -126,6 +126,54 @@ class Invoicedata {
     };
   }
 
+  Future<Map<String, dynamic>> getSellerInvoices(int sellerId) async {
+    final dbClient = await db.db;
+    if (dbClient == null) throw Exception("Database connection is null");
+
+    final invoices = await dbClient.rawQuery('''
+  SELECT 
+    i.uuid AS invoice_uuid,
+    i.Transaction_uuid,
+    i.discount,
+    i.invoies_numper,
+    i.invoies_date,
+    i.Payment_price,
+    i.user_id,
+    i.seller_id,
+    IFNULL(SUM(s.subtotal), 0) AS total_sales,
+    (IFNULL(SUM(s.subtotal), 0) - IFNULL(i.discount, 0)) AS total_after_discount,
+    ((IFNULL(SUM(s.subtotal), 0) - IFNULL(i.discount, 0)) - IFNULL(i.Payment_price, 0)) AS debt,
+    t.name,
+    t.transactions,
+    t.family_name,
+    t.phone_number
+  FROM invoies i
+  LEFT JOIN transactions t 
+  ON t.uuid = i.Transaction_uuid        
+  LEFT JOIN sales s 
+      ON s.invoie_uuid = i.uuid                     
+  WHERE i.user_id = ? AND i.seller_id = ? AND (t.transactions = 2 OR t.transactions IS NULL)
+  GROUP BY i.uuid
+  ORDER BY i.invoies_date DESC;
+''', [id, sellerId]);
+
+    double sumPrice = 0.0;
+    double sumPaymentPrice = 0.0;
+    
+    for (var inv in invoices) {
+      sumPrice += double.tryParse(inv['total_after_discount'].toString()) ?? 0.0;
+      sumPaymentPrice += double.tryParse(inv['Payment_price'].toString()) ?? 0.0;
+    }
+
+    return {
+      "data": {
+        "invoices": invoices,
+        "sum_price": sumPrice,
+        "sum_payment_Price": sumPaymentPrice,
+      }
+    };
+  }
+
   Future<Map<String, dynamic>> getMyInvoicesByTransaction(
       Map<String, Object?> data) async {
     final transactionuuId = data["transaction_uuid"];

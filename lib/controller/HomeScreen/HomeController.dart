@@ -13,6 +13,9 @@ class Homecontroller extends GetxController {
   Statusrequest staticrequest = Statusrequest.none;
   StatisticsHomeModel? statisticsHome;
 
+  bool showExpirationWarning = false;
+  Myservices myServices = Get.find();
+
   gotoAddclients() {
     Get.toNamed(Approutes.AddConvict);
   }
@@ -88,6 +91,34 @@ class Homecontroller extends GetxController {
     update();
   }
 
+  void checkExpirationDate() {
+    final status = myServices.sharedPreferences!.getInt("Status");
+    if (status == 5 || status == 6) {
+      showExpirationWarning = false;
+      return;
+    }
+
+    final dateStr = myServices.sharedPreferences!.getString("date_experiment");
+    if (dateStr != null && dateStr.isNotEmpty) {
+      try {
+        final expDate = DateTime.parse(dateStr);
+        final now = DateTime.now();
+        final difference = expDate.difference(now).inDays;
+
+        if (difference >= 0 && difference <= 30) {
+          showExpirationWarning = true;
+        }
+      } catch (e) {
+        // ignore parsing error
+      }
+    }
+  }
+
+  void dismissWarning() {
+    showExpirationWarning = false;
+    update();
+  }
+
   @override
   void onInit() {
     final refreshService = Get.find<RefreshService>();
@@ -102,6 +133,8 @@ class Homecontroller extends GetxController {
     if (fromLogin) {
       _handleLoginSync();
     }
+
+    checkExpirationDate();
 
     super.onInit();
   }

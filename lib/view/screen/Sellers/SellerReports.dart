@@ -111,7 +111,7 @@ class _SellerReportsState extends State<SellerReports> {
                     ],
                   ),
                 ),
-                Text("العملاء".tr),
+                Text("تقارير العملاء".tr),
                 SizedBox(
                   height: 15,
                 ),
@@ -123,7 +123,7 @@ class _SellerReportsState extends State<SellerReports> {
                   child: Column(
                     children: [
                       Custemcartbutton(
-                        Title: 'مبيعات العملاء'.tr,
+                        Title: 'تقارير مبيعات العملاء'.tr,
                         iconData: Icons.description_outlined,
                         ontap: () {
                           showDialog(

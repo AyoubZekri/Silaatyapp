@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
+import '../core/constant/routes.dart';
 import '../core/functions/Snacpar.dart';
 import '../core/services/Services.dart';
 
@@ -28,16 +29,29 @@ class SellerInvoicesController extends GetxController {
     statusrequest = Statusrequest.loadeng;
     update();
 
-    // Here you would fetch invoices created by the seller (user_id = seller['id']).
-    // For now, we simulate an empty response because the query for seller invoices isn't fully set up.
-    
-    // Create an empty InvoiceData model to prevent null errors in the UI
-    invoice = InvoiceData(
-      transaction: null,
-      invoices: [],
-      sumPrice: 0.0,
-      sumPaymentPrice: 0.0,
-    );
+    try {
+      final sellerId = seller['id'];
+      if (sellerId != null) {
+        final result = await invoicedata.getSellerInvoices(sellerId);
+        if (result['data'] != null) {
+          final data = result['data'];
+          
+          List<InvoiceItem> invoiceList = [];
+          if (data['invoices'] != null) {
+            invoiceList = (data['invoices'] as List).map((i) => InvoiceItem.fromJson(i)).toList();
+          }
+
+          invoice = InvoiceData(
+            transaction: null, // Since these aren't bound to one transaction
+            invoices: invoiceList,
+            sumPrice: (data['sum_price'] ?? 0.0).toDouble(),
+            sumPaymentPrice: (data['sum_payment_Price'] ?? 0.0).toDouble(),
+          );
+        }
+      }
+    } catch (e) {
+      print("Error fetching seller invoices: $e");
+    }
 
     statusrequest = Statusrequest.success;
     update();
@@ -80,6 +94,9 @@ class SellerInvoicesController extends GetxController {
   }
   
   gotoShowInvoice(InvoiceItem invoice) {
-    // Navigate to invoice details
+    Get.toNamed(
+      Approutes.shwoinvoice,
+      arguments: {"invoice": invoice},
+    );
   }
 }

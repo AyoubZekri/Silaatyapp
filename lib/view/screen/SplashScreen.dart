@@ -77,14 +77,13 @@ class _SplashScreenState extends State<SplashScreen>
       int status = myServices.sharedPreferences?.getInt("Status") ?? 0;
 
       // الحالة 4 يدخل مباشرة
-      if (status == 4) {
+      if (status == 5 || status == 6) {
         Get.offAllNamed(Approutes.HomeScreen);
-
         return;
       }
 
       // الحالات 2 و 3 لازم تاريخ صالح
-      if (status == 2 || status == 3) {
+      if (status == 2 || status == 3 || status == 4) {
         if (experimentDateString != null && experimentDateString.isNotEmpty) {
           DateTime experimentDate = DateTime.parse(experimentDateString);
 

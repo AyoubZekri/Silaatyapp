@@ -51,4 +51,5 @@ class Profailecontroller extends GetxController {
 
   String? name = Get.find<Myservices>().sharedPreferences?.getString("name");
   String? email = Get.find<Myservices>().sharedPreferences?.getString("email");
+  int? status = Get.find<Myservices>().sharedPreferences?.getInt("Status");
 }
