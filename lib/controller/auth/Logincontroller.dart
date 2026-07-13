@@ -71,6 +71,14 @@ class Logincontroller extends GetxController {
             myServices.sharedPreferences!.setString("date_experiment",
                 response["data"]["user"]["user"]["date_experiment"]);
           }
+          if (response["data"]["user"]["user"]["sell_type"] != null) {
+            myServices.sharedPreferences!.setInt("sell_type",
+                int.tryParse(response["data"]["user"]["user"]["sell_type"].toString()) ?? 1);
+          }
+          if (response["data"]["user"]["user"]["max_sellers"] != null) {
+            myServices.sharedPreferences!.setInt("max_sellers",
+                int.tryParse(response["data"]["user"]["user"]["max_sellers"].toString()) ?? 0);
+          }
           myServices.sharedPreferences!
               .setString("token", response["data"]["user"]["token"]);
           myServices.sharedPreferences!.setString("step", "2");

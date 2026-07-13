@@ -40,6 +40,7 @@ class Additemscontroller extends GetxController {
   CategorisData categorisData = CategorisData(Get.find());
   ProdactData prodactData = ProdactData(Get.find());
   int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
+  int sellType = Get.find<Myservices>().sharedPreferences?.getInt("sell_type") ?? 3;
 
   // Myservices myServices = Get.find();
   List<Catdata> categories = [];
@@ -85,8 +86,8 @@ class Additemscontroller extends GetxController {
         'product_description': descriptionController.text,
         'product_quantity': quantityController.text,
         'product_price': priseController.text,
-        'product_price_half_wholesale': priseHalfWholesaleController.text.isNotEmpty ? priseHalfWholesaleController.text : "0",
-        'product_price_wholesale': priseWholesaleController.text.isNotEmpty ? priseWholesaleController.text : "0",
+        'product_price_half_wholesale': sellType >= 2 ? (priseHalfWholesaleController.text.isNotEmpty ? priseHalfWholesaleController.text : "0") : "0",
+        'product_price_wholesale': sellType >= 3 ? (priseWholesaleController.text.isNotEmpty ? priseWholesaleController.text : "0") : "0",
         'categorie_id': selectedCategoryId.toString(),
         'categoris_uuid': selectedtypeuuid,
         'product_price_total': priceTotal.toString(),

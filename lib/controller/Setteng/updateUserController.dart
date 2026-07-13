@@ -26,7 +26,7 @@ class Updateusercontroller extends GetxController {
   Userdata userdata = Userdata(Get.find());
 
   // Myservices myServices = Get.find();
-  Statusrequest statusrequest = Statusrequest.none;
+  Statusrequest statusrequest = Statusrequest.success;
 
   updateuser() async {
     if (formstate.currentState!.validate()) {

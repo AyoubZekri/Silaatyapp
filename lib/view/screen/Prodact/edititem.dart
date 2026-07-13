@@ -248,22 +248,24 @@ class _EdititemState extends State<Edititem> {
                         iconData: Icons.attach_money,
                         enabled: true,
                       ),
-                      Custemtextfromfild(
-                        MyController: controller.priseHalfWholesaleController,
-                        keyboardType: TextInputType.number,
-                        hintText: "سعر النصف جملة".tr,
-                        label: "سعر النصف جملة".tr,
-                        iconData: Icons.attach_money,
-                        enabled: true,
-                      ),
-                      Custemtextfromfild(
-                        MyController: controller.priseWholesaleController,
-                        keyboardType: TextInputType.number,
-                        hintText: "سعر الجملة".tr,
-                        label: "سعر الجملة".tr,
-                        iconData: Icons.attach_money,
-                        enabled: true,
-                      ),
+                      if (controller.sellType >= 2)
+                        Custemtextfromfild(
+                          MyController: controller.priseHalfWholesaleController,
+                          keyboardType: TextInputType.number,
+                          hintText: "سعر النصف جملة".tr,
+                          label: "سعر النصف جملة".tr,
+                          iconData: Icons.attach_money,
+                          enabled: true,
+                        ),
+                      if (controller.sellType >= 3)
+                        Custemtextfromfild(
+                          MyController: controller.priseWholesaleController,
+                          keyboardType: TextInputType.number,
+                          hintText: "سعر الجملة".tr,
+                          label: "سعر الجملة".tr,
+                          iconData: Icons.attach_money,
+                          enabled: true,
+                        ),
                       Custemtextfromfild(
                         MyController: controller.pricePurchaseController,
                         keyboardType: TextInputType.number,

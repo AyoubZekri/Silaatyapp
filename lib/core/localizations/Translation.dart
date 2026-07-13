@@ -541,6 +541,8 @@ class MyTranslation extends Translations {
           "سعر التجزئة": "سعر التجزئة",
           "سعر النصف جملة": "سعر النصف جملة",
           "سعر الجملة": "سعر الجملة",
+          "max_sellers_reached": "لقد وصلت للحد الأقصى لعدد البائعين المسموح به",
+          "contact_admin_to_increase_sellers": "يرجى الاتصال بالمشرف لزيادة عدد البائعين",
         },
         // ::::::
         // ::::::
@@ -1157,6 +1159,8 @@ class MyTranslation extends Translations {
           "ورق فيه فجوات بين كل ملصق - الطابعة تتوقف عند الفجوة":
               "Paper with gaps between labels - printer stops at gaps",
           "Barcode Type": "Barcode Type",
+          "max_sellers_reached": "You have reached the maximum allowed number of sellers",
+          "contact_admin_to_increase_sellers": "Please contact the admin to increase the number of sellers",
         },
       };
 }

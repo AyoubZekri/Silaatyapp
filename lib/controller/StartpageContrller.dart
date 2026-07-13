@@ -58,6 +58,16 @@ class Startpagecontrller extends GetxController {
               .setString("date_experiment", user["date_experiment"]);
           date_experiment = user["date_experiment"];
         }
+        print(
+            "==================================${user["max_sellers"]} ${user["sell_type"]} ${user["sell_type"]}");
+
+        if (user["sell_type"] != null) {
+          myServices.sharedPreferences!.setInt("sell_type", int.tryParse(user["sell_type"].toString()) ?? 0);
+        }
+        if (user["max_sellers"] != null) {
+          myServices.sharedPreferences!.setInt("max_sellers", int.tryParse(user["max_sellers"].toString()) ?? 0);
+        }
+        
       }
     }
 

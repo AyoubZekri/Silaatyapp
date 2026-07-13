@@ -4,12 +4,14 @@ import '../../core/class/Statusrequest.dart';
 import '../../core/constant/Colorapp.dart';
 import '../../core/constant/routes.dart';
 import '../../core/functions/Snacpar.dart';
+import '../../core/services/Services.dart';
 import '../../data/datasource/Remote/SaleData.dart';
 import '../../data/datasource/Remote/transactiondata.dart';
 
 class SaleController extends GetxController {
   int? type;
   RxInt saleType = 1.obs; // 1 = Retail, 2 = Half Wholesale, 3 = Wholesale
+  late int userSellType = Get.find<Myservices>().sharedPreferences?.getInt("sell_type") ?? 3;
   RxString selectedCustomer = ''.obs;
   List<String> get customers => [
         if (type != 1) "virtualCustomer".tr,

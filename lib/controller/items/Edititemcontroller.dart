@@ -47,6 +47,7 @@ class Edititemcontroller extends GetxController {
 
   Myservices myservices = Get.find();
   late int? id = myservices.sharedPreferences?.getInt("id");
+  late int sellType = myservices.sharedPreferences?.getInt("sell_type") ?? 3;
 
   void toggleBarcodeMode(int mode, BuildContext context) {
     barcodeMode = mode;
@@ -96,8 +97,8 @@ class Edititemcontroller extends GetxController {
       'product_description': descriptionController.text,
       'product_quantity': newQty,
       'product_price': priseController.text,
-      'product_price_half_wholesale': priseHalfWholesaleController.text.isNotEmpty ? priseHalfWholesaleController.text : "0",
-      'product_price_wholesale': priseWholesaleController.text.isNotEmpty ? priseWholesaleController.text : "0",
+      'product_price_half_wholesale': sellType >= 2 ? (priseHalfWholesaleController.text.isNotEmpty ? priseHalfWholesaleController.text : "0") : "0",
+      'product_price_wholesale': sellType >= 3 ? (priseWholesaleController.text.isNotEmpty ? priseWholesaleController.text : "0") : "0",
       'categorie_id': selectedCategoryId.toString(),
       'categoris_uuid': selectedtypeuuId.toString(),
       'product_price_total': priceTotal.toString(),

@@ -64,9 +64,12 @@ class Saledata {
         );
 
         final currentQuantity = result[0]["product_quantity"] as String;
+        final type = sale["type_sales"] as int;
+        final quantitySold =
+            double.tryParse(sale["quantity"]?.toString() ?? "0") ?? 0.0;
         final updatedProductData = {
           "uuid": productUuid,
-          "product_quantity": currentQuantity,
+          "quantity_delta": -(type == 1 ? 0.0 : quantitySold),
         };
 
         await _syncService.addToQueue(
@@ -86,12 +89,14 @@ class Saledata {
   }
 
   Future<Map<String, dynamic>> updateSaleQuantity(
-      String uuidSale, double newQty, double RemainingAmount) async {
+    String uuidSale,
+    double newQty,
+    double RemainingAmount,
+  ) async {
     try {
       final sale = (await db.read(
         'sales',
-      ))
-          .firstWhere((e) => e['uuid'] == uuidSale);
+      )).firstWhere((e) => e['uuid'] == uuidSale);
 
       if (sale.isEmpty) {
         return {"status": 0, "error": "Sale not found"};
@@ -105,8 +110,9 @@ class Saledata {
       final double unitPrice =
           double.tryParse(sale['unit_price']?.toString() ?? "0") ?? 0;
 
-      final product = (await db.read('products'))
-          .firstWhere((e) => e['uuid'] == productUuid);
+      final product = (await db.read(
+        'products',
+      )).firstWhere((e) => e['uuid'] == productUuid);
 
       if (product.isEmpty) {
         return {"status": 0, "error": "Product not found"};
@@ -116,8 +122,9 @@ class Saledata {
           double.tryParse(product['product_quantity']?.toString() ?? "0") ?? 0;
 
       final invoice = (await db.read("invoies")).firstWhere(
-          (e) => e["uuid"] == invoiceUuid,
-          orElse: () => <String, Object?>{});
+        (e) => e["uuid"] == invoiceUuid,
+        orElse: () => <String, Object?>{},
+      );
 
       if (invoice.isEmpty) {
         return {"status": 0, "error": "Invoice not found"};
@@ -167,7 +174,7 @@ class Saledata {
         'products',
         {
           'product_quantity': newProductQty,
-          'updated_at': DateTime.now().toIso8601String()
+          'updated_at': DateTime.now().toIso8601String(),
         },
         'uuid = ?',
         [productUuid],
@@ -184,37 +191,22 @@ class Saledata {
       );
 
       if (result2 > 0 && result1 > 0 && resultInv > 0) {
-        await _syncService.addToQueue(
-          "sales",
-          "update",
-          uuidSale,
-          {
-            "uuid": uuidSale,
-            'quantity': newQty,
-            "subtotal": unitPrice * newQty,
-            'updated_at': DateTime.now().toIso8601String(),
-          },
-        );
-        await _syncService.addToQueue(
-          "products",
-          "update",
-          productUuid,
-          {
-            "uuid": productUuid,
-            'product_quantity': newProductQty,
-            'updated_at': DateTime.now().toIso8601String()
-          },
-        );
+        await _syncService.addToQueue("sales", "update", uuidSale, {
+          "uuid": uuidSale,
+          'quantity': newQty,
+          "subtotal": unitPrice * newQty,
+          'updated_at': DateTime.now().toIso8601String(),
+        });
+        await _syncService.addToQueue("products", productUuid, "update", {
+          "uuid": productUuid,
+          'quantity_delta': -(type == 1 ? 0.0 : diff),
+          'updated_at': DateTime.now().toIso8601String(),
+        });
 
-        await _syncService.addToQueue(
-          "invoies",
-          invoiceUuid,
-          "update",
-          {
-            "uuid": invoiceUuid,
-            "Payment_price": paymentPrice,
-          },
-        );
+        await _syncService.addToQueue("invoies", invoiceUuid, "update", {
+          "uuid": invoiceUuid,
+          "Payment_price": paymentPrice,
+        });
 
         return {"status": 1};
       }
@@ -230,8 +222,9 @@ class Saledata {
     try {
       /// 1. جلب عملية البيع
       final sale = (await db.read('sales')).firstWhere(
-          (e) => e['uuid'] == uuidSale,
-          orElse: () => <String, dynamic>{});
+        (e) => e['uuid'] == uuidSale,
+        orElse: () => <String, dynamic>{},
+      );
 
       if (sale.isEmpty) {
         return {"status": 0, "error": "Sale not found"};
@@ -248,29 +241,34 @@ class Saledata {
 
       /// 2. جلب المنتج
       final product = (await db.read('products')).firstWhere(
-          (e) => e['uuid'] == productUuid,
-          orElse: () => <String, dynamic>{});
+        (e) => e['uuid'] == productUuid,
+        orElse: () => <String, dynamic>{},
+      );
 
       if (product.isNotEmpty) {
-        final newProduct = {
-          'uuid': productUuid,
-          'product_quantity': (type == 1 ? 0 : qty),
+        final restoreProduct = {
           'is_delete': 0,
           'updated_at': DateTime.now().toIso8601String(),
         };
 
         await db.update(
           'products',
-          newProduct,
+          restoreProduct,
           "uuid = ? AND user_id = ?",
           [productUuid, id],
         );
+
+        final syncProduct = {
+          'uuid': productUuid,
+          'is_delete': 0,
+          'updated_at': DateTime.now().toIso8601String(),
+        };
 
         await _syncService.addToQueue(
           'products',
           productUuid,
           'update',
-          newProduct,
+          syncProduct,
         );
 
         final String categoryUuid = product['categoris_uuid']?.toString() ?? '';
@@ -301,10 +299,7 @@ class Saledata {
                 'categoris',
                 categoryUuid,
                 'update',
-                {
-                  'uuid': categoryUuid,
-                  'is_delete': 0,
-                },
+                {'uuid': categoryUuid, 'is_delete': 0},
               );
             }
           }
@@ -318,8 +313,9 @@ class Saledata {
 
       /// 3. جلب الفاتورة
       final invoice = (await db.read('invoies')).firstWhere(
-          (e) => e['uuid'] == invoiceUuid,
-          orElse: () => <String, dynamic>{});
+        (e) => e['uuid'] == invoiceUuid,
+        orElse: () => <String, dynamic>{},
+      );
 
       if (invoice.isEmpty) {
         return {"status": 0, "error": "Invoice not found"};
@@ -332,9 +328,9 @@ class Saledata {
       if (paymentPrice < 0) paymentPrice = 0;
 
       /// تحقق واش باقي أي منتجات في الفاتورة
-      final remainingSales = (await db.read('sales'))
-          .where((e) => e['invoie_uuid'] == invoiceUuid)
-          .toList();
+      final remainingSales = (await db.read(
+        'sales',
+      )).where((e) => e['invoie_uuid'] == invoiceUuid).toList();
 
       /// 4. تحديث المخزون
       final resultProduct = await db.update(
@@ -355,16 +351,11 @@ class Saledata {
         resultInvoice = await db.delete('invoies', 'uuid = ?', [invoiceUuid]);
 
         // Sync: حذف الفاتورة
-        await _syncService.addToQueue(
-          'invoies',
-          invoiceUuid,
-          'delete',
-          {
-            'uuid': invoiceUuid,
-            'is_delete': 1,
-            'updated_at': DateTime.now().toIso8601String(),
-          },
-        );
+        await _syncService.addToQueue('invoies', invoiceUuid, 'delete', {
+          'uuid': invoiceUuid,
+          'is_delete': 1,
+          'updated_at': DateTime.now().toIso8601String(),
+        });
       } else {
         // باقي منتجات، نحدث المبلغ فقط
         resultInvoice = await db.update(
@@ -378,47 +369,32 @@ class Saledata {
         );
 
         // Sync: تحديث الفاتورة
-        await _syncService.addToQueue(
-          'invoies',
-          invoiceUuid,
-          'update',
-          {
-            'uuid': invoiceUuid,
-            'Payment_price': paymentPrice,
-          },
-        );
+        await _syncService.addToQueue('invoies', invoiceUuid, 'update', {
+          'uuid': invoiceUuid,
+          'Payment_price': paymentPrice,
+        });
       }
 
       /// 6. حذف البيع
       final resultSale = await db.delete('sales', 'uuid = ?', [uuidSale]);
 
       // Sync: حذف البيع
-      await _syncService.addToQueue(
-        "sales",
-        uuidSale,
-        "update",
-        {
-          "uuid": uuidSale,
-          'is_delete': 1,
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-      );
+      await _syncService.addToQueue("sales", uuidSale, "update", {
+        "uuid": uuidSale,
+        'is_delete': 1,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
 
       // Sync: تحديث المخزون المنتج
-      await _syncService.addToQueue(
-        'products',
-        productUuid,
-        'update',
-        {
-          'uuid': productUuid,
-          'product_quantity': newProductQty,
-        },
-      );
+      await _syncService.addToQueue('products', productUuid, 'update', {
+        'uuid': productUuid,
+        'quantity_delta': (type == 1 ? 0.0 : qty),
+      });
 
       if (resultProduct > 0 && resultInvoice > 0 && resultSale > 0) {
         return {
           "status": 1,
-          "msg": remainingSales.length <= 1 ? "true" : "false"
+          "msg": remainingSales.length <= 1 ? "true" : "false",
         };
       }
 
@@ -443,9 +419,9 @@ class Saledata {
       }
 
       /// 2. جلب جميع أسطر البيع المرتبطة بالفاتورة
-      final sales = (await db.read('sales'))
-          .where((e) => e['invoie_uuid'] == invoiceUuid)
-          .toList();
+      final sales = (await db.read(
+        'sales',
+      )).where((e) => e['invoie_uuid'] == invoiceUuid).toList();
 
       print("===================$sales");
 
@@ -453,16 +429,11 @@ class Saledata {
         /// ما فيهاش منتجات → نحذف الفاتورة مباشرة
         await db.delete('invoies', 'uuid = ?', [invoiceUuid]);
 
-        await _syncService.addToQueue(
-          "invoies",
-          invoiceUuid,
-          "update",
-          {
-            "uuid": invoiceUuid,
-            'is_delete': 1,
-            'updated_at': DateTime.now().toIso8601String(),
-          },
-        );
+        await _syncService.addToQueue("invoies", invoiceUuid, "update", {
+          "uuid": invoiceUuid,
+          'is_delete': 1,
+          'updated_at': DateTime.now().toIso8601String(),
+        });
 
         return {"status": 1};
       }
@@ -479,25 +450,29 @@ class Saledata {
           orElse: () => <String, dynamic>{},
         );
         if (product.isNotEmpty) {
-          final newProduct = {
-            'uuid': productUuid,
-            'product_quantity': (type == 1 ? 0 : qty),
+          final restoreProduct = {
             'is_delete': 0,
             'updated_at': DateTime.now().toIso8601String(),
           };
 
           await db.update(
             'products',
-            newProduct,
+            restoreProduct,
             "uuid = ? AND user_id = ?",
             [productUuid, id],
           );
+
+          final syncProduct = {
+            'uuid': productUuid,
+            'is_delete': 0,
+            'updated_at': DateTime.now().toIso8601String(),
+          };
 
           await _syncService.addToQueue(
             'products',
             productUuid,
             'update',
-            newProduct,
+            syncProduct,
           );
 
           final String categoryUuid =
@@ -529,10 +504,7 @@ class Saledata {
                   'categoris',
                   categoryUuid,
                   'update',
-                  {
-                    'uuid': categoryUuid,
-                    'is_delete': 0,
-                  },
+                  {'uuid': categoryUuid, 'is_delete': 0},
                 );
               }
             }
@@ -541,7 +513,7 @@ class Saledata {
 
         final double currentQty =
             double.tryParse(product['product_quantity']?.toString() ?? '0') ??
-                0;
+            0;
 
         final double newQty = currentQty + (type == 1 ? 0 : qty);
 
@@ -560,41 +532,26 @@ class Saledata {
         await db.delete('sales', 'uuid = ?', [sale['uuid']]);
 
         /// Sync
-        await _syncService.addToQueue(
-          'products',
-          productUuid,
-          'update',
-          {
-            'uuid': productUuid,
-            'product_quantity': newQty,
-          },
-        );
+        await _syncService.addToQueue('products', productUuid, 'update', {
+          'uuid': productUuid,
+          'quantity_delta': (type == 1 ? 0.0 : qty),
+        });
 
-        await _syncService.addToQueue(
-          "sales",
-          sale['uuid'],
-          "update",
-          {
-            "uuid": sale['uuid'],
-            'is_delete': 1,
-            'updated_at': DateTime.now().toIso8601String(),
-          },
-        );
+        await _syncService.addToQueue("sales", sale['uuid'], "update", {
+          "uuid": sale['uuid'],
+          'is_delete': 1,
+          'updated_at': DateTime.now().toIso8601String(),
+        });
       }
 
       /// 4. حذف الفاتورة نفسها
       await db.delete('invoies', 'uuid = ?', [invoiceUuid]);
 
-      await _syncService.addToQueue(
-        "invoies",
-        invoiceUuid,
-        "update",
-        {
-          "uuid": invoiceUuid,
-          'is_delete': 1,
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-      );
+      await _syncService.addToQueue("invoies", invoiceUuid, "update", {
+        "uuid": invoiceUuid,
+        'is_delete': 1,
+        'updated_at': DateTime.now().toIso8601String(),
+      });
 
       return {"status": 1};
     } catch (e, st) {

@@ -6,6 +6,7 @@ import 'package:Silaaty/data/datasource/Remote/SellerData.dart';
 
 import '../core/class/Crud.dart';
 import '../core/functions/handlingdatacontroller.dart';
+import '../core/services/Services.dart';
 
 class SellerController extends GetxController {
   SellerData sellerData = SellerData(Get.find<Crud>());
@@ -59,8 +60,19 @@ class SellerController extends GetxController {
     update();
   }
 
+  Myservices myServices = Get.find();
+
   addSeller() async {
     if (!formState.currentState!.validate()) return;
+
+    int maxSellers = myServices.sharedPreferences!.getInt("max_sellers") ?? 0;
+    
+    print("================== Current Sellers: ${sellers.length}, Max Sellers: $maxSellers ==================");
+
+    if (maxSellers > 0 && sellers.length >= maxSellers) {
+      showSnackbar("تنبيه".tr, "${"max_sellers_reached".tr}\n${"contact_admin_to_increase_sellers".tr}", Colors.orange);
+      return;
+    }
 
     statusrequest = Statusrequest.loadeng;
     update();

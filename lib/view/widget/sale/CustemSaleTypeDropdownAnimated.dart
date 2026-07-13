@@ -5,18 +5,20 @@ import 'package:Silaaty/core/constant/Colorapp.dart';
 class CustemSaleTypeDropdownAnimated extends StatelessWidget {
   final RxInt selectedSaleType;
   final Function(int) onSelect;
+  final int allowedSellType;
   final RxBool isExpanded = false.obs;
 
-  final Map<int, String> saleTypes = {
+  late final Map<int, String> saleTypes = {
     1: "تجزئة".tr,
-    2: "نصف جملة".tr,
-    3: "جملة".tr,
+    if (allowedSellType >= 2) 2: "نصف جملة".tr,
+    if (allowedSellType >= 3) 3: "جملة".tr,
   };
 
   CustemSaleTypeDropdownAnimated({
     super.key,
     required this.selectedSaleType,
     required this.onSelect,
+    required this.allowedSellType,
   });
 
   @override
