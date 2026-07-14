@@ -88,7 +88,7 @@ class Handlingview extends StatelessWidget {
               const AlwaysScrollableScrollPhysics(), // 🔹 مهم للـ RefreshIndicator
           child: ConstrainedBox(
             constraints: BoxConstraints(
-              minHeight: constraints.maxHeight, // يشغل كل مساحة الشاشة
+              minHeight: constraints.hasBoundedHeight ? constraints.maxHeight : MediaQuery.of(context).size.height * 0.6, // يشغل كل مساحة الشاشة
             ),
             child: Center(
               child: Column(

@@ -67,7 +67,7 @@ class Additemscontroller extends GetxController {
 
   String generateBarcode() {
     final random = Random();
-    return List.generate(13, (_) => random.nextInt(10)).join();
+    return List.generate(11, (_) => random.nextInt(10)).join();
   }
 
   addProduct() async {
