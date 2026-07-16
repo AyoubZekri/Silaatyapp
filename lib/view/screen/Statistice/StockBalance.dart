@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../controller/Statistice/StockBalanceController.dart';
 import '../../../core/constant/Colorapp.dart';
+import '../../../core/functions/FormatQuantity.dart';
 import '../../widget/Bills/CostumtitlePayment.dart';
 import '../../widget/Statistics/CustomApparr.dart';
 import '../../widget/Statistics/CustomStatCard.dart';
@@ -54,20 +55,14 @@ class _StockbalanceState extends State<Stockbalance> {
                         Custemcard(
                           color: Colors.green,
                           iconData: FontAwesomeIcons.boxArchive,
-                          Price: controller.data?.summary?.totalStart
-                                  .toStringAsFixed(0)
-                                  .toString() ??
-                              "0.0",
+                          Price: formatQuantity(controller.data?.summary?.totalStart ?? 0),
                           Title: "كمية اول مدة".tr,
                         ),
                         const SizedBox(width: 10),
                         Custemcard(
                           color: Colors.grey,
                           iconData: FontAwesomeIcons.box,
-                          Price: controller.data?.summary?.totalEnd
-                                  .toStringAsFixed(0)
-                                  .toString() ??
-                              "0.0",
+                          Price: formatQuantity(controller.data?.summary?.totalEnd ?? 0),
                           Title: "كمية اخر مدة".tr,
                         ),
                       ],
@@ -78,20 +73,14 @@ class _StockbalanceState extends State<Stockbalance> {
                         Custemcard(
                           color: Colors.red,
                           iconData: FontAwesomeIcons.cartShopping,
-                          Price: controller.data?.summary?.totalSold
-                                  .toStringAsFixed(0)
-                                  .toString() ??
-                              "0.0",
+                          Price: formatQuantity(controller.data?.summary?.totalSold ?? 0),
                           Title: "الكمية المباعة".tr,
                         ),
                         const SizedBox(width: 10),
                         Custemcard(
                           color: Colors.blue,
                           iconData: FontAwesomeIcons.truckRampBox,
-                          Price: controller.data?.summary?.totalIn
-                                  .toStringAsFixed(0)
-                                  .toString() ??
-                              "0.0",
+                          Price: formatQuantity(controller.data?.summary?.totalIn ?? 0),
                           Title: "الكمية الواردة".tr,
                         ),
                       ],
@@ -118,11 +107,11 @@ class _StockbalanceState extends State<Stockbalance> {
                           animated: true,
                           period: item?.productName.toString() ?? "",
                           revenue: "",
-                          profit: item?.endQuantity.toString() ?? "",
+                          profit: formatQuantity(item?.endQuantity ?? 0),
                           profit2: "",
-                          totalSales: item?.startQuantity.toString() ?? "",
-                          expenses: item?.soldQuantity.toString() ?? "",
-                          itemsSold: item?.inQuantity.toString() ?? "",
+                          totalSales: formatQuantity(item?.startQuantity ?? 0),
+                          expenses: formatQuantity(item?.soldQuantity ?? 0),
+                          itemsSold: formatQuantity(item?.inQuantity ?? 0),
                           profitRate: "",
                           labelTotalSales: "كمية اول مدة".tr,
                           labelExpenses: "الكمية المباعة".tr,

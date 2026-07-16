@@ -366,33 +366,38 @@ class Statisticsdata {
     final sqlTotalInBefore = '''
       SELECT IFNULL(SUM(s.quantity), 0) AS total_in_before
       FROM sales s
+      JOIN products p ON s.product_uuid = p.uuid
       WHERE s.user_id = ?
         AND s.type_sales = 3
         AND DATE(s.created_at) < DATE(?)
+        AND s.is_delete = 0 AND p.is_delete = 0
     ''';
 
     // الكمية المباعة قبل الفترة
     final sqlTotalOutBefore = '''
     SELECT IFNULL(SUM(s.quantity), 0) AS total_out_before
     FROM sales s
+    JOIN products p ON s.product_uuid = p.uuid
     WHERE s.user_id = ? AND s.created_at < DATE(?) AND s.type_sales = 2
-    AND s.is_delete = 0
+    AND s.is_delete = 0 AND p.is_delete = 0
   ''';
 
     // الكمية المباعة في الفترة
     final sqlTotalSold = '''
     SELECT IFNULL(SUM(s.quantity), 0) AS total_sold
     FROM sales s
+    JOIN products p ON s.product_uuid = p.uuid
     WHERE s.user_id = ? $whereClause AND s.type_sales = 2
-    AND s.is_delete = 0
+    AND s.is_delete = 0 AND p.is_delete = 0
   ''';
 
     // الكمية الواردة في الفترة
     final sqlTotalIn = '''
     SELECT IFNULL(SUM(s.quantity), 0) AS total_in
     FROM sales s
+    JOIN products p ON s.product_uuid = p.uuid
     WHERE s.user_id = ? $whereClause AND s.type_sales = 3 
-    AND s.is_delete = 0
+    AND s.is_delete = 0 AND p.is_delete = 0
   ''';
 
     // استعلام القيم
@@ -466,7 +471,8 @@ class Statisticsdata {
           MAX(datetime(s.created_at)) AS last_update
 
         FROM sales s
-        WHERE s.user_id = ?
+        LEFT JOIN products p ON s.product_uuid = p.uuid
+        WHERE s.user_id = ? AND p.is_delete = 0
         GROUP BY s.product_uuid, s.product_name
       )
 
@@ -529,32 +535,36 @@ class Statisticsdata {
     final sqlTotalInBefore = '''
     SELECT IFNULL(SUM(s.subtotal), 0) AS total_in_before
     FROM sales s
+    JOIN products p ON s.product_uuid = p.uuid
     WHERE s.user_id = ? AND s.type_sales = 3 AND s.created_at < DATE(?) 
-    AND s.is_delete = 0
+    AND s.is_delete = 0 AND p.is_delete = 0
   ''';
 
     // الكمية المباعة قبل الفترة
     final sqlTotalOutBefore = '''
     SELECT IFNULL(SUM(s.subtotal), 0) AS total_out_before
     FROM sales s
+    JOIN products p ON s.product_uuid = p.uuid
     WHERE s.user_id = ? AND s.created_at < DATE(?) AND s.type_sales = 2
-    AND s.is_delete = 0
+    AND s.is_delete = 0 AND p.is_delete = 0
   ''';
 
     // الكمية المباعة في الفترة
     final sqlTotalSold = '''
     SELECT IFNULL(SUM(s.subtotal), 0) AS total_sold
     FROM sales s
+    JOIN products p ON s.product_uuid = p.uuid
     WHERE s.user_id = ? $whereClause AND s.type_sales = 2
-    AND s.is_delete = 0
+    AND s.is_delete = 0 AND p.is_delete = 0
     ''';
 
     // الكمية الواردة في الفترة
     final sqlTotalIn = '''
     SELECT IFNULL(SUM(s.subtotal), 0) AS total_in
     FROM sales s
+    JOIN products p ON s.product_uuid = p.uuid
     WHERE s.user_id = ? $whereClause AND s.type_sales = 3 
-    AND s.is_delete = 0
+    AND s.is_delete = 0 AND p.is_delete = 0
   ''';
 
     // استعلام القيم
@@ -620,7 +630,8 @@ class Statisticsdata {
           ) AS total_sold_period
 
         FROM sales s
-        WHERE s.user_id = ?
+        LEFT JOIN products p ON s.product_uuid = p.uuid
+        WHERE s.user_id = ? AND p.is_delete = 0
         GROUP BY s.product_uuid, s.product_name
       )
 

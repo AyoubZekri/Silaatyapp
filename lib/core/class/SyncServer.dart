@@ -56,6 +56,7 @@ class SyncService {
         (i + batchSize > unsynced.length) ? unsynced.length : i + batchSize,
       );
 
+      int successCount = 0;
       for (final row in batch) {
         final data = row["data"] != null
             ? Map<String, dynamic>.from(jsonDecode(row["data"] as String))
@@ -119,16 +120,23 @@ class SyncService {
               {"synced": 1},
               "id=${row["id"]}",
             );
+            successCount++;
             print("✅ نجاح رفع ${data["uuid"]}");
           } else {
             print("❌ HTTP ${res.statusCode}: ${res.body}");
           }
         } catch (e) {
           print("❌ استثناء: $e");
+          if (e is SocketException || e.toString().contains('SocketException')) {
+            print("📴 انقطاع الاتصال، إيقاف الرفع لجدول $table...");
+            return;
+          }
         }
       }
 
-      print("$table نجاح رفع دفعة ${i ~/ batchSize + 1} (${batch.length} سجل)");
+      if (successCount > 0) {
+        print("$table نجاح رفع دفعة ${i ~/ batchSize + 1} ($successCount سجل)");
+      }
     }
 
     print("🏁 انتهى الرفع.");

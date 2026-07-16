@@ -99,19 +99,32 @@ class Logincontroller extends GetxController {
           final today = DateTime.now();
           final status = response['data']["user"]["user"]['Status'];
 
-          if (status == 0) {
+          if (status == 0||status == 1) {
             Get.offNamed(Approutes.VerifiycodeSignUp, arguments: {
               "email": Email.text,
             });
             reset();
-          } else if (status == 5 || status == 6) {
+          } else if (status == 5 || status == 6||status == 13||status == 14) {
             Get.offAllNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
-          } else if ((status == 2 || status == 3 || status == 4) &&
-              experimentDate != null &&
-              today.isBefore(experimentDate)) {
-            Get.offAllNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
-          } else if (status == 2 || status == 3 || status == 4) {
-            Get.offAllNamed(Approutes.activationExpiredPage);
+          } else if (status == 2 || status == 3 || status == 4 || status == 11 || status == 12) {
+            if (experimentDate != null) {
+              DateTime now = DateTime.now();
+              DateTime todayDay = DateTime(now.year, now.month, now.day);
+              DateTime expireDate = DateTime(
+                experimentDate.year,
+                experimentDate.month,
+                experimentDate.day,
+              );
+              bool isValid = todayDay.isBefore(expireDate);
+
+              if (isValid) {
+                Get.offAllNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
+              } else {
+                Get.offAllNamed(Approutes.activationExpiredPage);
+              }
+            } else {
+              Get.offAllNamed(Approutes.activationExpiredPage);
+            }
           } else {
             showSnackbar("error".tr, "contact_admin".tr, Colors.red);
           }
