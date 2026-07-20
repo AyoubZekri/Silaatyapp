@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import '../../controller/HomeScreen/HomeController.dart';
-import '../../core/constant/Colorapp.dart';
+import 'package:Silaaty/core/constant/Colorapp.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import '../widget/Home/CustemCard.dart';
 import '../widget/Home/CustemcartAbbreviation.dart';
 
@@ -41,7 +42,8 @@ class _HomeState extends State<Home> {
               if (controller.showExpirationWarning)
                 Container(
                   margin: const EdgeInsets.only(bottom: 16),
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                   decoration: BoxDecoration(
                     color: Colors.orange.withOpacity(0.1),
                     border: Border.all(color: Colors.orange, width: 1),
@@ -49,7 +51,8 @@ class _HomeState extends State<Home> {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 28),
+                      const Icon(Icons.warning_amber_rounded,
+                          color: Colors.orange, size: 28),
                       const SizedBox(width: 12),
                       Expanded(
                         child: Text(
@@ -79,9 +82,9 @@ class _HomeState extends State<Home> {
                       Custemcard(
                         color: Colors.green,
                         iconData: FontAwesomeIcons.sackDollar,
-                        Price:
-                            controller.statisticsHome?.todayIncome.toStringAsFixed(2).toString() ??
-                                "0,0",
+                        Price: controller.statisticsHome?.todayIncome != null
+                            ? formavalue(controller.statisticsHome!.todayIncome!)
+                            : "0,0",
                         Title: "المبيعات".tr,
                       ),
                       const SizedBox(width: 10),
@@ -101,10 +104,9 @@ class _HomeState extends State<Home> {
                       Custemcard(
                         color: Colors.grey,
                         iconData: FontAwesomeIcons.moneyBillWave,
-                        Price: controller.statisticsHome?.todayNetProfit
-                                .toStringAsFixed(2)
-                                .toString() ??
-                            "0,0",
+                        Price: controller.statisticsHome?.todayNetProfit != null
+                            ? formavalue(controller.statisticsHome!.todayNetProfit!)
+                            : "0,0",
                         Title: "صافي الربح".tr,
                       ),
                       const SizedBox(width: 10),

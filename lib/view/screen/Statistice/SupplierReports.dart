@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../controller/Statistice/Supplierreportscontroller.dart';
 import '../../../core/constant/Colorapp.dart';
+import '../../../core/functions/FormatQuantity.dart';
 import '../../widget/Bills/CostumtitlePayment.dart';
 import '../../widget/Statistics/CustomApparr.dart';
 import '../../widget/Statistics/CustomStatCard.dart';
@@ -54,18 +55,18 @@ class _SupplierreportsState extends State<Supplierreports> {
                         Custemcard(
                           color: Colors.blue,
                           iconData: FontAwesomeIcons.moneyBillWave,
-                          Price:
-                              controller.data?.summary?.totalSold.toStringAsFixed(2).toString() ??
-                                  "0.0",
+                          Price: controller.data?.summary?.totalSold != null
+                              ? formavalue(controller.data!.summary!.totalSold!)
+                              : "0.0",
                           Title: "الشراء".tr,
                         ),
                         const SizedBox(width: 10),
                         Custemcard(
                           color: Colors.red,
                           iconData: FontAwesomeIcons.coins,
-                          Price:
-                              controller.data?.summary?.totalDebts.toStringAsFixed(2).toString() ??
-                                  "0.0",
+                          Price: controller.data?.summary?.totalDebts != null
+                              ? formavalue(controller.data!.summary!.totalDebts!)
+                              : "0.0",
                           Title: "الديون".tr,
                         ),
                       ],
@@ -93,11 +94,11 @@ class _SupplierreportsState extends State<Supplierreports> {
                         return FinanceDetailRow(
                           animated: true,
                           period: '${trn?.familyName} ${trn?.name}',
-                          revenue: trn?.totalSold.toStringAsFixed(2).toString() ?? "0.0",
-                          profit: trn?.debts.toStringAsFixed(2).toString() ?? "0.0",
+                          revenue: trn?.totalSold != null ? formavalue(trn!.totalSold!) : "0.0",
+                          profit: trn?.debts != null ? formavalue(trn!.debts!) : "0.0",
                           profit2: "",
-                          totalSales: trn?.totalInvoices.toString() ?? "0",
-                          expenses: trn?.averageOrderValue.toString() ?? "0.0",
+                          totalSales: trn?.totalInvoices?.toString() ?? "0",
+                          expenses: trn?.averageOrderValue != null ? formavalue(trn!.averageOrderValue!) : "0.0",
                           itemsSold: "",
                           profitRate: "",
                           labelTotalSales: "إجمالي الفواتير".tr,

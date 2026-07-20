@@ -56,44 +56,71 @@ class _ItemsState extends State<Items> with RouteAware {
                   context: context,
                   builder: (context) {
                     return Dialog(
-                      insetPadding: const EdgeInsets.all(20),
+                      insetPadding: const EdgeInsets.all(16),
+                      backgroundColor: Colors.transparent,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(20),
                       ),
-                      child: SizedBox(
-                        height: 400,
-                        child: Column(
-                          children: [
-                            AppBar(
-                              title: Text(
-                                "امسح الباركود".tr,
-                                style:
-                                    TextStyle(color: AppColor.backgroundcolor),
-                              ),
-                              automaticallyImplyLeading: false,
-                              backgroundColor: AppColor.primarycolor,
-                              actions: [
-                                IconButton(
-                                  icon: const Icon(Icons.close,
-                                      color: AppColor.backgroundcolor),
-                                  onPressed: () => Get.back(),
-                                ),
-                              ],
-                            ),
-                            Expanded(
-                              child: MobileScanner(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(20),
+                        child: SizedBox(
+                          height: 550,
+                          width: double.infinity,
+                          child: Stack(
+                            children: [
+                              MobileScanner(
                                 onDetect: (capture) {
                                   final barcodes = capture.barcodes;
                                   if (barcodes.isNotEmpty) {
                                     final scannedCode = barcodes.first.rawValue;
-                                    print(
-                                        "=======================$scannedCode");
-                                    controller.searchBarcode(scannedCode!);
+                                    if (scannedCode != null) {
+                                      print("=======================$scannedCode");
+                                      controller.searchBarcode(scannedCode);
+                                    }
                                   }
                                 },
                               ),
-                            ),
-                          ],
+                              Center(
+                                child: Container(
+                                  width: 250,
+                                  height: 250,
+                                  decoration: BoxDecoration(
+                                    border: Border.all(color: AppColor.backgroundcolor, width: 3),
+                                    borderRadius: BorderRadius.circular(16),
+                                  ),
+                                ),
+                              ),
+                              Positioned(
+                                top: 0, left: 0, right: 0,
+                                child: Container(
+                                  padding: const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 20),
+                                  decoration: const BoxDecoration(
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                      colors: [Colors.black87, Colors.transparent],
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.symmetric(horizontal: 10),
+                                        child: Text(
+                                          "امسح الباركود".tr,
+                                          style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                                        onPressed: () => Get.back(),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                     );

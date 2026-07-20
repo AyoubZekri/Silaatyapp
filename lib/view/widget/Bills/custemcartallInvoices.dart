@@ -32,63 +32,16 @@ class Custemcartallinvoice extends StatefulWidget {
 }
 
 class _CustemcartallinvoiceState extends State<Custemcartallinvoice> {
-  bool showActions = false;
-
   @override
   Widget build(BuildContext context) {
     final isEn = Get.locale?.languageCode == 'en';
 
     return GestureDetector(
       onTap: () {
-        if (showActions) {
-          setState(() {
-            showActions = false;
-          });
-        } else {
-          widget.onTap?.call();
-        }
-      },
-      onLongPress: () {
-        setState(() {
-          showActions = !showActions;
-        });
+        widget.onTap?.call();
       },
       child: Stack(
         children: [
-          Stack(
-            children: [
-              AnimatedPositioned(
-                duration: const Duration(milliseconds: 300),
-                right: isEn ? 15 : null,
-                left: !isEn ? 15 : null,
-                top: 20,
-                bottom: 20,
-                child: AnimatedOpacity(
-                  opacity: showActions ? 1 : 0,
-                  duration: const Duration(milliseconds: 300),
-                  child: Row(
-                    children: [
-                      IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () {
-                            widget.onDelete?.call();
-                            if (mounted) {
-                              setState(() {
-                                showActions = false;
-                              });
-                            }
-                          }),
-                    ],
-                  ),
-                ),
-              ),
-              AnimatedPadding(
-                duration: const Duration(milliseconds: 300),
-                padding: isEn
-                    ? EdgeInsets.only(right: showActions ? 50 : 0)
-                    : EdgeInsets.only(left: showActions ? 50 : 0),
-                child: Stack(
-                  children: [
                     Container(
                       margin: const EdgeInsets.symmetric(
                           vertical: 10, horizontal: 15),
@@ -197,11 +150,6 @@ class _CustemcartallinvoiceState extends State<Custemcartallinvoice> {
                         ),
                       ),
                     ),
-                  ],
-                ),
-              ),
-            ],
-          ),
         ],
       ),
     );

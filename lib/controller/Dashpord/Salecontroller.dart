@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../core/class/Statusrequest.dart';
 import '../../core/constant/Colorapp.dart';
 import '../../core/constant/routes.dart';
+import '../../core/functions/FormatQuantity.dart';
 import '../../core/functions/Snacpar.dart';
 import '../../core/services/Services.dart';
 import '../../data/datasource/Remote/SaleData.dart';
@@ -180,7 +181,7 @@ class SaleController extends GetxController {
                     double? weight = double.tryParse(val);
                     if (weight != null) {
                       totalPriceController.text =
-                          (weight * unitPrice).toStringAsFixed(2);
+                          formavalue(weight * unitPrice);
                     } else {
                       totalPriceController.clear();
                     }
@@ -213,7 +214,7 @@ class SaleController extends GetxController {
                     double? price = double.tryParse(val);
                     if (price != null) {
                       weightController.text =
-                          (price / unitPrice).toStringAsFixed(3);
+                          formavalue(price / unitPrice);
                     } else {
                       weightController.clear();
                     }
@@ -316,28 +317,84 @@ class SaleController extends GetxController {
     }
   }
 
+  Map<String, dynamic>? pendingProduct;
+  double? pendingAddedQuantity;
+  int? pendingExistingIndex;
+
+  void confirmPendingProduct() {
+    if (pendingProduct == null) return;
+    final uuid = pendingProduct!['uuid'] ?? pendingProduct!['id'] ?? '';
+    final name = pendingProduct!['product_name'] ?? '';
+    final price = _getSalePrice(pendingProduct!);
+    final typeItem = pendingProduct!['type'];
+
+    if (pendingExistingIndex != null && pendingExistingIndex != -1) {
+      selectedProducts[pendingExistingIndex!]['quantity'] += pendingAddedQuantity!;
+      selectedProducts[pendingExistingIndex!]['total'] = (type == 1
+              ? selectedProducts[pendingExistingIndex!]['price_Purchase']
+              : selectedProducts[pendingExistingIndex!]['price']) *
+          selectedProducts[pendingExistingIndex!]['quantity'];
+      selectedProducts[pendingExistingIndex!] =
+          Map<String, dynamic>.from(selectedProducts[pendingExistingIndex!]);
+    } else {
+      selectedProducts.add({
+        "uuid": uuid,
+        "name": name,
+        type == 1 ? "price_Purchase" : "price": price,
+        "quantity": pendingAddedQuantity,
+        "total": price * pendingAddedQuantity!,
+        "type_item": typeItem,
+        "quantity_item": pendingProduct!['product_quantity'],
+      });
+    }
+
+    _calculateTotals();
+    pendingProduct = null;
+    pendingAddedQuantity = null;
+    pendingExistingIndex = null;
+    lastScannedTime = null; // reset debounce
+    update();
+  }
+
+  void cancelPendingProduct() {
+    pendingProduct = null;
+    pendingAddedQuantity = null;
+    pendingExistingIndex = null;
+    lastScannedTime = null; // reset debounce
+    update();
+  }
+
+  String lastScannedCode = '';
+  DateTime? lastScannedTime;
+
   search(String codepar) async {
-    Get.back();
+    if (pendingProduct != null) return; // Prevent new scans while waiting for confirmation
+    
+    lastScannedCode = codepar;
+    lastScannedTime = DateTime.now();
+
+    // Get.back();
     await Future.delayed(const Duration(milliseconds: 200));
     update();
     String cleaned = codepar.replaceAll(RegExp(r'[^\d]'), '');
     print(cleaned);
+    
+    String searchCode = cleaned;
     double? scaleWeight;
 
     // Logic for Scale Barcode (EAN-13 starting with 2)
-    // Common format: 2 (1 digit) + Product Code (5 digits) + Weight/Price (5 digits) + Check (1 digit)
-    if (cleaned.length == 13 && cleaned.startsWith('2')) {
-      // searchCode =
-      //     cleaned.substring(1, 7); // Extract product code (e.g. 5 or 6 digits)
+    // Common format: Prefix (2 digits) + Product Code (5 digits) + Weight (5 digits) + Checksum (1 digit)
+    if (cleaned.length == 13 && cleaned.startsWith('25')) {
+      searchCode = cleaned.substring(0, 7); // Extract prefix + product code (7 digits)
       String weightPart = cleaned.substring(7, 12); // Extract weight
       scaleWeight = double.tryParse(weightPart) != null
           ? double.parse(weightPart) / 1000.0 // Assuming grams to kg
           : null;
-      print("⚖️  Weight $scaleWeight");
+      print("⚖️  Scale Item Detected - Base Code: $searchCode, Weight: $scaleWeight kg");
     }
 
     Map<String, Object?> data = {
-      "codepar": cleaned,
+      "codepar": searchCode,
     };
 
     print("==================$cleaned");
@@ -352,39 +409,28 @@ class SaleController extends GetxController {
       final uuid = productData['uuid'] ?? productData['id'] ?? '';
       final name = productData['product_name'] ?? '';
       final price = _getSalePrice(productData);
-      final typeItem = productData['type'];
+      int typeItem = int.tryParse(productData['type'].toString()) ?? 1;
+
+      bool isScaleBarcode = cleaned.length == 13 && cleaned.startsWith('25');
+      if (isScaleBarcode) {
+        typeItem = 2; // Force to weighted item if a scale barcode is detected
+      }
 
       final existingIndex =
           selectedProducts.indexWhere((item) => item['uuid'] == uuid);
 
-      if (typeItem == 2 && scaleWeight == null) {
+      if (typeItem == 2 && (scaleWeight == null || scaleWeight == 0)) {
         showWeightDialog(productData,
             existingIndex: existingIndex != -1 ? existingIndex : null);
         return;
       }
 
       double addedQuantity =
-          (typeItem == 2 && scaleWeight != null) ? scaleWeight : 1.0;
+          (typeItem == 2 && scaleWeight != null && scaleWeight != 0) ? scaleWeight : 1.0;
 
-      if (existingIndex != -1) {
-        selectedProducts[existingIndex]['quantity'] += addedQuantity;
-        selectedProducts[existingIndex]['total'] = (type == 1
-                ? selectedProducts[existingIndex]['price_Purchase']
-                : selectedProducts[existingIndex]['price']) *
-            selectedProducts[existingIndex]['quantity'];
-        selectedProducts[existingIndex] =
-            Map<String, dynamic>.from(selectedProducts[existingIndex]);
-      } else {
-        selectedProducts.add({
-          "uuid": uuid,
-          "name": name,
-          type == 1 ? "price_Purchase" : "price": price,
-          "quantity": addedQuantity,
-          "total": price * addedQuantity,
-          "type_item": typeItem,
-          "quantity_item": productData['product_quantity'],
-        });
-      }
+      pendingProduct = productData;
+      pendingAddedQuantity = addedQuantity;
+      pendingExistingIndex = existingIndex;
 
       _calculateTotals();
       statusrequest = Statusrequest.success;

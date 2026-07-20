@@ -152,13 +152,12 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                       : item['price'];
                                   TextEditingController priceController =
                                       TextEditingController(
-                                    text: currentPrice.toString(),
+                                    text: formavalue(currentPrice),
                                   );
 
                                   TextEditingController totalPriceController =
                                       TextEditingController(
-                                    text: (currentPrice * item['quantity'])
-                                        .toStringAsFixed(2),
+                                    text: formavalue(currentPrice * item['quantity']),
                                   );
 
                                   Get.dialog(
@@ -225,9 +224,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                                     if (weight != null &&
                                                         uprice != null) {
                                                       totalPriceController
-                                                          .text = (weight *
-                                                              uprice)
-                                                          .toStringAsFixed(2);
+                                                          .text = formavalue(weight * uprice);
                                                     }
                                                   }
                                                 },
@@ -271,8 +268,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                                   if (uprice != null &&
                                                       qty != null) {
                                                     totalPriceController.text =
-                                                        (uprice * qty)
-                                                            .toStringAsFixed(2);
+                                                        formavalue(uprice * qty);
                                                   }
                                                 },
                                               ),
@@ -322,9 +318,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                                         uprice != null &&
                                                         uprice > 0) {
                                                       qtyController.text =
-                                                          (total / uprice)
-                                                              .toStringAsFixed(
-                                                                  3);
+                                                          formatQuantity(total / uprice);
                                                     }
                                                   },
                                                 ),
@@ -388,19 +382,18 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                   );
                                 },
                                 title: item["name"],
-                                price: controller.type == 1
-                                    ? item["price_Purchase"].toString()
-                                    : item["price"].toString(),
+                                price: formavalue(controller.type == 1
+                                    ? item["price_Purchase"]
+                                    : item["price"]),
                                 fontSize: 17,
                                 color: AppColor.grey,
                                 colorp: AppColor.grey,
                                 da: "DA".tr,
                                 q: formatQuantity(item["quantity"]),
-                                value: ((controller.type == 1
+                                value: formavalue((controller.type == 1
                                             ? item["price_Purchase"]
                                             : item["price"]) *
-                                        item["quantity"])
-                                    .toStringAsFixed(0),
+                                        item["quantity"]),
                               );
                             },
                           ),
@@ -432,12 +425,12 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               Text(
-                                  "DZD ${controller.totalallPrice.toStringAsFixed(2)}",
+                                  "DZD ${formavalue(controller.totalallPrice)}",
                                   style:
                                       TextStyle(fontWeight: FontWeight.bold)),
                               Text("الإجمالي".tr),
                               Text(
-                                  "${'عناصر'.tr} ${controller.totalItems.toStringAsFixed(0)}"),
+                                  "${'عناصر'.tr} ${formatQuantity(controller.totalItems)}"),
                               Icon(Icons.shopping_cart_outlined),
                             ],
                           ),
@@ -477,54 +470,132 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                                     context: context,
                                     builder: (context) {
                                       return Dialog(
-                                        insetPadding: const EdgeInsets.all(20),
+                                        insetPadding: const EdgeInsets.all(16),
+                                        backgroundColor: Colors.transparent,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius:
-                                              BorderRadius.circular(12),
+                                          borderRadius: BorderRadius.circular(20),
                                         ),
-                                        child: SizedBox(
-                                          height: 400,
-                                          child: Column(
-                                            children: [
-                                              AppBar(
-                                                title: Text(
-                                                  "امسح الباركود".tr,
-                                                  style: TextStyle(
-                                                      color: AppColor
-                                                          .backgroundcolor),
-                                                ),
-                                                automaticallyImplyLeading:
-                                                    false,
-                                                backgroundColor:
-                                                    AppColor.primarycolor,
-                                                actions: [
-                                                  IconButton(
-                                                    icon: const Icon(
-                                                        Icons.close,
-                                                        color: AppColor
-                                                            .backgroundcolor),
-                                                    onPressed: () => Get.back(),
-                                                  ),
-                                                ],
-                                              ),
-                                              Expanded(
-                                                child: MobileScanner(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(20),
+                                          child: SizedBox(
+                                            height: 550,
+                                            width: double.infinity,
+                                            child: Stack(
+                                              children: [
+                                                MobileScanner(
                                                   onDetect: (capture) {
-                                                    final barcodes =
-                                                        capture.barcodes;
+                                                    final barcodes = capture.barcodes;
                                                     if (barcodes.isNotEmpty) {
-                                                      final scannedCode =
-                                                          barcodes
-                                                              .first.rawValue;
-                                                      print(
-                                                          "=======================$scannedCode");
-                                                      controller
-                                                          .search(scannedCode!);
+                                                      final scannedCode = barcodes.first.rawValue;
+                                                      if (scannedCode != null) {
+                                                        controller.search(scannedCode);
+                                                      }
                                                     }
                                                   },
                                                 ),
-                                              ),
-                                            ],
+                                                Center(
+                                                  child: Container(
+                                                    width: 250,
+                                                    height: 250,
+                                                    decoration: BoxDecoration(
+                                                      border: Border.all(color: AppColor.backgroundcolor, width: 3),
+                                                      borderRadius: BorderRadius.circular(16),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  top: 0, left: 0, right: 0,
+                                                  child: Container(
+                                                    padding: const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 20),
+                                                    decoration: const BoxDecoration(
+                                                      gradient: LinearGradient(
+                                                        begin: Alignment.topCenter,
+                                                        end: Alignment.bottomCenter,
+                                                        colors: [Colors.black87, Colors.transparent],
+                                                      ),
+                                                    ),
+                                                    child: Row(
+                                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                      children: [
+                                                        Padding(
+                                                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                          child: Text(
+                                                            "امسح الباركود".tr,
+                                                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                                                          ),
+                                                        ),
+                                                        IconButton(
+                                                          icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                                                          onPressed: () => Get.back(),
+                                                        ),
+                                                      ],
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                  bottom: 0, left: 0, right: 0,
+                                                  child: GetBuilder<SaleController>(
+                                                    builder: (controller) {
+                                                      if (controller.pendingProduct == null) {
+                                                        return const SizedBox.shrink();
+                                                      }
+                                                      return Container(
+                                                        margin: const EdgeInsets.all(16),
+                                                        padding: const EdgeInsets.all(20),
+                                                        decoration: BoxDecoration(
+                                                          color: Colors.white,
+                                                          borderRadius: BorderRadius.circular(20),
+                                                          boxShadow: const [
+                                                            BoxShadow(color: Colors.black26, blurRadius: 10, offset: Offset(0, 5))
+                                                          ],
+                                                        ),
+                                                        child: Column(
+                                                          mainAxisSize: MainAxisSize.min,
+                                                          children: [
+                                                            const Icon(Icons.check_circle, color: Colors.green, size: 45),
+                                                            const SizedBox(height: 12),
+                                                            Text(
+                                                              controller.pendingProduct!['product_name'] ?? "",
+                                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: Colors.black87),
+                                                              textAlign: TextAlign.center,
+                                                            ),
+                                                            const SizedBox(height: 20),
+                                                            Row(
+                                                              children: [
+                                                                Expanded(
+                                                                  child: OutlinedButton(
+                                                                    onPressed: () => controller.cancelPendingProduct(),
+                                                                    style: OutlinedButton.styleFrom(
+                                                                      foregroundColor: Colors.red,
+                                                                      side: const BorderSide(color: Colors.red),
+                                                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                                    ),
+                                                                    child: Text("إلغاء".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                                                                  ),
+                                                                ),
+                                                                const SizedBox(width: 15),
+                                                                Expanded(
+                                                                  child: ElevatedButton(
+                                                                    onPressed: () => controller.confirmPendingProduct(),
+                                                                    style: ElevatedButton.styleFrom(
+                                                                      backgroundColor: AppColor.backgroundcolor,
+                                                                      padding: const EdgeInsets.symmetric(vertical: 12),
+                                                                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                                                    ),
+                                                                    child: Text("تأكيد".tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 16)),
+                                                                  ),
+                                                                ),
+                                                              ],
+                                                            ),
+                                                          ],
+                                                        ),
+                                                      );
+                                                    }
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
                                           ),
                                         ),
                                       );

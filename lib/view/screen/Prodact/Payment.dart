@@ -2,7 +2,9 @@ import 'package:Silaaty/controller/items/PaymentController.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../core/class/Statusrequest.dart';
 import '../../../core/constant/Colorapp.dart';
+import '../../../core/functions/FormatQuantity.dart';
 import '../../../core/functions/valiedinput.dart';
 import '../../widget/Bills/CostumCartdetails.dart';
 import '../../widget/Bills/CostumCartdetailsPayment.dart';
@@ -103,7 +105,7 @@ class _PaymentState extends State<Payment> {
                     children: [
                       Costumcartdetailspayment(
                         title: "المجموع الفرعي".tr,
-                        body: controller.totalprice.toStringAsFixed(2),
+                        body: formavalue(controller.totalprice),
                       ),
                       Costumcartdetailspayment(
                         title: "الخصم".tr,
@@ -118,7 +120,7 @@ class _PaymentState extends State<Payment> {
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold)),
                           Text(
-                            controller.finalAmount.toStringAsFixed(2),
+                            formavalue(controller.finalAmount),
                             style: TextStyle(
                                 color: AppColor.black,
                                 fontSize: 20,
@@ -129,19 +131,42 @@ class _PaymentState extends State<Payment> {
                     ],
                   ),
                 ),
-                Custembutton(
-                  text: "Add".tr,
-                  onPressed: () {
-                    if (!validInputsnak(
-                        controller.paymentController.text, 1, 20, "Name".tr)) {
-                      return;
-                    }
-
-                    controller.addSale();
-                  },
-                  vertical: 30,
-                  horizontal: 10,
-                  paddingvertical: 10,
+                Row(
+                  children: [
+                    Expanded(
+                      child: Custembutton(
+                        text: "حفظ وطباعة".tr,
+                        isLoading: controller.statusrequest == Statusrequest.loadeng
+                        ,
+                        onPressed: () {
+                          if (!validInputsnak(
+                              controller.paymentController.text, 1, 20, "Name".tr)) {
+                            return;
+                          }
+                          controller.addSale(printInvoice: true);
+                        },
+                        vertical: 30,
+                        horizontal: 5,
+                        paddingvertical: 10,
+                      ),
+                    ),
+                    Expanded(
+                      child: Custembutton(
+                        text: "Add".tr,
+                        isLoading: controller.statusrequest == Statusrequest.loadeng,
+                        onPressed: () {
+                          if (!validInputsnak(
+                              controller.paymentController.text, 1, 20, "Name".tr)) {
+                            return;
+                          }
+                          controller.addSale(printInvoice: false);
+                        },
+                        vertical: 30,
+                        horizontal: 5,
+                        paddingvertical: 10,
+                      ),
+                    ),
+                  ],
                 )
               ],
             ),

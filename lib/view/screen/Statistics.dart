@@ -3,7 +3,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../controller/HomeScreen/StatisticsController.dart';
-import '../../core/constant/Colorapp.dart';
+import 'package:Silaaty/core/constant/Colorapp.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import '../widget/Setteng/custemCartButton.dart';
 import '../widget/Statistics/CustemTypeStatistice.dart';
 import '../widget/Statistics/CustomCurve.dart';
@@ -140,10 +141,9 @@ class _StatisticsState extends State<Statistics> {
                           Text("إجمالي المبيعات".tr),
                           Text(
                             truncateWithDots(
-                                controller.currentStats?.totalSales
-                                        .toStringAsFixed(2)
-                                        .toString() ??
-                                    "0.0",
+                                controller.currentStats?.totalSales != null
+                                    ? formavalue(controller.currentStats!.totalSales!)
+                                    : "0",
                                 13),
                             style: TextStyle(color: Colors.green),
                           ),
@@ -154,10 +154,9 @@ class _StatisticsState extends State<Statistics> {
                           Text("الأرباح".tr),
                           Text(
                             truncateWithDots(
-                                controller.currentStats?.totalProfit
-                                        .toStringAsFixed(2)
-                                        .toString() ??
-                                    "0.0",
+                                controller.currentStats?.totalProfit != null
+                                    ? formavalue(controller.currentStats!.totalProfit!)
+                                    : "0",
                                 13),
                           ),
                         ],
@@ -167,10 +166,9 @@ class _StatisticsState extends State<Statistics> {
                           Text("المصروفات".tr),
                           Text(
                             truncateWithDots(
-                                controller.currentStats?.totalExpenses
-                                        .toStringAsFixed(2)
-                                        .toString() ??
-                                    "0.0",
+                                controller.currentStats?.totalExpenses != null
+                                    ? formavalue(controller.currentStats!.totalExpenses!)
+                                    : "0",
                                 13),
                             style: TextStyle(color: Colors.red),
                           ),

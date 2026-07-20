@@ -1,6 +1,7 @@
 import 'package:Silaaty/controller/items/ItemsController.dart';
 import 'package:Silaaty/core/class/handlingview.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import 'package:Silaaty/view/widget/Home/CustemType.dart';
 import 'package:Silaaty/view/widget/Home/custemSearch.dart';
 import 'package:flutter/material.dart';
@@ -84,7 +85,7 @@ class _AddProductSaleState extends State<AddProductSale> {
                   double? weight = double.tryParse(val);
                   if (weight != null) {
                     priceController.text =
-                        (weight * unitPrice).toStringAsFixed(2);
+                        formavalue(weight * unitPrice);
                   } else {
                     priceController.clear();
                   }
@@ -350,7 +351,7 @@ class _AddProductSaleState extends State<AddProductSale> {
                                         Body: num.tryParse(
                                                 item.productQuantity ?? '0') ??
                                             0,
-                                        Price: controller.getSalePrice(item).toStringAsFixed(2),
+                                        Price: formavalue(controller.getSalePrice(item)),
                                         uuid: item.uuid!,
                                       ),
                                     );

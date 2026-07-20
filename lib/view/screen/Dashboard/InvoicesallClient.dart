@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../controller/Dashpord/invoicesallcontroller.dart';
-import '../../../core/constant/Colorapp.dart';
+import 'package:Silaaty/core/constant/Colorapp.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import '../../../main.dart';
 import '../../widget/Bills/custemcartallInvoices.dart';
 import '../../widget/Home/Custemstatus.dart';
@@ -171,36 +172,13 @@ class _InvoicesallState extends State<Invoicesall> with RouteAware {
                             Status: inv.debt! <= 0
                                 ? "Sincere".tr
                                 : "Not Sincere".tr,
-                            Price: "${inv.debt!.toStringAsFixed(2)}",
+                            Price: inv.debt != null ? formavalue(inv.debt!) : "",
                             onTap: () {
                               print("================i$index");
                               print(
                                   "================${controller.filteredInvoices}");
                               controller
                                   .gotoShowInvoice(filteredInvoices[index]);
-                            },
-                            onDelete: () {
-                              Get.defaultDialog(
-                                backgroundColor: AppColor.white,
-                                title: "Alert".tr,
-                                titleStyle: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColor.backgroundcolor,
-                                ),
-                                middleText: "deleteInvoiceWarning".tr,
-                                onConfirm: () {
-                                  controller.invoices.removeWhere(
-                                    (element) => element.uuid == inv.uuid,
-                                  );
-                                  Get.back();
-                                  controller.update();
-                                  controller.deleteInvoice(inv.uuid!);
-                                },
-                                onCancel: () {},
-                                buttonColor: AppColor.backgroundcolor,
-                                confirmTextColor: AppColor.primarycolor,
-                                cancelTextColor: AppColor.backgroundcolor,
-                              );
                             },
                           );
                         },

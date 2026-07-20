@@ -143,9 +143,7 @@ class Customcartaddproductsale extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                type == 2 && Body != 0
-                                    ? Body.toStringAsFixed(3)
-                                    : Body.toStringAsFixed(0),
+                                formatQuantity(Body),
                                 style:
                                     Theme.of(context).textTheme.headlineLarge,
                               ),

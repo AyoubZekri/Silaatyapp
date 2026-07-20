@@ -1,9 +1,9 @@
 import 'package:Silaaty/controller/Profaile/invoice/Shwoinvoicecontroller.dart';
 import 'package:Silaaty/core/class/handlingview.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import 'package:Silaaty/view/widget/Bills/CustemEditpayment.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:Silaaty/core/functions/FormatQuantity.dart';
 
 import '../../../core/constant/Colorapp.dart';
 import '../../../core/functions/valiedinput.dart';
@@ -206,13 +206,13 @@ class _PaymentState extends State<Shwoinvoice> {
                                   );
                                 },
                                 title: pro?.productName ?? "",
-                                price: pro?.unitPrice.toStringAsFixed(0) ?? "",
+                                price: pro?.unitPrice != null ? formavalue(pro!.unitPrice!) : "",
                                 fontSize: 17,
                                 color: AppColor.grey,
                                 colorp: AppColor.grey,
                                 da: "DA".tr,
                                 q: formatQuantity(pro!.quantity),
-                                value: pro.subtotal.toStringAsFixed(0),
+                                value: formavalue(pro.subtotal ?? 0),
                               );
                             },
                           )),
@@ -261,29 +261,25 @@ class _PaymentState extends State<Shwoinvoice> {
                             title: "المجموع الفرعي".tr,
                             body: controller.productSale == null
                                 ? ""
-                                : controller.productSale!.sumPrice
-                                    .toStringAsFixed(2),
+                                : formavalue(controller.productSale!.sumPrice ?? 0),
                           ),
                           Costumcartdetailspayment(
                             title: "الخصم".tr,
-                            body: controller.productSale?.discount
-                                    .toStringAsFixed(2) ??
-                                "",
+                            body: controller.productSale?.discount != null
+                                    ? formavalue(controller.productSale!.discount!)
+                                    : "",
                           ),
                           Costumcartdetailspayment(
                             title: "الإجمالي".tr,
                             body: controller.productSale == null
                                 ? ""
-                                : (double.parse(controller.productSale!.sumPrice
-                                            .toStringAsFixed(2)) -
-                                        (controller.productSale?.discount ?? 0))
-                                    .toStringAsFixed(2),
+                                : formavalue((controller.productSale!.sumPrice ?? 0) - (controller.productSale?.discount ?? 0)),
                           ),
                           Costumcartdetailspayment(
                             title: "المدفوع".tr,
-                            body: controller.productSale?.paymentprice
-                                    .toStringAsFixed(2) ??
-                                "",
+                            body: controller.productSale?.paymentprice != null
+                                    ? formavalue(controller.productSale!.paymentprice!)
+                                    : "",
                           ),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -294,9 +290,7 @@ class _PaymentState extends State<Shwoinvoice> {
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold)),
                               Text(
-                                controller
-                                    .getRemainingAmount()
-                                    .toStringAsFixed(2),
+                                formavalue(controller.getRemainingAmount()),
                                 style: TextStyle(
                                     color: AppColor.black,
                                     fontSize: 20,
@@ -415,31 +409,6 @@ class _PaymentState extends State<Shwoinvoice> {
                             },
                             iconData: Icons.keyboard_return,
                             title: 'return'.tr,
-                          ),
-                          const SizedBox(width: 15),
-                          Custemcartabbreviation(
-                            height: 50,
-                            width: Get.width / 4,
-                            onTap: () {
-                              Get.defaultDialog(
-                                backgroundColor: AppColor.white,
-                                title: "Alert".tr,
-                                titleStyle: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColor.backgroundcolor,
-                                ),
-                                middleText: "deleteInvoiceWarning".tr,
-                                onConfirm: () {
-                                  controller.deleteInvoice(controller.uuid!);
-                                },
-                                onCancel: () {},
-                                buttonColor: AppColor.backgroundcolor,
-                                confirmTextColor: AppColor.primarycolor,
-                                cancelTextColor: AppColor.backgroundcolor,
-                              );
-                            },
-                            iconData: Icons.delete_sharp,
-                            title: "حذف".tr,
                           ),
                         ],
                       ),

@@ -1,5 +1,6 @@
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/constant/routes.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import 'package:Silaaty/data/datasource/Remote/invoiceData.dart';
 import 'package:Silaaty/data/model/InvoiceModel.dart';
 import 'package:flutter/material.dart';
@@ -157,8 +158,11 @@ class InvoicesController extends GetxController {
   String getRemainingAmount() {
     final total = invoice?.sumPrice ?? 0.0;
     final paid = invoice?.sumPaymentPrice ?? 0.0;
-    final remaining = total - paid;
-    return remaining.toStringAsFixed(2);
+    double remaining = total - paid;
+    
+    remaining = double.parse(remaining.toStringAsFixed(3));
+    
+    return formavalue(remaining <= 0 ? 0 : remaining);
   }
 
   @override

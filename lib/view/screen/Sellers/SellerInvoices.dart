@@ -4,6 +4,8 @@ import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/data/model/InvoiceModel.dart';
 import 'package:Silaaty/view/widget/Bills/CustemCartinvoice.dart';
 import 'package:Silaaty/view/widget/Bills/CustemTypeinvoice.dart';
+import 'package:Silaaty/view/widget/Home/CustemTitle.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import 'package:Silaaty/view/widget/Bills/Custemaddinvoice.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -250,8 +252,7 @@ class _SellerInvoicesState extends State<SellerInvoices> with RouteAware {
                         Mon: controller.getMonthAbbreviation(inv.date),
                         Title: "#${inv.number ?? ''}",
                         Status: inv.isPaid ? "Sincere".tr : 'Not Sincere'.tr,
-                        Price:
-                            "${(((double.parse(inv.invoiceSum.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)) < 0 ? 0 : (double.parse(inv.invoiceSum!.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)).toStringAsFixed(2)}",
+                        Price: formavalue((((double.parse(inv.invoiceSum.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)) < 0 ? 0 : (double.parse(inv.invoiceSum!.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0))),
                         onTap: () {
                           final selectedInvoiceData = InvoiceItem(
                             id: inv.id,
@@ -273,25 +274,7 @@ class _SellerInvoicesState extends State<SellerInvoices> with RouteAware {
                           );
 
                           controller.gotoShowInvoice(selectedInvoiceData);
-                        },
-                        onDelete: () {
-                          Get.defaultDialog(
-                            backgroundColor: AppColor.white,
-                            title: "Alert".tr,
-                            titleStyle: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: AppColor.backgroundcolor),
-                            middleText: "deleteInvoiceWarning".tr,
-                            onConfirm: () {
-                              controller.deleteInvoice(inv.uuid!);
-                            },
-                            onCancel: () {},
-                            buttonColor: AppColor.backgroundcolor,
-                            confirmTextColor: AppColor.primarycolor,
-                            cancelTextColor: AppColor.backgroundcolor,
-                          );
-                        },
-                      ),
+                  }),
                     );
                   },
                 ),

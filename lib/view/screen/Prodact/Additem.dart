@@ -2,6 +2,7 @@ import 'package:Silaaty/controller/items/AdditemsController.dart';
 import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/class/handlingview.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import 'package:Silaaty/core/functions/Snacpar.dart';
 import 'package:Silaaty/core/functions/valiedinput.dart';
 import 'package:Silaaty/view/widget/addItem/CustemButton.dart';
@@ -268,8 +269,7 @@ class _AdditemState extends State<Additem> {
                       ),
                       Custemtextfromfild(
                         MyController: TextEditingController(
-                            text: controller.priceTotalPurchase
-                                .toStringAsFixed(2)),
+                            text: formavalue(controller.priceTotalPurchase)),
                         keyboardType: TextInputType.number,
                         hintText: "إجمالي سعر التكلفة".tr,
                         label: "إجمالي سعر التكلفة".tr,
@@ -278,7 +278,7 @@ class _AdditemState extends State<Additem> {
                       ),
                       Custemtextfromfild(
                         MyController: TextEditingController(
-                            text: controller.priceTotal.toStringAsFixed(2)),
+                            text: formavalue(controller.priceTotal)),
                         keyboardType: TextInputType.number,
                         hintText: "Selling Prise Total".tr,
                         label: "Selling Prise Total".tr,
@@ -294,10 +294,17 @@ class _AdditemState extends State<Additem> {
                                   return;
                                 }
 
-                                if (!validInputsnak(controller.barcodeController.text,
-                                    8, 13, "Barcode".tr)) {
-                                  return;
-                                }
+                        if (controller.type == 2) {
+                          if (controller.barcodeController.text.length != 5) {
+                            showSnackbar("تنبيه".tr, "باركود الميزان يجب أن يتكون من 5 أرقام (سيضاف الرقم 25 تلقائياً)".tr, Colors.orange);
+                            return;
+                          }
+                        } else {
+                          if (!validInputsnak(controller.barcodeController.text,
+                              8, 13, "Barcode".tr)) {
+                            return;
+                          }
+                        }
 
                                 controller.addProduct();
                                 Get.back(result: true);

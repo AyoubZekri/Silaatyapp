@@ -1,10 +1,13 @@
+import 'package:Silaaty/data/model/InvoiceModel.dart';
+import 'package:Silaaty/controller/Profaile/invoice/Shwoinvoicecontroller.dart';
 import 'package:Silaaty/data/datasource/Remote/SaleData.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
-import '../../core/class/Statusrequest.dart';
+import 'package:Silaaty/core/class/Statusrequest.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import '../../core/functions/Snacpar.dart';
 import '../../core/services/Services.dart';
 
@@ -30,7 +33,8 @@ class PaymentController extends GetxController {
   int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
   Statusrequest statusrequest = Statusrequest.none;
 
-  Future<void> addSale() async {
+  Future<void> addSale({bool printInvoice = false}) async {
+    print("===============${paymentController.text}============");
     final String uuidinvoice = Uuid().v4();
     print(
         "========================================${DateTime.now().toIso8601String()}");
@@ -78,6 +82,32 @@ class PaymentController extends GetxController {
     if (result["status"] == 1) {
       Get.back(result: true);
       Get.find<RefreshService>().fire();
+
+      if (printInvoice) {
+        InvoiceItem invoice = InvoiceItem(
+          uuid: uuidinvoice,
+          name: name,
+          familyName: familyName,
+          paymentPrice: double.tryParse(paymentController.text) ?? 0,
+          discount: double.tryParse(discountController.text) ?? 0,
+          invoiceSum: totalprice,
+          number: data["invoies_numper"].toString(),
+          date: data["invoies_date"].toString(),
+        );
+
+        // Put the controller in memory to handle printing without navigating
+        Get.delete<Shwoinvoicecontroller>();
+        final printCtrl = Get.put(Shwoinvoicecontroller());
+        printCtrl.uuid = uuidinvoice;
+        printCtrl.invoices = invoice;
+
+        printCtrl.Shwoinvoice().then((_) {
+          printCtrl.printThermalInvoice(); // Trigger the background print
+        }).catchError((e) {
+          print("Background print error: $e");
+        });
+      }
+      
       // showSnackbar("success".tr, "add_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);
@@ -112,8 +142,7 @@ class PaymentController extends GetxController {
     paymentController.addListener(recalculateFinalAmount);
 
     if (selectedCustomer == "virtualCustomer".tr) {
-      paymentController =
-          TextEditingController(text: finalAmount.toStringAsFixed(2));
+      paymentController = TextEditingController(text: formavalue(finalAmount));
     } else {
       paymentController = TextEditingController(text: "0");
     }
@@ -125,7 +154,7 @@ class PaymentController extends GetxController {
 
     finalAmount = total - discount;
     if (selectedCustomer == "virtualCustomer".tr) {
-      paymentController.text = finalAmount.toStringAsFixed(2);
+      paymentController.text = formavalue(finalAmount);
     }
 
     update();

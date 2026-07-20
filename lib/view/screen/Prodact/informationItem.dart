@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:Silaaty/controller/items/informationItemController.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/constant/imageassets.DART';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import 'package:Silaaty/view/widget/Iformationitem/iconButton.dart';
 import 'package:barcode_widget/barcode_widget.dart';
 import 'package:flutter/material.dart';
@@ -174,21 +175,21 @@ class _InformationitemState extends State<Informationitem> {
                         const Divider(height: 30),
                         _infoRow(
                           "سعر البيع".tr,
-                          "${product.productPrice!.toStringAsFixed(2)} ${'دينار'.tr}",
+                          "${product.productPrice != null ? formavalue(product.productPrice!) : ''} ${'دينار'.tr}",
                         ),
                         _infoRow(
                           "سعر الشراء".tr,
-                          "${product.productPricePurchase!.toStringAsFixed(2)} ${'دينار'.tr}",
+                          "${product.productPricePurchase != null ? formavalue(product.productPricePurchase!) : ''} ${'دينار'.tr}",
                         ),
                         _infoRow("الكمية".tr,
                             "${product.productQuantity}${product.type == 2 ? "Kg" : ""}"),
                         _infoRow(
                           "الإجمالي بيع".tr,
-                          "${product.productPriceTotal!.toStringAsFixed(2)}",
+                          "${product.productPriceTotal != null ? formavalue(product.productPriceTotal!) : ''}",
                         ),
                         _infoRow(
                           "الإجمالي شراء".tr,
-                          "${product.productPriceTotalPurchase!.toStringAsFixed(2)}",
+                          "${product.productPriceTotalPurchase != null ? formavalue(product.productPriceTotalPurchase!) : ''}",
                         ),
                         _infoRow(
                           "تاريخ الإضافة".tr,
@@ -319,7 +320,7 @@ class _InformationitemState extends State<Informationitem> {
               color: Colors.black,
             ),
           ),
-          Text("${price.toStringAsFixed(2)} ${"DA".tr}",
+          Text("${formavalue(price)} ${"DA".tr}",
               style: const TextStyle(fontSize: 20, color: Colors.black, fontFamily: 'Cairo', fontWeight: FontWeight.bold)),
         ],
       ),

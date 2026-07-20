@@ -31,8 +31,8 @@ class Logincontroller extends GetxController {
     if (formData!.validate()) {
       statusrequest = Statusrequest.loadeng;
       update();
-       String? fcmToken = await FirebaseMessaging.instance.getToken();
-       print("FCM Token: $fcmToken");
+      String? fcmToken = await FirebaseMessaging.instance.getToken();
+      print("FCM Token: $fcmToken");
       var response =
           await logenData.postdata(Password.text, Email.text, fcmToken!);
       if (response == Statusrequest.serverfailure) {
@@ -72,12 +72,18 @@ class Logincontroller extends GetxController {
                 response["data"]["user"]["user"]["date_experiment"]);
           }
           if (response["data"]["user"]["user"]["sell_type"] != null) {
-            myServices.sharedPreferences!.setInt("sell_type",
-                int.tryParse(response["data"]["user"]["user"]["sell_type"].toString()) ?? 1);
+            myServices.sharedPreferences!.setInt(
+                "sell_type",
+                int.tryParse(response["data"]["user"]["user"]["sell_type"]
+                        .toString()) ??
+                    1);
           }
           if (response["data"]["user"]["user"]["max_sellers"] != null) {
-            myServices.sharedPreferences!.setInt("max_sellers",
-                int.tryParse(response["data"]["user"]["user"]["max_sellers"].toString()) ?? 0);
+            myServices.sharedPreferences!.setInt(
+                "max_sellers",
+                int.tryParse(response["data"]["user"]["user"]["max_sellers"]
+                        .toString()) ??
+                    0);
           }
           myServices.sharedPreferences!
               .setString("token", response["data"]["user"]["token"]);
@@ -99,14 +105,21 @@ class Logincontroller extends GetxController {
           final today = DateTime.now();
           final status = response['data']["user"]["user"]['Status'];
 
-          if (status == 0||status == 1) {
+          if (status == 0 || status == 1) {
             Get.offNamed(Approutes.VerifiycodeSignUp, arguments: {
               "email": Email.text,
             });
             reset();
-          } else if (status == 5 || status == 6||status == 13||status == 14) {
+          } else if (status == 5 ||
+              status == 6 ||
+              status == 13 ||
+              status == 14) {
             Get.offAllNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
-          } else if (status == 2 || status == 3 || status == 4 || status == 11 || status == 12) {
+          } else if (status == 2 ||
+              status == 3 ||
+              status == 4 ||
+              status == 11 ||
+              status == 12) {
             if (experimentDate != null) {
               DateTime now = DateTime.now();
               DateTime todayDay = DateTime(now.year, now.month, now.day);
@@ -118,7 +131,8 @@ class Logincontroller extends GetxController {
               bool isValid = todayDay.isBefore(expireDate);
 
               if (isValid) {
-                Get.offAllNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
+                Get.offAllNamed(Approutes.HomeScreen,
+                    arguments: {"fromlogin": 1});
               } else {
                 Get.offAllNamed(Approutes.activationExpiredPage);
               }

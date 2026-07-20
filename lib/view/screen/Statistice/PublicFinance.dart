@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 
 import '../../../controller/Statistice/PublicFinanceController.dart';
 import '../../../core/constant/Colorapp.dart';
+import '../../../core/functions/FormatQuantity.dart';
 import '../../widget/Bills/CostumtitlePayment.dart';
 import '../../widget/Statistics/CustomApparr.dart';
 import '../../widget/Statistics/CustomStatCard.dart';
@@ -65,10 +66,9 @@ class _PublicfinanceState extends State<Publicfinance> {
                           iconData: FontAwesomeIcons.coins,
                           Price: (controller.data?.summary?.netProfit ?? 0) < 0
                               ? "0"
-                              : controller.data?.summary?.netProfit
-                                      .toStringAsFixed(2)
-                                      .toString() ??
-                                  "0",
+                              : controller.data?.summary?.netProfit != null
+                                      ? formavalue(controller.data!.summary!.netProfit!)
+                                      : "0",
                           Title: "صافي الربح".tr,
                         ),
                       ],
@@ -79,20 +79,18 @@ class _PublicfinanceState extends State<Publicfinance> {
                         Custemcard(
                           color: Colors.red,
                           iconData: FontAwesomeIcons.moneyBillWave,
-                          Price: controller.data?.summary?.totalExpenses
-                                  .toStringAsFixed(2)
-                                  .toString() ??
-                              "0.0",
+                          Price: controller.data?.summary?.totalExpenses != null
+                                  ? formavalue(controller.data!.summary!.totalExpenses!)
+                                  : "0.0",
                           Title: "المصروفات".tr,
                         ),
                         const SizedBox(width: 10),
                         Custemcard(
                           color: Colors.blue,
                           iconData: FontAwesomeIcons.sackDollar,
-                          Price: controller.data?.summary?.totalRevenue
-                                  .toStringAsFixed(2)
-                                  .toString() ??
-                              "0.0",
+                          Price: controller.data?.summary?.totalRevenue != null
+                                  ? formavalue(controller.data!.summary!.totalRevenue!)
+                                  : "0.0",
                           Title: "الإرادات".tr,
                         ),
                       ],
@@ -120,22 +118,15 @@ class _PublicfinanceState extends State<Publicfinance> {
                           period:
                               controller.formatSmartDate(detils?.period ?? ""),
                           revenue:
-                              detils?.netProfit.toStringAsFixed(2).toString() ??
-                                  "",
+                              detils?.netProfit != null ? formavalue(detils!.netProfit!) : "",
                           profit: (detils?.revenue ?? 0) < 0
                               ? "0"
-                              : detils?.revenue.toStringAsFixed(2).toString() ??
-                                  "",
+                              : detils?.revenue != null ? formavalue(detils!.revenue!) : "",
                           profit2:
-                              detils?.netProfit.toStringAsFixed(2).toString() ??
-                                  "",
-                          totalSales: detils?.totalSales
-                                  .toStringAsFixed(2)
-                                  .toString() ??
-                              "",
+                              detils?.netProfit != null ? formavalue(detils!.netProfit!) : "",
+                          totalSales: detils?.totalSales != null ? formavalue(detils!.totalSales!) : "",
                           expenses:
-                              detils?.expenses.toStringAsFixed(2).toString() ??
-                                  "",
+                              detils?.expenses != null ? formavalue(detils!.expenses!) : "",
                           itemsSold: detils?.itemsSold.toString() ?? "",
                           profitRate: "${detils?.profitRate.toString() ?? ""}%",
                           labelTotalSales: "Total Sales".tr,

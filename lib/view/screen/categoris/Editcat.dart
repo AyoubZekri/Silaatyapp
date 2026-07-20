@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:Silaaty/controller/categoris/Editcatcontroller.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/functions/valiedinput.dart';
@@ -52,7 +54,7 @@ class _EditcatState extends State<Editcat> {
                           borderRadius: BorderRadius.circular(10),
                           border: Border.all(width: 2),
                         ),
-                        child: controller.file == null
+                        child: (controller.file == null && (controller.imageUrl == null || controller.imageUrl!.isEmpty))
                             ? MaterialButton(
                                 onPressed: () {
                                   controller.imageupload();
@@ -67,15 +69,20 @@ class _EditcatState extends State<Editcat> {
                                       child: ClipRRect(
                                           borderRadius:
                                               BorderRadius.circular(10),
-                                          child: controller.imageUrl != null
-                                              ? Image.network(
-                                                  "${Applink.image}/storage/${controller.imageUrl}",
-                                                  fit: BoxFit.cover,
-                                                )
-                                              : Image.file(
+                                          child: controller.file != null
+                                              ? Image.file(
                                                   controller.file!,
                                                   fit: BoxFit.cover,
-                                                )),
+                                                )
+                                              : ((controller.imageUrl?.startsWith('/') ?? false) || (controller.imageUrl?.startsWith('file://') ?? false) || (controller.imageUrl?.startsWith('C:') ?? false)
+                                                  ? Image.file(
+                                                      File(controller.imageUrl!),
+                                                      fit: BoxFit.cover,
+                                                    )
+                                                  : Image.network(
+                                                      "${Applink.image}/storage/${controller.imageUrl}",
+                                                      fit: BoxFit.cover,
+                                                    ))),
                                     ),
                                   ),
                                   Positioned(

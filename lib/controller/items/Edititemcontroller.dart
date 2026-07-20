@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:Silaaty/core/functions/uploudfiler.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 import 'package:Silaaty/data/model/Product_Model.dart' as Prodact;
@@ -51,10 +52,35 @@ class Edititemcontroller extends GetxController {
 
   void toggleBarcodeMode(int mode, BuildContext context) {
     barcodeMode = mode;
-    if (mode == 2) {
+    if (mode == 0) {
+      barcodeController.text = generateBarcode();
+    } else if (mode == 1) {
+      barcodeController.clear();
+    } else if (mode == 2) {
+      barcodeController.clear();
       scanBarcode(context);
     }
     update();
+  }
+
+  void selectType(int selectedType) {
+    type = selectedType;
+    if (type == 2) {
+      if (barcodeMode == 0) {
+        barcodeController.text = generateBarcode();
+      } else if (barcodeController.text.length != 5) {
+        barcodeController.text = '';
+      }
+    }
+    update();
+  }
+
+  String generateBarcode() {
+    final random = Random();
+    if (type == 2) {
+      return List.generate(5, (_) => random.nextInt(10)).join();
+    }
+    return '1' + List.generate(10, (_) => random.nextInt(10)).join();
   }
 
   getCategoris() async {
@@ -90,6 +116,11 @@ class Edititemcontroller extends GetxController {
       showSnackbar("error".tr, "كمية غير صالحة".tr, Colors.red);
       return;
     }
+    
+    if (type == 2 && barcodeController.text.length != 5) {
+      showSnackbar("error".tr, "يجب أن يتكون باركود الميزان من 5 أرقام", Colors.red);
+      return;
+    }
 
     final data = {
       "uuid": uuid,
@@ -97,14 +128,25 @@ class Edititemcontroller extends GetxController {
       'product_description': descriptionController.text,
       'product_quantity': newQty,
       'product_price': priseController.text,
-      'product_price_half_wholesale': sellType >= 2 ? (priseHalfWholesaleController.text.isNotEmpty ? priseHalfWholesaleController.text : "0") : "0",
-      'product_price_wholesale': sellType >= 3 ? (priseWholesaleController.text.isNotEmpty ? priseWholesaleController.text : "0") : "0",
+      'product_price_half_wholesale': sellType >= 2
+          ? (priseHalfWholesaleController.text.isNotEmpty
+              ? priseHalfWholesaleController.text
+              : "0")
+          : "0",
+      'product_price_wholesale': sellType >= 3
+          ? (priseWholesaleController.text.isNotEmpty
+              ? priseWholesaleController.text
+              : "0")
+          : "0",
       'categorie_id': selectedCategoryId.toString(),
       'categoris_uuid': selectedtypeuuId.toString(),
+      'type': type,
       'product_price_total': priceTotal.toString(),
       'product_price_total_purchase': priceTotalPurchase.toString(),
       'product_price_purchase': pricePurchaseController.text,
-      "codepar": barcodeController.text,
+      "codepar": (type == 2 && !barcodeController.text.startsWith('25'))
+          ? '25' + barcodeController.text
+          : barcodeController.text,
       'updated_at': DateTime.now().toString().substring(0, 19),
     };
 
@@ -168,17 +210,23 @@ class Edititemcontroller extends GetxController {
     nameController.text = product.productName ?? "";
     descriptionController.text = product.productDescription ?? "";
     priseController.text = product.productPrice.toString();
-    priseHalfWholesaleController.text = product.productPriceHalfWholesale?.toString() ?? "0";
-    priseWholesaleController.text = product.productPriceWholesale?.toString() ?? "0";
+    priseHalfWholesaleController.text =
+        product.productPriceHalfWholesale?.toString() ?? "0";
+    priseWholesaleController.text =
+        product.productPriceWholesale?.toString() ?? "0";
     pricePurchaseController.text = product.productPricePurchase.toString();
-    barcodeController.text = product.codepar.toString();
+    type = int.tryParse(product.type.toString()) ?? 1;
+    barcodeController.text = (type == 2 &&
+            product.codepar != null &&
+            product.codepar.toString().length >= 5)
+        ? product.codepar.toString().substring(product.codepar.toString().length - 5)
+        : product.codepar.toString();
     selectedCategoryId = product.categorieId;
     quantityController.text = product.productQuantity ?? "";
     selectedtypeuuId = product.categorisuuId;
     uuid = product.uuid;
     imageUrl = product.productImage ?? "";
     oldquantity = product.productQuantity ?? "";
-    type = product.type ?? 1;
 
     print("============================$selectedtypeuuId");
   }
@@ -190,41 +238,32 @@ class Edititemcontroller extends GetxController {
 
     Get.dialog(
       Dialog(
-        insetPadding: const EdgeInsets.all(20),
+        insetPadding: const EdgeInsets.all(16),
+        backgroundColor: Colors.transparent,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(20),
         ),
-        child: SizedBox(
-          height: 400,
-          child: Column(
-            children: [
-              AppBar(
-                title: Text(
-                  "امسح الباركود".tr,
-                  style: const TextStyle(color: AppColor.backgroundcolor),
-                ),
-                automaticallyImplyLeading: false,
-                backgroundColor: AppColor.primarycolor,
-                actions: [
-                  IconButton(
-                    icon: const Icon(Icons.close,
-                        color: AppColor.backgroundcolor),
-                    onPressed: () {
-                      _isScanning = false;
-                      Get.back();
-                    },
-                  ),
-                ],
-              ),
-              Expanded(
-                child: MobileScanner(
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: SizedBox(
+            height: 550,
+            width: double.infinity,
+            child: Stack(
+              children: [
+                MobileScanner(
                   onDetect: (capture) {
                     final barcodes = capture.barcodes;
                     if (barcodes.isNotEmpty && _isScanning) {
                       final scannedCode = barcodes.first.rawValue;
                       if (scannedCode != null) {
                         _isScanning = false;
-                        barcodeController.text = scannedCode;
+                        if (type == 2 &&
+                            scannedCode.length == 13 &&
+                            scannedCode.startsWith('25')) {
+                          barcodeController.text = scannedCode.substring(2, 7);
+                        } else {
+                          barcodeController.text = scannedCode;
+                        }
                         update();
                         if (Get.isDialogOpen!) {
                           Get.back();
@@ -233,8 +272,58 @@ class Edititemcontroller extends GetxController {
                     }
                   },
                 ),
-              ),
-            ],
+                Center(
+                  child: Container(
+                    width: 250,
+                    height: 250,
+                    decoration: BoxDecoration(
+                      border:
+                          Border.all(color: AppColor.backgroundcolor, width: 3),
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                ),
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: Container(
+                    padding: const EdgeInsets.only(
+                        top: 15, left: 10, right: 10, bottom: 20),
+                    decoration: const BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [Colors.black87, Colors.transparent],
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 10),
+                          child: Text(
+                            "امسح الباركود".tr,
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.close,
+                              color: Colors.white, size: 28),
+                          onPressed: () {
+                            _isScanning = false;
+                            Get.back();
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

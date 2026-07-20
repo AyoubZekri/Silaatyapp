@@ -17,8 +17,10 @@ import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:pos_universal_printer/pos_universal_printer.dart';
 
 import '../../../core/constant/Colorapp.dart';
+import 'package:Silaaty/core/functions/FormatQuantity.dart';
+import 'package:Silaaty/core/functions/handlingdatacontroller.dart';
+import 'package:Silaaty/core/services/Services.dart';
 import '../../../core/functions/Snacpar.dart';
-import '../../../core/services/Services.dart';
 import '../../../data/model/InvoiceModel.dart';
 import '../../../data/model/InvoiceSalesModel.dart';
 
@@ -48,6 +50,7 @@ class Shwoinvoicecontroller extends GetxController {
     update();
     Map<String, Object?> data = {"uuid": uuid};
     var result = await invoicedata.showInvoice(data);
+    print("========================$result");
     if (result["status"] == 1) {
       final modele = InvoiceSalesData.fromJson(result["data"]);
       productSale = modele;
@@ -59,7 +62,7 @@ class Shwoinvoicecontroller extends GetxController {
   }
 
   Editinvoise(String invuuid) async {
-    if (int.parse(paymentPrice.text) > getRemainingAmount()) {
+    if ((double.tryParse(paymentPrice.text) ?? 0.0) > getRemainingAmount()) {
       return showSnackbar(
           "تنبيه".tr, "مبلغ الدفع اكثر من المستحق".tr, Colors.orange);
     }
@@ -169,19 +172,34 @@ class Shwoinvoicecontroller extends GetxController {
         double.tryParse(productSale?.paymentprice.toString() ?? "0") ?? 0;
     final discount =
         double.tryParse(productSale?.discount.toString() ?? "0") ?? 0;
-    final remaining = total - (paid + discount);
-    return remaining < 0 ? 0 : remaining;
+    double remaining = total - (paid + discount);
+    
+    // Fix floating point precision
+    remaining = double.parse(remaining.toStringAsFixed(3));
+    
+    return remaining <= 0 ? 0 : remaining;
   }
 
   @override
   void onInit() {
     final args = Get.arguments;
+    bool autoPrint = false;
     if (args != null) {
       invoices = args["invoice"];
       uuid = invoices?.uuid;
-      paymentpriceinvoise = invoices!.paymentPrice!;
+      paymentpriceinvoise = invoices?.paymentPrice ?? 0;
+      autoPrint = args["autoPrint"] ?? false;
     }
-    Shwoinvoice();
+    
+    if (uuid != null) {
+      Shwoinvoice().then((_) {
+        if (autoPrint) {
+          Future.delayed(const Duration(milliseconds: 500), () {
+            printThermalInvoice();
+          });
+        }
+      });
+    }
     super.onInit();
   }
 
@@ -941,14 +959,14 @@ class Shwoinvoicecontroller extends GetxController {
                                     style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
                             Expanded(
                                 flex: 2,
-                                child: Text("${p.unitPrice.toStringAsFixed(2)}",
+                                child: Text("${p.unitPrice != null ? formavalue(p.unitPrice!) : ""}",
                                     textAlign: isArabic
                                         ? TextAlign.left
                                         : TextAlign.right,
                                     style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
                             Expanded(
                                 flex: 2,
-                                child: Text("${p.subtotal.toStringAsFixed(2)}",
+                                child: Text("${p.subtotal != null ? formavalue(p.subtotal!) : ""}",
                                     textAlign: isArabic
                                         ? TextAlign.left
                                         : TextAlign.right,
@@ -986,7 +1004,7 @@ class Shwoinvoicecontroller extends GetxController {
                             fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: Colors.black),
                       ),
                       Text(
-                        "${getRemainingAmount().toStringAsFixed(2)} ${'DA'.tr}",
+                        "${formavalue(getRemainingAmount())} ${'DA'.tr}",
                         style: const TextStyle(
                             fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: Colors.black),
                       ),
