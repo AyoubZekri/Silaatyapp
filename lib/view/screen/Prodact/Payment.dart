@@ -136,11 +136,11 @@ class _PaymentState extends State<Payment> {
                     Expanded(
                       child: Custembutton(
                         text: "حفظ وطباعة".tr,
-                        isLoading: controller.statusrequest == Statusrequest.loadeng
-                        ,
+                        isLoading:
+                            controller.statusrequest == Statusrequest.loadeng,
                         onPressed: () {
-                          if (!validInputsnak(
-                              controller.paymentController.text, 1, 20, "Name".tr)) {
+                          if (!validInputsnak(controller.paymentController.text,
+                              1, 20, "Name".tr)) {
                             return;
                           }
                           controller.addSale(printInvoice: true);
@@ -153,10 +153,11 @@ class _PaymentState extends State<Payment> {
                     Expanded(
                       child: Custembutton(
                         text: "Add".tr,
-                        isLoading: controller.statusrequest == Statusrequest.loadeng,
+                        isLoading:
+                            controller.statusrequest == Statusrequest.loadeng,
                         onPressed: () {
-                          if (!validInputsnak(
-                              controller.paymentController.text, 1, 20, "Name".tr)) {
+                          if (!validInputsnak(controller.paymentController.text,
+                              1, 20, "Name".tr)) {
                             return;
                           }
                           controller.addSale(printInvoice: false);

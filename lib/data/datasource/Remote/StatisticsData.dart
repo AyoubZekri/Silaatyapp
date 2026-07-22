@@ -30,21 +30,11 @@ class Statisticsdata {
       AND i.invoies_date LIKE '$today%' AND  (t.transactions = 2 OR t.transactions IS NULL)
   ''', [id]);
 
-    final netProfit = await db.readData('''
-      SELECT IFNULL(SUM(invoice_profit - invoice_discount), 0) as netProfit
-      FROM (
-        SELECT 
-          i.uuid,
-          i.discount AS invoice_discount,
-          SUM(CASE WHEN s.type_sales = 2 THEN (s.unit_price - s.product_price_purchase) * s.quantity ELSE 0 END) AS invoice_profit
-        FROM invoies i
-        JOIN sales s ON s.invoie_uuid = i.uuid
-        LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid
-        WHERE i.user_id = ?
-          AND i.invoies_date LIKE '$today%'
-          AND (t.transactions = 2 OR t.transactions IS NULL)
-        GROUP BY i.uuid
-      )
+    final totalPurchases = await db.readData('''
+      SELECT IFNULL(SUM(product_price_purchase * quantity), 0) as totalPurchases
+      FROM sales 
+      WHERE user_id = ?   
+      AND created_at LIKE '$today%' AND type_sales = 2 AND is_delete = 0
     ''', [id]);
 
     final lowStock = await db.readData('''
@@ -55,10 +45,13 @@ class Statisticsdata {
     AND CAST(product_quantity AS INTEGER) < 10 AND categorie_id = 1
   ''', [id]);
 
+    final double income = ((totalIncome[0]["totalIncome"] ?? 0) as num).toDouble();
+    final double purchases = ((totalPurchases[0]["totalPurchases"] ?? 0) as num).toDouble();
+
     return {
       "todayInvoices": invoicesCount[0]["count"] ?? 0,
-      "todayIncome": totalIncome[0]["totalIncome"] ?? 0,
-      "todayNetProfit": netProfit[0]["netProfit"] ?? 0,
+      "todayIncome": income,
+      "todayNetProfit": income - purchases,
       "lowStockCount": lowStock[0]["lowStock"] ?? 0,
     };
   }
@@ -89,24 +82,32 @@ class Statisticsdata {
 
     // بيانات الرسم البياني
     String queryGraph = """
-    SELECT $groupBy AS x, SUM(s.subtotal) AS y
-    FROM invoies i
-    LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid 
-    JOIN sales s ON s.invoie_uuid = i.uuid
-    WHERE i.user_id = ? 
-    AND $dateCondition AND (t.transactions IS NULL OR t.transactions = 2)
+    SELECT x, SUM(invoice_sales - invoice_discount) AS y
+    FROM (
+      SELECT 
+        $groupBy AS x,
+        i.uuid,
+        IFNULL(i.discount, 0) AS invoice_discount,
+        SUM(CASE WHEN s.type_sales = 2 THEN s.subtotal ELSE 0 END) AS invoice_sales
+      FROM invoies i
+      LEFT JOIN transactions t ON t.uuid = i.Transaction_uuid 
+      JOIN sales s ON s.invoie_uuid = i.uuid
+      WHERE i.user_id = ? 
+      AND $dateCondition AND (t.transactions IS NULL OR t.transactions = 2)
+      GROUP BY x, i.uuid
+    )
     GROUP BY x ORDER BY x
   """;
 
     // الإحصائيات العامة (المبيعات والأرباح)
     String queryStats = """
     SELECT
-      IFNULL(SUM(invoice_sales), 0) AS total_sales,
+      IFNULL(SUM(invoice_sales - invoice_discount), 0) AS total_sales,
       IFNULL(SUM(invoice_profit - invoice_discount), 0) AS total_profit
     FROM (
       SELECT 
         i.uuid,
-        i.discount AS invoice_discount,
+        IFNULL(i.discount, 0) AS invoice_discount,
         SUM(CASE WHEN s.type_sales = 2 THEN s.subtotal ELSE 0 END) AS invoice_sales,
         SUM(CASE WHEN s.type_sales = 2 THEN (s.unit_price - s.product_price_purchase) * s.quantity ELSE 0 END) AS invoice_profit
       FROM invoies i
@@ -265,7 +266,7 @@ class Statisticsdata {
         '''
     SELECT 
         period,
-        IFNULL(SUM(invoice_sales), 0) AS total_sales,
+        IFNULL(SUM(invoice_sales - invoice_discount), 0) AS total_sales,
         IFNULL(SUM(invoice_profit - invoice_discount), 0) AS net_profit,
         IFNULL(SUM(invoice_discount), 0) AS total_discount,
         IFNULL(SUM(invoice_expenses), 0) AS expenses,
@@ -273,8 +274,8 @@ class Statisticsdata {
         IFNULL(SUM(items_sold), 0) AS items_sold,
         IFNULL(SUM(revenue), 0) AS revenue,
         CASE 
-            WHEN SUM(invoice_sales) > 0 THEN
-              ROUND(SUM(invoice_profit - invoice_discount) * 100.0 / SUM(invoice_sales), 2)
+            WHEN SUM(invoice_sales - invoice_discount) > 0 THEN
+              ROUND(SUM(invoice_profit - invoice_discount) * 100.0 / SUM(invoice_sales - invoice_discount), 2)
             ELSE 0
         END AS profit_rate
     FROM (
