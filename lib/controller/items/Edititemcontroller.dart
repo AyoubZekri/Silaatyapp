@@ -138,7 +138,7 @@ class Edititemcontroller extends GetxController {
               ? priseWholesaleController.text
               : "0")
           : "0",
-      'categorie_id': selectedCategoryId.toString(),
+      'categorie_id': 1,
       'categoris_uuid': selectedtypeuuId.toString(),
       'type': type,
       'product_price_total': priceTotal.toString(),

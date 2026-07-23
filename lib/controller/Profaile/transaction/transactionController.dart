@@ -110,8 +110,12 @@ class Transactioncontroller extends GetxController {
 
   @override
   void onInit() {
-    type = 0;
-    type = Get.arguments["type"];
+    final args = Get.arguments;
+    if (args != null && args['type'] != null) {
+      type = args['type'];
+    } else {
+      type = 2; // Fallback
+    }
     getTransactions();
     super.onInit();
   }

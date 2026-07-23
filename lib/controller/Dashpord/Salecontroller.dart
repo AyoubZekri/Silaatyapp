@@ -459,6 +459,23 @@ class SaleController extends GetxController {
     }
   }
 
+  void addDraftedProduct(Map<String, dynamic> draftedProduct) {
+    if (draftedProduct['is_draft'] == true) {
+      selectedProducts.add({
+        "uuid": draftedProduct['uuid'],
+        "name": draftedProduct['product_name'],
+        type == 1 ? "price_Purchase" : "price": double.tryParse(draftedProduct[type == 1 ? 'product_price_purchase' : 'product_price'].toString()) ?? 0.0,
+        "quantity": 1,
+        "total": double.tryParse(draftedProduct[type == 1 ? 'product_price_purchase' : 'product_price'].toString()) ?? 0.0,
+        "type_item": draftedProduct['type'],
+        "quantity_item": "9999", // Unconstrained for draft products
+        "draft_data": draftedProduct // Save the payload to insert on payment
+      });
+      _calculateTotals();
+      update();
+    }
+  }
+
   void gotoPayment() {
     if (selectedCustomer.value == (type == 1 ? 'مورد'.tr : 'العميل'.tr) ||
         selectedCustomer.value ==

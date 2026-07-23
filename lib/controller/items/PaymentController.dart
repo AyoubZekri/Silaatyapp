@@ -1,3 +1,4 @@
+import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 import 'package:Silaaty/data/model/InvoiceModel.dart';
 import 'package:Silaaty/controller/Profaile/invoice/Shwoinvoicecontroller.dart';
 import 'package:Silaaty/data/datasource/Remote/SaleData.dart';
@@ -30,10 +31,28 @@ class PaymentController extends GetxController {
   double finalAmount = 0.0;
   GlobalKey<FormState> formstate = GlobalKey<FormState>();
   Saledata saledata = Saledata();
+  ProdactData prodactData = ProdactData(Get.find());
   int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
   Statusrequest statusrequest = Statusrequest.none;
 
   Future<void> addSale({bool printInvoice = false}) async {
+    for (var item in products) {
+      if (item is Map<String, dynamic> && item.containsKey('draft_data')) {
+        var draftPayload = item['draft_data'];
+        var draftData = draftPayload['draft_data'];
+        var draftDataSale = draftPayload['draft_data_sale'];
+        var file = draftPayload['file'];
+
+        final insertResult = await prodactData.addProduct(draftData, draftDataSale, file);
+        if (insertResult != true) {
+          showSnackbar("error".tr, "فشل في حفظ المنتج الجديد: ${item['name']}", Colors.red);
+          statusrequest = Statusrequest.failure;
+          update();
+          return;
+        }
+      }
+    }
+
     print("===============${paymentController.text}============");
     final String uuidinvoice = Uuid().v4();
     print(

@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
+import 'package:Silaaty/core/constant/routes.dart';
 import '../../widget/addItem/CustemButton.dart';
 import '../../widget/addItem/CustomCartaddProductSale.dart';
 
@@ -165,6 +166,22 @@ class _AddProductSaleState extends State<AddProductSale> {
             elevation: 4,
             // ignore: deprecated_member_use
             shadowColor: Colors.black.withOpacity(0.3),
+            actions: [
+              if (controller.type.toString() == '1')
+                IconButton(
+                  icon: const Icon(Icons.add_circle_outline, size: 28, color: AppColor.primarycolor),
+                  tooltip: "إضافة منتج جديد",
+                  onPressed: () async {
+                    var result = await Get.toNamed(
+                      Approutes.Additem,
+                      arguments: {'isDraftMode': true},
+                    );
+                    if (result != null && result is Map<String, dynamic>) {
+                      Get.back(result: result);
+                    }
+                  },
+                ),
+            ],
           ),
           floatingActionButton: Custembutton(
             text: "Save".tr,

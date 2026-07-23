@@ -15,6 +15,7 @@ import '../../core/functions/Snacpar.dart';
 import '../../core/services/Services.dart';
 
 class Additemscontroller extends GetxController {
+  bool isDraftMode = false;
   File? file;
   int? barcodeMode; // 0: Auto, 1: Manual, 2: Scan
   int? selectedCategoryId = 1;
@@ -94,7 +95,10 @@ class Additemscontroller extends GetxController {
         return;
       }
 
+      final String newProductUuid = Uuid().v4();
+
       Map<String, Object?> data = {
+        "uuid": newProductUuid,
         "user_id": id,
         'product_name': nameController.text,
         'product_description': descriptionController.text,
@@ -102,7 +106,7 @@ class Additemscontroller extends GetxController {
         'product_price': priseController.text,
         'product_price_half_wholesale': sellType >= 2 ? (priseHalfWholesaleController.text.isNotEmpty ? priseHalfWholesaleController.text : "0") : "0",
         'product_price_wholesale': sellType >= 3 ? (priseWholesaleController.text.isNotEmpty ? priseWholesaleController.text : "0") : "0",
-        'categorie_id': selectedCategoryId.toString(),
+        'categorie_id': 1,
         'categoris_uuid': selectedtypeuuid,
         'product_price_total': priceTotal.toString(),
         'product_price_total_purchase': priceTotalPurchase.toString(),
@@ -127,6 +131,16 @@ class Additemscontroller extends GetxController {
 
       try {
         print("========================$selectedtypeuuid");
+
+        if (isDraftMode) {
+          final cleanData = Map<String, Object?>.from(data);
+          data['is_draft'] = true;
+          data['draft_data'] = cleanData;
+          data['draft_data_sale'] = dataSale;
+          data['file'] = file;
+          Get.back(result: data);
+          return;
+        }
 
         /// ندخل المنتج في SQLite مع الصورة + uuid + sync_queue
         final result = await prodactData.addProduct(data, dataSale, file);
@@ -186,6 +200,9 @@ class Additemscontroller extends GetxController {
     if (Get.arguments != null) {
       final args = Get.arguments as Map<String, dynamic>;
       selectedCategoryId = args["catid"];
+      if (args.containsKey('isDraftMode')) {
+        isDraftMode = args['isDraftMode'] == true;
+      }
     }
     super.onInit();
     quantityController.addListener(calculateTotalPrice);

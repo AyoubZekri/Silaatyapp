@@ -62,12 +62,13 @@ class Startpagecontrller extends GetxController {
             "==================================${user["max_sellers"]} ${user["sell_type"]} ${user["sell_type"]}");
 
         if (user["sell_type"] != null) {
-          myServices.sharedPreferences!.setInt("sell_type", int.tryParse(user["sell_type"].toString()) ?? 0);
+          myServices.sharedPreferences!.setInt(
+              "sell_type", int.tryParse(user["sell_type"].toString()) ?? 0);
         }
         if (user["max_sellers"] != null) {
-          myServices.sharedPreferences!.setInt("max_sellers", int.tryParse(user["max_sellers"].toString()) ?? 0);
+          myServices.sharedPreferences!.setInt(
+              "max_sellers", int.tryParse(user["max_sellers"].toString()) ?? 0);
         }
-        
       }
     }
 

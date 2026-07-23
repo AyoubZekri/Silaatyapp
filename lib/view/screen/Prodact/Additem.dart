@@ -307,7 +307,6 @@ class _AdditemState extends State<Additem> {
                         }
 
                                 controller.addProduct();
-                                Get.back(result: true);
                               },
                               vertical: 10,
                               horizontal: 10,
