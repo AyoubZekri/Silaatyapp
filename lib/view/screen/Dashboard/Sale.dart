@@ -445,29 +445,21 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
         ],
       ),
       actions: [
-        Row(
-          children: [
-            Expanded(
-              child: TextButton(
-                onPressed: () => Get.back(),
-                child: Text("إلغاء".tr, style: const TextStyle(color: AppColor.grey, fontWeight: FontWeight.bold)),
-              ),
-            ),
-            Expanded(
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColor.red,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                ),
-                onPressed: () {
-                  controller.deleteProduct(item["uuid"]);
-                  Get.back();
-                },
-                child: Text("حذف".tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
-              ),
-            ),
-          ],
-        )
+        TextButton(
+          onPressed: () => Get.back(),
+          child: Text("إلغاء".tr, style: const TextStyle(color: AppColor.grey, fontWeight: FontWeight.bold)),
+        ),
+        ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColor.red,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+          ),
+          onPressed: () {
+            controller.deleteProduct(item["uuid"]);
+            Get.back();
+          },
+          child: Text("حذف".tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+        ),
       ],
     );
   }
@@ -481,6 +473,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
       Dialog(
         backgroundColor: Colors.transparent,
         child: Container(
+          width: MediaQuery.of(context).size.width * 0.9,
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),

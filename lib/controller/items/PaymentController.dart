@@ -50,6 +50,10 @@ class PaymentController extends GetxController {
           update();
           return;
         }
+        
+        // IMPORTANT: prodactData.addProduct generates a new UUID and mutates draftData.
+        // We must update the item's uuid so the final sale points to the inserted product in the database.
+        item['uuid'] = draftData['uuid'];
       }
     }
 

@@ -82,6 +82,11 @@ class Additemscontroller extends GetxController {
 
   addProduct() async {
     if (formstate.currentState!.validate()) {
+      if (selectedtypeuuid == null || selectedtypeuuid!.isEmpty) {
+        showSnackbar("error".tr, "يرجى اختيار الفئة".tr, Colors.red);
+        return;
+      }
+
       if (type == 2
           ? double.parse(quantityController.text) < 0
           : int.parse(quantityController.text) < 0) {
@@ -91,7 +96,7 @@ class Additemscontroller extends GetxController {
       }
       
       if (type == 2 && barcodeController.text.length != 5) {
-        showSnackbar("error".tr, "يجب أن يتكون باركود الميزان من 5 أرقام", Colors.red);
+        showSnackbar("error".tr, "يجب أن يتكون باركود الميزان من 5 أرقام".tr, Colors.red);
         return;
       }
 

@@ -32,6 +32,8 @@ class Itemscontroller extends GetxController {
 
   final RxMap<String, num> quantities = <String, num>{}.obs;
 
+  List<Map<String, dynamic>> originalSelectedProducts = [];
+
   bool isSelected(String uuid) =>
       selectedUuids.contains(uuid) && getQuantity(uuid) > 0;
 
@@ -108,6 +110,13 @@ class Itemscontroller extends GetxController {
               "quantity_item": item.productQuantity,
               "type_item": item.type,
             };
+          } else {
+            final originalItem = originalSelectedProducts.firstWhereOrNull((e) => e['uuid'] == uuid);
+            if (originalItem != null) {
+              final updatedItem = Map<String, dynamic>.from(originalItem);
+              updatedItem['quantity'] = quantities[uuid] ?? 1;
+              return updatedItem;
+            }
           }
           return {};
         })
@@ -325,6 +334,7 @@ class Itemscontroller extends GetxController {
     if (args != null && args['selectedProducts'] != null) {
       final List<Map<String, dynamic>> selected =
           List<Map<String, dynamic>>.from(args['selectedProducts']);
+      originalSelectedProducts = selected;
       type = args["type"] ?? 0;
       saleType = args["sale_type"] ?? 1;
       print("=============================type$type, saleType$saleType");

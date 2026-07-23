@@ -63,6 +63,10 @@ class Saledata {
           [productUuid],
         );
 
+        if (result.isEmpty) {
+          throw Exception("المنتج غير موجود في قاعدة البيانات: $productUuid");
+        }
+
         final currentQuantity = result[0]["product_quantity"] as String;
         final type = sale["type_sales"] as int;
         final quantitySold =

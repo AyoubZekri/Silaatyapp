@@ -109,6 +109,11 @@ class Edititemcontroller extends GetxController {
   EditProduct() async {
     if (!formstate.currentState!.validate()) return;
 
+    if (selectedtypeuuId == null || selectedtypeuuId!.isEmpty) {
+      showSnackbar("error".tr, "يرجى اختيار الفئة".tr, Colors.red);
+      return;
+    }
+
     final newQty = double.tryParse(quantityController.text) ?? 0;
     final oldQty = double.tryParse(oldquantity!) ?? 0.0;
 
@@ -116,9 +121,10 @@ class Edititemcontroller extends GetxController {
       showSnackbar("error".tr, "كمية غير صالحة".tr, Colors.red);
       return;
     }
-    
+
     if (type == 2 && barcodeController.text.length != 5) {
-      showSnackbar("error".tr, "يجب أن يتكون باركود الميزان من 5 أرقام", Colors.red);
+      showSnackbar(
+          "error".tr, "يجب أن يتكون باركود الميزان من 5 أرقام".tr, Colors.red);
       return;
     }
 
@@ -219,7 +225,9 @@ class Edititemcontroller extends GetxController {
     barcodeController.text = (type == 2 &&
             product.codepar != null &&
             product.codepar.toString().length >= 5)
-        ? product.codepar.toString().substring(product.codepar.toString().length - 5)
+        ? product.codepar
+            .toString()
+            .substring(product.codepar.toString().length - 5)
         : product.codepar.toString();
     selectedCategoryId = product.categorieId;
     quantityController.text = product.productQuantity ?? "";
