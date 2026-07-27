@@ -35,27 +35,6 @@ class Edititemcontroller extends GetxController {
 
   final productCodeController = TextEditingController();
   final minSellingPriceController = TextEditingController();
-  final itemsPerCartonController = TextEditingController();
-  final cartonsCountController = TextEditingController();
-  bool isCarton = false;
-
-  void toggleIsCarton(bool value) {
-    isCarton = value;
-    calculateTotalQuantity();
-    update();
-  }
-
-  void calculateTotalQuantity() {
-    if (isCarton) {
-      double cartons = double.tryParse(cartonsCountController.text) ?? 0.0;
-      double items = double.tryParse(itemsPerCartonController.text) ?? 0.0;
-      quantityController.text = formatQuantity(cartons * items);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        update();
-      });
-    }
-    calculateTotalPrice();
-  }
 
   double priceTotal = 0.0;
   double priceTotalPurchase = 0.0;
@@ -265,8 +244,8 @@ class Edititemcontroller extends GetxController {
       'product_price_purchase': pricePurchaseController.text,
       "codepar": barcodeToSave,
       'product_code': productCodeToSave,
-      'items_per_carton': isCarton ? (int.tryParse(itemsPerCartonController.text) ?? 1) : null,
-      'quantity_per_carton': isCarton ? (int.tryParse(itemsPerCartonController.text) ?? 1) : null,
+      'items_per_carton': null,
+      'quantity_per_carton': null,
       'min_selling_price': double.tryParse(minSellingPriceController.text) ?? 0.0,
       'updated_at': DateTime.now().toString().substring(0, 19),
     };
@@ -294,8 +273,6 @@ class Edititemcontroller extends GetxController {
     quantityController.addListener(calculateTotalPrice);
     priseController.addListener(calculateTotalPrice);
     pricePurchaseController.addListener(calculateTotalPrice);
-    cartonsCountController.addListener(calculateTotalQuantity);
-    itemsPerCartonController.addListener(calculateTotalQuantity);
   }
 
   void calculateTotalPrice() {
@@ -311,9 +288,7 @@ class Edititemcontroller extends GetxController {
   }
 
   void onQuantityChanged(num value) {
-    if (!isCarton) {
-      calculateTotalPrice();
-    }
+    calculateTotalPrice();
   }
 
   void imageupload() {
@@ -355,19 +330,6 @@ class Edititemcontroller extends GetxController {
     oldquantity = product.productQuantity ?? "";
     productCodeController.text = product.productCode ?? "";
     minSellingPriceController.text = product.minSellingPrice?.toString() ?? "";
-    itemsPerCartonController.text = product.itemsPerCarton?.toString() ?? "";
-    
-    if (product.itemsPerCarton != null && product.itemsPerCarton! > 1) {
-      isCarton = true;
-      double totalQty = double.tryParse(product.productQuantity ?? "0") ?? 0;
-      if (product.itemsPerCarton! > 0) {
-        cartonsCountController.text = (totalQty / product.itemsPerCarton!).toString();
-      } else {
-        cartonsCountController.text = totalQty.toString();
-      }
-    } else {
-      isCarton = false;
-    }
 
     print("============================$selectedtypeuuId");
   }
@@ -483,8 +445,6 @@ class Edititemcontroller extends GetxController {
     quantityController.dispose();
     productCodeController.dispose();
     minSellingPriceController.dispose();
-    itemsPerCartonController.dispose();
-    cartonsCountController.dispose();
     super.onClose();
   }
 }

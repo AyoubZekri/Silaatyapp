@@ -226,98 +226,21 @@ class _AdditemState extends State<Additem> {
                       //       validInput(val!, 20, 300, "username");
                       //       return null;
                       //     }),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: AppColor.white,
-                          borderRadius: BorderRadius.circular(20),
-                          border: Border.all(color: AppColor.backgroundcolor.withOpacity(0.3), width: 1.5),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.grey.withOpacity(0.1),
-                              spreadRadius: 2,
-                              blurRadius: 5,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Column(
-                          children: [
-                            CheckboxListTile(
-                              title: Text("التعامل بالكرتون".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColor.backgroundcolor)),
-                              value: controller.isCarton,
-                              onChanged: (val) {
-                                if (val != null) controller.toggleIsCarton(val);
-                              },
-                              activeColor: AppColor.backgroundcolor,
-                              checkColor: Colors.white,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-                            ),
-                            if (controller.isCarton) ...[
-                              Divider(height: 1, thickness: 1, color: AppColor.backgroundcolor.withOpacity(0.2)),
-                              const SizedBox(height: 10),
-                              QuantityInput(
-                                initialValue: double.tryParse(controller.cartonsCountController.text) ?? 1.0,
-                                Mycontroller: controller.cartonsCountController,
-                                hintText: "عدد الكراتين".tr,
-                                label: "عدد الكراتين".tr,
-                                onChanged: (_) { controller.calculateTotalQuantity(); },
-                                isDecimal: controller.type == 2,
-                              ),
-                              Custemtextfromfild(
-                                MyController: controller.itemsPerCartonController,
-                                keyboardType: TextInputType.number,
-                                hintText: "عدد القطع في الكرتونة".tr,
-                                label: "عدد القطع في الكرتونة".tr,
-                                iconData: Icons.format_list_numbered,
-                                enabled: true,
-                              ),
-                              Container(
-                                margin: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-                                padding: const EdgeInsets.all(15),
-                                decoration: BoxDecoration(
-                                  color: AppColor.backgroundcolor.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Row(
-                                      children: [
-                                        const Icon(Icons.production_quantity_limits, color: AppColor.backgroundcolor),
-                                        const SizedBox(width: 10),
-                                        Text("الكمية الإجمالية".tr, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: AppColor.backgroundcolor)),
-                                      ],
-                                    ),
-                                    Text(
-                                      controller.quantityController.text.isEmpty ? "0" : controller.quantityController.text,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 22, color: AppColor.backgroundcolor),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                              const SizedBox(height: 5),
-                            ],
-                          ],
-                        ),
+                      QuantityInput(
+                        initialValue: controller.type == 2
+                            ? (double.tryParse(
+                                    controller.quantityController.text) ??
+                                1)
+                            : ((int.tryParse(
+                                        controller.quantityController.text) ??
+                                    1)
+                                .toDouble()),
+                        Mycontroller: controller.quantityController,
+                        hintText: "Quantity".tr,
+                        label: "Quantity".tr,
+                        onChanged: controller.onQuantityChanged,
+                        isDecimal: controller.type == 2,
                       ),
-                      if (!controller.isCarton) ...[
-                        QuantityInput(
-                          initialValue: controller.type == 2
-                              ? (double.tryParse(
-                                      controller.quantityController.text) ??
-                                  1)
-                              : ((int.tryParse(
-                                          controller.quantityController.text) ??
-                                      1)
-                                  .toDouble()),
-                          Mycontroller: controller.quantityController,
-                          hintText: "Quantity".tr,
-                          label: "Quantity".tr,
-                          onChanged: controller.onQuantityChanged,
-                          isDecimal: controller.type == 2,
-                        ),
-                      ],
                       Custemtextfromfild(
                         MyController: controller.priseController,
                         keyboardType: TextInputType.number,

@@ -438,8 +438,10 @@ class SaleController extends GetxController {
         return;
       }
 
-      double addedQuantity =
-          (typeItem == 2 && scaleWeight != null && scaleWeight != 0) ? scaleWeight : 1.0;
+      double addedQuantity = 1.0;
+      if (typeItem == 2 && scaleWeight != null && scaleWeight != 0) {
+        addedQuantity = scaleWeight;
+      }
 
       pendingProduct = productData;
       pendingAddedQuantity = addedQuantity;

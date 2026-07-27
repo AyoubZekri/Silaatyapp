@@ -36,27 +36,6 @@ class Additemscontroller extends GetxController {
 
   final productCodeController = TextEditingController();
   final minSellingPriceController = TextEditingController();
-  final itemsPerCartonController = TextEditingController();
-  final cartonsCountController = TextEditingController();
-  bool isCarton = false;
-
-  void toggleIsCarton(bool value) {
-    isCarton = value;
-    calculateTotalQuantity();
-    update();
-  }
-
-  void calculateTotalQuantity() {
-    if (isCarton) {
-      double cartons = double.tryParse(cartonsCountController.text) ?? 0.0;
-      double items = double.tryParse(itemsPerCartonController.text) ?? 0.0;
-      quantityController.text = formatQuantity(cartons * items);
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        update();
-      });
-    }
-    calculateTotalPrice();
-  }
 
   double priceTotal = 0.0;
   double priceTotalPurchase = 0.0;
@@ -257,12 +236,8 @@ class Additemscontroller extends GetxController {
         'type': type,
         'codepar': barcodeToSave,
         'product_code': productCodeToSave,
-        'items_per_carton': isCarton
-            ? (int.tryParse(itemsPerCartonController.text) ?? 1)
-            : null,
-        'quantity_per_carton': isCarton
-            ? (int.tryParse(itemsPerCartonController.text) ?? 1)
-            : null,
+        'items_per_carton': null,
+        'quantity_per_carton': null,
         'min_selling_price':
             double.tryParse(minSellingPriceController.text) ?? 0.0,
         "created_at": DateTime.now().toIso8601String(),
@@ -360,8 +335,6 @@ class Additemscontroller extends GetxController {
     quantityController.addListener(calculateTotalPrice);
     priseController.addListener(calculateTotalPrice);
     pricePurchaseController.addListener(calculateTotalPrice);
-    cartonsCountController.addListener(calculateTotalQuantity);
-    itemsPerCartonController.addListener(calculateTotalQuantity);
   }
 
   void calculateTotalPrice() {
@@ -378,9 +351,7 @@ class Additemscontroller extends GetxController {
   }
 
   void onQuantityChanged(num value) {
-    if (!isCarton) {
-      calculateTotalPrice();
-    }
+    calculateTotalPrice();
   }
 
   void imageupload() {
@@ -506,10 +477,7 @@ class Additemscontroller extends GetxController {
     pricePurchaseController.clear();
     productCodeController.clear();
     minSellingPriceController.clear();
-    itemsPerCartonController.clear();
-    cartonsCountController.clear();
     quantityController.text = "1";
-    isCarton = false;
     getCategoris();
     selectedtypeuuid = null;
     file = null;

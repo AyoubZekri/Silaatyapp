@@ -133,6 +133,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                   ],
                 ],
               ),
+
             ),
             
             const SizedBox(height: 20),

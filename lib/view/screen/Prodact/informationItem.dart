@@ -176,10 +176,6 @@ class _InformationitemState extends State<Informationitem> {
                         _infoRow("المنتج ميزان؟".tr, product.type == 2 ? "ميزان".tr : "غير ميزان".tr),
                         _infoRow("كود المنتج".tr, product.productCode?.toString() ?? '-'),
                         _infoRow("Barcode".tr, product.codepar.toString()),
-                        if ((product.itemsPerCarton ?? 0) > 0) ...[
-                          _infoRow("الكمية في الكرتونة الواحدة".tr, product.itemsPerCarton.toString()),
-                          _infoRow("عدد الكراتين".tr, formatQuantity(double.parse(product.productQuantity ?? "0") / product.itemsPerCarton!)),
-                        ],
                         const Divider(height: 30),
                         _infoRow(
                           "سعر الشراء".tr,

@@ -46,15 +46,24 @@ class Itemscontroller extends GetxController {
       quantities[uuid] = 0;
     } else {
       selectedUuids.add(uuid);
-      quantities[uuid] = 1;
+      num qtyToAdd = 1;
+      quantities[uuid] = qtyToAdd;
     }
     update();
   }
 
   void increment(String uuid, num maxQuantity, {num? val}) {
     final currentQty = getQuantity(uuid);
-    if (currentQty < maxQuantity || type == 1) {
-      quantities[uuid] = currentQty + (val ?? 1);
+    num qtyToAdd = val ?? 1;
+
+    if (type == 1) {
+      quantities[uuid] = currentQty + qtyToAdd;
+    } else {
+      if (currentQty + qtyToAdd > maxQuantity) {
+        quantities[uuid] = maxQuantity;
+      } else {
+        quantities[uuid] = currentQty + qtyToAdd;
+      }
     }
     selectedUuids.add(uuid);
     update();
