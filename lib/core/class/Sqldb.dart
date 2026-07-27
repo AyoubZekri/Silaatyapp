@@ -20,7 +20,7 @@ class SQLDB {
     Database mydb = await openDatabase(
       path,
       onCreate: _onCreate,
-      version: 5,
+      version: 2,
       onUpgrade: _onUpgrade,
     );
     return mydb;
@@ -31,9 +31,6 @@ class SQLDB {
     if (oldversion < 2) {
       await db
           .execute('ALTER TABLE products ADD COLUMN type INTEGER DEFAULT 1');
-    }
-
-    if (oldversion < 3) {
       await db.execute('''
     CREATE TABLE sales_new (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -77,22 +74,33 @@ class SQLDB {
 
       await db.execute('DROP TABLE sales');
       await db.execute('ALTER TABLE sales_new RENAME TO sales');
-    }
 
-    if (oldversion < 4) {
       await db.execute(
           'ALTER TABLE products ADD COLUMN product_price_half_wholesale REAL DEFAULT 0.00');
       await db.execute(
           'ALTER TABLE products ADD COLUMN product_price_wholesale REAL DEFAULT 0.00');
       await db.execute(
           'ALTER TABLE invoies ADD COLUMN sale_type INTEGER DEFAULT 1');
-    }
 
-    if (oldversion < 5) {
       await db.execute(
           'ALTER TABLE invoies ADD COLUMN seller_id INTEGER DEFAULT NULL');
       await db.execute(
           'ALTER TABLE sales ADD COLUMN seller_id INTEGER DEFAULT NULL');
+
+      await db.execute('ALTER TABLE products ADD COLUMN product_code TEXT');
+      await db
+          .execute('ALTER TABLE products ADD COLUMN items_per_carton INTEGER');
+      await db
+          .execute('ALTER TABLE products ADD COLUMN min_selling_price REAL');
+      await db.execute(
+          'ALTER TABLE products ADD COLUMN quantity_per_carton INTEGER');
+
+      await db.execute('ALTER TABLE transactions ADD COLUMN address TEXT');
+      await db.execute(
+          'ALTER TABLE transactions ADD COLUMN supplier_products TEXT');
+      await db.execute('ALTER TABLE transactions ADD COLUMN notes TEXT');
+      await db.execute(
+          'ALTER TABLE transactions ADD COLUMN customer_sale_type TEXT');
     }
   }
 
@@ -169,6 +177,10 @@ class SQLDB {
       product_price_total_purchase REAL,
       product_price_total REAL,
       codepar INTEGER,
+      product_code TEXT,
+      items_per_carton INTEGER,
+      min_selling_price REAL,
+      quantity_per_carton INTEGER,
       is_delete INTEGER NOT NULL DEFAULT 0,
       type INTEGER DEFAULT 1,
       created_at TEXT,
@@ -199,6 +211,10 @@ class SQLDB {
       family_name TEXT,
       phone_number TEXT NOT NULL,
       transactions INTEGER NOT NULL,
+      address TEXT,
+      supplier_products TEXT,
+      notes TEXT,
+      customer_sale_type TEXT,
       is_delete INTEGER NOT NULL DEFAULT 0,
       created_at TEXT,
       updated_at TEXT,

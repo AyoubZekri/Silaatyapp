@@ -5,6 +5,7 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 import '../../../core/functions/Snacpar.dart';
+import '../../../core/services/Services.dart';
 
 class EditTransactionController extends GetxController {
   int? type;
@@ -13,11 +14,16 @@ class EditTransactionController extends GetxController {
   final nameController = TextEditingController();
   final familyNameController = TextEditingController();
   final phoneController = TextEditingController();
+  final addressController = TextEditingController();
+  final notesController = TextEditingController();
+  final supplierProductsController = TextEditingController();
+  int? customerSaleType;
 
   final formKey = GlobalKey<FormState>();
   final Transactiondata transactiondata = Transactiondata(Get.find());
 
   Statusrequest statusrequest = Statusrequest.none;
+  int get sellType => Get.find<Myservices>().sharedPreferences?.getInt("sell_type") ?? 3;
 
   Future<void> editTransaction() async {
     if (!formKey.currentState!.validate()) return;
@@ -30,6 +36,10 @@ class EditTransactionController extends GetxController {
       "name": nameController.text,
       "family_name": familyNameController.text,
       "phone_number": phoneController.text,
+      "address": addressController.text,
+      "notes": notesController.text,
+      "supplier_products": supplierProductsController.text,
+      "customer_sale_type": customerSaleType?.toString() ?? '',
       "updated_at": DateTime.now().toIso8601String(),
     };
 
@@ -54,6 +64,10 @@ class EditTransactionController extends GetxController {
     nameController.text = trans.transaction?.name ?? "";
     familyNameController.text = trans.transaction?.familyName ?? "";
     phoneController.text = trans.transaction?.phoneNumber ?? "";
+    addressController.text = trans.transaction?.address ?? "";
+    notesController.text = trans.transaction?.notes ?? "";
+    supplierProductsController.text = trans.transaction?.supplierProducts ?? "";
+    customerSaleType = int.tryParse(trans.transaction?.customerSaleType ?? '');
   }
 
   @override
@@ -61,6 +75,9 @@ class EditTransactionController extends GetxController {
     nameController.dispose();
     familyNameController.dispose();
     phoneController.dispose();
+    addressController.dispose();
+    notesController.dispose();
+    supplierProductsController.dispose();
     super.onClose();
   }
 }

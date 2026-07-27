@@ -3,6 +3,7 @@ import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/functions/valiedinput.dart';
 import 'package:Silaaty/view/widget/addItem/CustemButton.dart';
 import 'package:Silaaty/view/widget/addItem/CustemTextFromFild.dart';
+import 'package:Silaaty/view/widget/addItem/CustemDropDownField.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -66,6 +67,30 @@ class _AddConvictState extends State<AddConvict> {
                           hintText: "Phone Numper".tr,
                           label: "Phone Numper".tr,
                           iconData: Icons.phone_outlined,
+                        ),
+                        CustemDropDownField(
+                          hintText: "نوع البيع".tr,
+                          items: [
+                            DropdownMenuItem(value: 1, child: Text("تجزئة".tr)),
+                            if (controller.sellType >= 2)
+                              DropdownMenuItem(value: 2, child: Text("نصف جملة".tr)),
+                            if (controller.sellType >= 3)
+                              DropdownMenuItem(value: 3, child: Text("جملة".tr)),
+                          ],
+                          value: controller.customerSaleType,
+                          onChanged: (val) {
+                            setState(() {
+                              if (val != null) controller.customerSaleType = val;
+                            });
+                          },
+                        ),
+                        Custemtextfromfild(
+                          MyController: controller.notesController,
+                          keyboardType: TextInputType.text,
+                          hintText: "ملاحظات".tr,
+                          label: "ملاحظات".tr,
+                          iconData: Icons.note,
+                          enabled: true,
                         ),
                         Custembutton(
                           text: "Add".tr,

@@ -272,6 +272,10 @@ class Transaction {
   String? createdAt;
   String? updatedAt;
   int? status;
+  String? address;
+  String? supplierProducts;
+  String? notes;
+  String? customerSaleType;
 
   Transaction({
     this.id,
@@ -284,6 +288,10 @@ class Transaction {
     this.createdAt,
     this.updatedAt,
     this.status,
+    this.address,
+    this.supplierProducts,
+    this.notes,
+    this.customerSaleType,
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
@@ -298,6 +306,10 @@ class Transaction {
       createdAt: json['created_at'],
       updatedAt: json['updated_at'],
       status: json['Status'],
+      address: json['address'],
+      supplierProducts: json['supplier_products'],
+      notes: json['notes'],
+      customerSaleType: json['customer_sale_type'],
     );
   }
 
@@ -312,5 +324,9 @@ class Transaction {
         'created_at': createdAt,
         'updated_at': updatedAt,
         'Status': status,
+        'address': address,
+        'supplier_products': supplierProducts,
+        'notes': notes,
+        'customer_sale_type': customerSaleType,
       };
 }

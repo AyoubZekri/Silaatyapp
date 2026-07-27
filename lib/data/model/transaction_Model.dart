@@ -61,6 +61,10 @@ class Transaction {
   String? createdAt;
   String? updatedAt;
   int? Status;
+  String? address;
+  String? supplierProducts;
+  String? notes;
+  String? customerSaleType;
 
   Transaction(
       {this.id,
@@ -72,7 +76,11 @@ class Transaction {
       this.Status,
       this.transactions,
       this.createdAt,
-      this.updatedAt});
+      this.updatedAt,
+      this.address,
+      this.supplierProducts,
+      this.notes,
+      this.customerSaleType});
 
   Transaction.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -85,6 +93,10 @@ class Transaction {
     Status = json['Status'];
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
+    address = json['address'];
+    supplierProducts = json['supplier_products'];
+    notes = json['notes'];
+    customerSaleType = json['customer_sale_type'];
   }
 
   Map<String, dynamic> toJson() {
@@ -99,6 +111,10 @@ class Transaction {
     data['Status'] = this.Status;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
+    data['address'] = this.address;
+    data['supplier_products'] = this.supplierProducts;
+    data['notes'] = this.notes;
+    data['customer_sale_type'] = this.customerSaleType;
     return data;
   }
 }

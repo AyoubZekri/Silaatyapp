@@ -13,6 +13,7 @@ import 'package:uuid/uuid.dart';
 import '../../core/constant/Colorapp.dart';
 import '../../core/functions/Snacpar.dart';
 import '../../core/services/Services.dart';
+import '../../core/functions/FormatQuantity.dart';
 
 class Additemscontroller extends GetxController {
   bool isDraftMode = false;
@@ -33,6 +34,30 @@ class Additemscontroller extends GetxController {
   final pricePurchaseController = TextEditingController();
   final quantityController = TextEditingController();
 
+  final productCodeController = TextEditingController();
+  final minSellingPriceController = TextEditingController();
+  final itemsPerCartonController = TextEditingController();
+  final cartonsCountController = TextEditingController();
+  bool isCarton = false;
+
+  void toggleIsCarton(bool value) {
+    isCarton = value;
+    calculateTotalQuantity();
+    update();
+  }
+
+  void calculateTotalQuantity() {
+    if (isCarton) {
+      double cartons = double.tryParse(cartonsCountController.text) ?? 0.0;
+      double items = double.tryParse(itemsPerCartonController.text) ?? 0.0;
+      quantityController.text = formatQuantity(cartons * items);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        update();
+      });
+    }
+    calculateTotalPrice();
+  }
+
   double priceTotal = 0.0;
   double priceTotalPurchase = 0.0;
 
@@ -41,7 +66,8 @@ class Additemscontroller extends GetxController {
   CategorisData categorisData = CategorisData(Get.find());
   ProdactData prodactData = ProdactData(Get.find());
   int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
-  int sellType = Get.find<Myservices>().sharedPreferences?.getInt("sell_type") ?? 3;
+  int sellType =
+      Get.find<Myservices>().sharedPreferences?.getInt("sell_type") ?? 3;
 
   // Myservices myServices = Get.find();
   List<Catdata> categories = [];
@@ -87,16 +113,119 @@ class Additemscontroller extends GetxController {
         return;
       }
 
-      if (type == 2
-          ? double.parse(quantityController.text) < 0
-          : int.parse(quantityController.text) < 0) {
+      final parsedQty = double.tryParse(quantityController.text) ?? 0.0;
+      if (parsedQty < 0) {
         showSnackbar(
             "error".tr, "لا يمكن أن تكون الكمية أقل من 1".tr, Colors.red);
         return;
       }
-      
+
       if (type == 2 && barcodeController.text.length != 5) {
-        showSnackbar("error".tr, "يجب أن يتكون باركود الميزان من 5 أرقام".tr, Colors.red);
+        showSnackbar("error".tr, "يجب أن يتكون باركود الميزان من 5 أرقام".tr,
+            Colors.red);
+        return;
+      }
+
+      final String barcodeToSave =
+          (type == 2 && !barcodeController.text.startsWith('25'))
+              ? '25' + barcodeController.text
+              : barcodeController.text;
+      final String productCodeToSave = productCodeController.text;
+
+      final existingProducts = await prodactData.checkProductExistsByCode(
+          barcodeToSave, productCodeToSave);
+      if (existingProducts.isNotEmpty) {
+        final existingName = existingProducts.first['product_name'];
+        Get.dialog(
+          Dialog(
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            elevation: 0,
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.rectangle,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black26,
+                    blurRadius: 10.0,
+                    offset: Offset(0.0, 10.0),
+                  ),
+                ],
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(15),
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.warning_amber_rounded,
+                        color: Colors.red, size: 50),
+                  ),
+                  const SizedBox(height: 20),
+                  Text(
+                    "تنبيه!".tr,
+                    style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black),
+                  ),
+                  const SizedBox(height: 15),
+                  Text(
+                    "هذا المنتج موجود مسبقاً باسم:".tr,
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 15),
+                    decoration: BoxDecoration(
+                      color: AppColor.backgroundcolor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(10),
+                      border: Border.all(
+                          color: AppColor.backgroundcolor.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      existingName.toString(),
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColor.backgroundcolor),
+                    ),
+                  ),
+                  const SizedBox(height: 25),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColor.backgroundcolor,
+                        shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12)),
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                      ),
+                      onPressed: () => Get.back(),
+                      child: Text("حسناً".tr,
+                          style: const TextStyle(
+                              fontSize: 18,
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold)),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          barrierDismissible: false,
+        );
         return;
       }
 
@@ -107,17 +236,35 @@ class Additemscontroller extends GetxController {
         "user_id": id,
         'product_name': nameController.text,
         'product_description': descriptionController.text,
-        'product_quantity': quantityController.text,
+        'product_quantity':
+            type == 2 ? parsedQty.toString() : parsedQty.toInt().toString(),
         'product_price': priseController.text,
-        'product_price_half_wholesale': sellType >= 2 ? (priseHalfWholesaleController.text.isNotEmpty ? priseHalfWholesaleController.text : "0") : "0",
-        'product_price_wholesale': sellType >= 3 ? (priseWholesaleController.text.isNotEmpty ? priseWholesaleController.text : "0") : "0",
+        'product_price_half_wholesale': sellType >= 2
+            ? (priseHalfWholesaleController.text.isNotEmpty
+                ? priseHalfWholesaleController.text
+                : "0")
+            : "0",
+        'product_price_wholesale': sellType >= 3
+            ? (priseWholesaleController.text.isNotEmpty
+                ? priseWholesaleController.text
+                : "0")
+            : "0",
         'categorie_id': 1,
         'categoris_uuid': selectedtypeuuid,
         'product_price_total': priceTotal.toString(),
         'product_price_total_purchase': priceTotalPurchase.toString(),
         'product_price_purchase': pricePurchaseController.text,
         'type': type,
-        'codepar': (type == 2 && !barcodeController.text.startsWith('25')) ? '25' + barcodeController.text : barcodeController.text,
+        'codepar': barcodeToSave,
+        'product_code': productCodeToSave,
+        'items_per_carton': isCarton
+            ? (int.tryParse(itemsPerCartonController.text) ?? 1)
+            : null,
+        'quantity_per_carton': isCarton
+            ? (int.tryParse(itemsPerCartonController.text) ?? 1)
+            : null,
+        'min_selling_price':
+            double.tryParse(minSellingPriceController.text) ?? 0.0,
         "created_at": DateTime.now().toIso8601String(),
       };
 
@@ -213,12 +360,12 @@ class Additemscontroller extends GetxController {
     quantityController.addListener(calculateTotalPrice);
     priseController.addListener(calculateTotalPrice);
     pricePurchaseController.addListener(calculateTotalPrice);
+    cartonsCountController.addListener(calculateTotalQuantity);
+    itemsPerCartonController.addListener(calculateTotalQuantity);
   }
 
   void calculateTotalPrice() {
-    final quantity = type == 2
-        ? double.tryParse(quantityController.text) ?? 0.0
-        : int.tryParse(quantityController.text) ?? 0;
+    final quantity = double.tryParse(quantityController.text) ?? 0.0;
     final price = double.tryParse(priseController.text) ?? 0.0;
     final pricePurchase = double.tryParse(pricePurchaseController.text) ?? 0.0;
 
@@ -231,7 +378,9 @@ class Additemscontroller extends GetxController {
   }
 
   void onQuantityChanged(num value) {
-    calculateTotalPrice();
+    if (!isCarton) {
+      calculateTotalPrice();
+    }
   }
 
   void imageupload() {
@@ -274,7 +423,9 @@ class Additemscontroller extends GetxController {
                       final scannedCode = barcodes.first.rawValue;
                       if (scannedCode != null) {
                         _isScanning = false;
-                        if (type == 2 && scannedCode.length == 13 && scannedCode.startsWith('25')) {
+                        if (type == 2 &&
+                            scannedCode.length == 13 &&
+                            scannedCode.startsWith('25')) {
                           barcodeController.text = scannedCode.substring(2, 7);
                         } else {
                           barcodeController.text = scannedCode;
@@ -292,15 +443,19 @@ class Additemscontroller extends GetxController {
                     width: 250,
                     height: 250,
                     decoration: BoxDecoration(
-                      border: Border.all(color: AppColor.backgroundcolor, width: 3),
+                      border:
+                          Border.all(color: AppColor.backgroundcolor, width: 3),
                       borderRadius: BorderRadius.circular(16),
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 0, left: 0, right: 0,
+                  top: 0,
+                  left: 0,
+                  right: 0,
                   child: Container(
-                    padding: const EdgeInsets.only(top: 15, left: 10, right: 10, bottom: 20),
+                    padding: const EdgeInsets.only(
+                        top: 15, left: 10, right: 10, bottom: 20),
                     decoration: const BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
@@ -315,11 +470,15 @@ class Additemscontroller extends GetxController {
                           padding: const EdgeInsets.symmetric(horizontal: 10),
                           child: Text(
                             "امسح الباركود".tr,
-                            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+                            style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold),
                           ),
                         ),
                         IconButton(
-                          icon: const Icon(Icons.close, color: Colors.white, size: 28),
+                          icon: const Icon(Icons.close,
+                              color: Colors.white, size: 28),
                           onPressed: () {
                             _isScanning = false;
                             Get.back();
@@ -345,7 +504,12 @@ class Additemscontroller extends GetxController {
     priseHalfWholesaleController.clear();
     priseWholesaleController.clear();
     pricePurchaseController.clear();
+    productCodeController.clear();
+    minSellingPriceController.clear();
+    itemsPerCartonController.clear();
+    cartonsCountController.clear();
     quantityController.text = "1";
+    isCarton = false;
     getCategoris();
     selectedtypeuuid = null;
     file = null;

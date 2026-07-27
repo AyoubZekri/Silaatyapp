@@ -543,6 +543,17 @@ class MyTranslation extends Translations {
           "سعر الجملة": "سعر الجملة",
           "max_sellers_reached": "لقد وصلت للحد الأقصى لعدد البائعين المسموح به",
           "contact_admin_to_increase_sellers": "يرجى الاتصال بالمشرف لزيادة عدد البائعين",
+          "كود المنتج": "كود المنتج",
+          "كود المنتج (اختياري)": "كود المنتج (اختياري)",
+          "التعامل بالكرتون": "التعامل بالكرتون",
+          "عدد الكراتين": "عدد الكراتين",
+          "عدد القطع في الكرتونة": "عدد القطع في الكرتونة",
+          "الكمية الإجمالية": "الكمية الإجمالية",
+          "أقل سعر للبيع": "أقل سعر للبيع",
+          "العنوان": "العنوان",
+          "ماذا يبيع؟": "ماذا يبيع؟",
+          "ملاحظات": "ملاحظات",
+
         },
         // ::::::
         // ::::::
@@ -1161,6 +1172,17 @@ class MyTranslation extends Translations {
           "Barcode Type": "Barcode Type",
           "max_sellers_reached": "You have reached the maximum allowed number of sellers",
           "contact_admin_to_increase_sellers": "Please contact the admin to increase the number of sellers",
+          "كود المنتج": "Product Code",
+          "كود المنتج (اختياري)": "Product Code (Optional)",
+          "التعامل بالكرتون": "Sell by Carton",
+          "عدد الكراتين": "Number of Cartons",
+          "عدد القطع في الكرتونة": "Items per Carton",
+          "الكمية الإجمالية": "Total Quantity",
+          "أقل سعر للبيع": "Minimum Selling Price",
+          "العنوان": "Address",
+          "ماذا يبيع؟": "What he sells?",
+          "ملاحظات": "Notes",
+
         },
       };
 }

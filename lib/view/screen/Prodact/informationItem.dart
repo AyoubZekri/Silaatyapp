@@ -173,14 +173,33 @@ class _InformationitemState extends State<Informationitem> {
                           ],
                         ),
                         const Divider(height: 30),
-                        _infoRow(
-                          "سعر البيع".tr,
-                          "${product.productPrice != null ? formavalue(product.productPrice!) : ''} ${'دينار'.tr}",
-                        ),
+                        _infoRow("المنتج ميزان؟".tr, product.type == 2 ? "ميزان".tr : "غير ميزان".tr),
+                        _infoRow("كود المنتج".tr, product.productCode?.toString() ?? '-'),
+                        _infoRow("Barcode".tr, product.codepar.toString()),
+                        if ((product.itemsPerCarton ?? 0) > 0) ...[
+                          _infoRow("الكمية في الكرتونة الواحدة".tr, product.itemsPerCarton.toString()),
+                          _infoRow("عدد الكراتين".tr, formatQuantity(double.parse(product.productQuantity ?? "0") / product.itemsPerCarton!)),
+                        ],
+                        const Divider(height: 30),
                         _infoRow(
                           "سعر الشراء".tr,
                           "${product.productPricePurchase != null ? formavalue(product.productPricePurchase!) : ''} ${'دينار'.tr}",
                         ),
+                        _infoRow(
+                          "سعر التجزئة".tr,
+                          "${product.productPrice != null ? formavalue(product.productPrice!) : ''} ${'دينار'.tr}",
+                        ),
+                        if (controller.sellType >= 2)
+                          _infoRow(
+                            "سعر النصف جملة".tr,
+                            "${product.productPriceHalfWholesale != null ? formavalue(product.productPriceHalfWholesale!) : ''} ${'دينار'.tr}",
+                          ),
+                        if (controller.sellType >= 3)
+                          _infoRow(
+                            "سعر الجملة".tr,
+                            "${product.productPriceWholesale != null ? formavalue(product.productPriceWholesale!) : ''} ${'دينار'.tr}",
+                          ),
+                        const Divider(height: 30),
                         _infoRow("الكمية".tr,
                             "${product.productQuantity}${product.type == 2 ? "Kg" : ""}"),
                         _infoRow(
@@ -191,11 +210,11 @@ class _InformationitemState extends State<Informationitem> {
                           "الإجمالي شراء".tr,
                           "${product.productPriceTotalPurchase != null ? formavalue(product.productPriceTotalPurchase!) : ''}",
                         ),
+                        const Divider(height: 30),
                         _infoRow(
                           "تاريخ الإضافة".tr,
                           product.createdAt?.substring(0, 10) ?? '',
                         ),
-                        _infoRow("Barcode".tr, product.codepar.toString()),
                       ],
                     ),
                   ),

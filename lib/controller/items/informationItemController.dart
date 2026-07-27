@@ -24,6 +24,7 @@ class Informationitemcontroller extends GetxController {
   final GlobalKey ticketKey = GlobalKey();
 
   late int? id = myservices.sharedPreferences?.getInt("id");
+  int get sellType => myservices.sharedPreferences?.getInt("sell_type") ?? 3;
 
   ProdactData prodactData = ProdactData(Get.find());
   Statusrequest statusrequest = Statusrequest.none;

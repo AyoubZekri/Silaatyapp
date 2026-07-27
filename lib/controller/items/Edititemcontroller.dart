@@ -13,6 +13,7 @@ import 'package:Silaaty/data/model/Categoris_model.dart';
 
 import '../../core/constant/Colorapp.dart';
 import '../../core/functions/Snacpar.dart';
+import '../../core/functions/FormatQuantity.dart';
 
 class Edititemcontroller extends GetxController {
   File? file;
@@ -31,6 +32,30 @@ class Edititemcontroller extends GetxController {
   final barcodeController = TextEditingController();
   final pricePurchaseController = TextEditingController();
   final quantityController = TextEditingController();
+
+  final productCodeController = TextEditingController();
+  final minSellingPriceController = TextEditingController();
+  final itemsPerCartonController = TextEditingController();
+  final cartonsCountController = TextEditingController();
+  bool isCarton = false;
+
+  void toggleIsCarton(bool value) {
+    isCarton = value;
+    calculateTotalQuantity();
+    update();
+  }
+
+  void calculateTotalQuantity() {
+    if (isCarton) {
+      double cartons = double.tryParse(cartonsCountController.text) ?? 0.0;
+      double items = double.tryParse(itemsPerCartonController.text) ?? 0.0;
+      quantityController.text = formatQuantity(cartons * items);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        update();
+      });
+    }
+    calculateTotalPrice();
+  }
 
   double priceTotal = 0.0;
   double priceTotalPurchase = 0.0;
@@ -128,11 +153,99 @@ class Edititemcontroller extends GetxController {
       return;
     }
 
+    final String barcodeToSave = (type == 2 && !barcodeController.text.startsWith('25')) ? '25' + barcodeController.text : barcodeController.text;
+    final String productCodeToSave = productCodeController.text;
+
+    final existingProducts = await prodactData.checkProductExistsByCode(barcodeToSave, productCodeToSave);
+      
+    // Filter out the current product from duplicates check
+    final duplicates = existingProducts.where((p) => p['uuid'] != uuid).toList();
+      
+    if (duplicates.isNotEmpty) {
+      final existingName = duplicates.first['product_name'];
+      Get.dialog(
+        Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+          backgroundColor: Colors.transparent,
+          child: Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              shape: BoxShape.rectangle,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: const [
+                BoxShadow(
+                  color: Colors.black26,
+                  blurRadius: 10.0,
+                  offset: Offset(0.0, 10.0),
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(Icons.warning_amber_rounded, color: Colors.red, size: 50),
+                ),
+                const SizedBox(height: 20),
+                Text(
+                  "تنبيه!".tr,
+                  style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.black),
+                ),
+                const SizedBox(height: 15),
+                Text(
+                  "هذا المنتج موجود مسبقاً باسم:".tr,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(fontSize: 16, color: Colors.black54),
+                ),
+                const SizedBox(height: 10),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+                  decoration: BoxDecoration(
+                    color: AppColor.backgroundcolor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(color: AppColor.backgroundcolor.withOpacity(0.3)),
+                  ),
+                  child: Text(
+                    existingName.toString(),
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColor.backgroundcolor),
+                  ),
+                ),
+                const SizedBox(height: 25),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColor.backgroundcolor,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                    ),
+                    onPressed: () => Get.back(),
+                    child: Text("حسناً".tr, style: const TextStyle(fontSize: 18, color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+        barrierDismissible: false,
+      );
+      return;
+    }
+
     final data = {
       "uuid": uuid,
       'product_name': nameController.text,
       'product_description': descriptionController.text,
-      'product_quantity': newQty,
+      'product_quantity': type == 2 ? newQty : newQty.toInt(),
       'product_price': priseController.text,
       'product_price_half_wholesale': sellType >= 2
           ? (priseHalfWholesaleController.text.isNotEmpty
@@ -150,9 +263,11 @@ class Edititemcontroller extends GetxController {
       'product_price_total': priceTotal.toString(),
       'product_price_total_purchase': priceTotalPurchase.toString(),
       'product_price_purchase': pricePurchaseController.text,
-      "codepar": (type == 2 && !barcodeController.text.startsWith('25'))
-          ? '25' + barcodeController.text
-          : barcodeController.text,
+      "codepar": barcodeToSave,
+      'product_code': productCodeToSave,
+      'items_per_carton': isCarton ? (int.tryParse(itemsPerCartonController.text) ?? 1) : null,
+      'quantity_per_carton': isCarton ? (int.tryParse(itemsPerCartonController.text) ?? 1) : null,
+      'min_selling_price': double.tryParse(minSellingPriceController.text) ?? 0.0,
       'updated_at': DateTime.now().toString().substring(0, 19),
     };
 
@@ -178,12 +293,13 @@ class Edititemcontroller extends GetxController {
     super.onInit();
     quantityController.addListener(calculateTotalPrice);
     priseController.addListener(calculateTotalPrice);
+    pricePurchaseController.addListener(calculateTotalPrice);
+    cartonsCountController.addListener(calculateTotalQuantity);
+    itemsPerCartonController.addListener(calculateTotalQuantity);
   }
 
   void calculateTotalPrice() {
-    final quantity = type == 2
-        ? double.tryParse(quantityController.text) ?? 0.0
-        : int.tryParse(quantityController.text) ?? 0;
+    final quantity = double.tryParse(quantityController.text) ?? 0.0;
     final price = double.tryParse(priseController.text) ?? 0.0;
     final pricePurchase = double.tryParse(pricePurchaseController.text) ?? 0.0;
 
@@ -195,7 +311,9 @@ class Edititemcontroller extends GetxController {
   }
 
   void onQuantityChanged(num value) {
-    calculateTotalPrice();
+    if (!isCarton) {
+      calculateTotalPrice();
+    }
   }
 
   void imageupload() {
@@ -235,6 +353,21 @@ class Edititemcontroller extends GetxController {
     uuid = product.uuid;
     imageUrl = product.productImage ?? "";
     oldquantity = product.productQuantity ?? "";
+    productCodeController.text = product.productCode ?? "";
+    minSellingPriceController.text = product.minSellingPrice?.toString() ?? "";
+    itemsPerCartonController.text = product.itemsPerCarton?.toString() ?? "";
+    
+    if (product.itemsPerCarton != null && product.itemsPerCarton! > 1) {
+      isCarton = true;
+      double totalQty = double.tryParse(product.productQuantity ?? "0") ?? 0;
+      if (product.itemsPerCarton! > 0) {
+        cartonsCountController.text = (totalQty / product.itemsPerCarton!).toString();
+      } else {
+        cartonsCountController.text = totalQty.toString();
+      }
+    } else {
+      isCarton = false;
+    }
 
     print("============================$selectedtypeuuId");
   }
@@ -348,6 +481,10 @@ class Edititemcontroller extends GetxController {
     priseHalfWholesaleController.dispose();
     priseWholesaleController.dispose();
     quantityController.dispose();
+    productCodeController.dispose();
+    minSellingPriceController.dispose();
+    itemsPerCartonController.dispose();
+    cartonsCountController.dispose();
     super.onClose();
   }
 }

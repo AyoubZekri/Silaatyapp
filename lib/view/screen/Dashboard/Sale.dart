@@ -374,35 +374,7 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                         ),
                       ),
                       
-                      // Add New Product Button (Supplier Only)
-                      if (controller.type?.toString() == '1') ...[
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: ElevatedButton(
-                            onPressed: () async {
-                              var result = await Get.toNamed(
-                                Approutes.Additem,
-                                arguments: {'isDraftMode': true},
-                              );
-                              if (result != null && result is Map<String, dynamic>) {
-                                controller.addDraftedProduct(result);
-                              }
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.white,
-                              foregroundColor: AppColor.backgroundcolor,
-                              side: const BorderSide(color: AppColor.backgroundcolor, width: 2),
-                              padding: const EdgeInsets.symmetric(vertical: 16),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                              elevation: 0,
-                            ),
-                            child: Text(
-                              "جديد".tr,
-                              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                      ],
+
                       
                       const SizedBox(width: 10),
                       
@@ -564,14 +536,20 @@ class _NewSaleState extends State<NewSale> with SingleTickerProviderStateMixin {
                         onPressed: () {
                           num? qty = double.tryParse(qtyController.text);
                           final price = double.tryParse(priceController.text);
+                          
                           if (qty != null && qty > 0) {
                             if (item['type_item'] != 2) qty = qty.toInt();
                             controller.updateQuantity(item['uuid'], qty);
                           }
+                          
+                          bool canClose = true;
                           if (price != null && price > 0) {
-                            controller.updateProductPrice(item['uuid'], price);
+                            canClose = controller.updateProductPrice(item['uuid'], price);
                           }
-                          Get.back();
+                          
+                          if (canClose) {
+                            Get.back();
+                          }
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColor.backgroundcolor,

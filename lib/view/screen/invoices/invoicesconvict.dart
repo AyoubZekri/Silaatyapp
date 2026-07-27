@@ -41,13 +41,89 @@ class _InvoicesState extends State<Invoices> with RouteAware {
     super.didPopNext();
   }
 
+  Widget _buildStatCard(String title, String amount, Color color) {
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.08),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.2), width: 1),
+        ),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                color: Colors.grey[700],
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Text(
+                    amount,
+                    style: TextStyle(
+                      color: color,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+                const SizedBox(width: 2),
+                Text(
+                  "DA".tr,
+                  style: TextStyle(
+                    color: color,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 16, color: Colors.grey[600]),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 13,
+                color: Colors.grey[800],
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<InvoicesController>(builder: (controller) {
       return Scaffold(
-        backgroundColor: AppColor.white,
+        backgroundColor: const Color(0xFFF7F8FA),
         appBar: AppBar(
+          elevation: 0,
           backgroundColor: AppColor.white,
+          centerTitle: true,
           iconTheme: const IconThemeData(
             color: AppColor.backgroundcolor,
           ),
@@ -55,7 +131,8 @@ class _InvoicesState extends State<Invoices> with RouteAware {
             'invoices'.tr,
             style: Theme.of(context).textTheme.headlineMedium!.copyWith(
                   color: AppColor.backgroundcolor,
-                  fontSize: 24,
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
                 ),
           ),
         ),
@@ -64,379 +141,359 @@ class _InvoicesState extends State<Invoices> with RouteAware {
             controller.gotoNewSale();
           },
           backgroundColor: AppColor.backgroundcolor,
-          child: const Icon(Icons.add, color: Colors.white),
+          elevation: 4,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: const Icon(Icons.add, color: Colors.white, size: 28),
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.startFloat,
         body: RefreshIndicator(
           onRefresh: () async {
             await controller.refreshData();
           },
-          child: Column(children: [
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    // بيانات العميل
-                    Expanded(
-                      child: Row(
-                        children: [
-                          Container(
-                            height: 100,
-                            width: 100,
-                            margin: const EdgeInsets.all(10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(180),
-                              border:
-                                  Border.all(width: 0.4, color: AppColor.grey),
-                            ),
-                            child: const Icon(
-                              Icons.person,
-                              size: 70,
-                              color: AppColor.backgroundcolor,
-                            ),
-                          ),
-                          const SizedBox(width: 10),
-                          Flexible(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  "${controller.invoice?.transaction?.name ?? ''} ${controller.invoice?.transaction?.familyName ?? ''}",
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    color: AppColor.black,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  controller
-                                          .invoice?.transaction?.phoneNumber ??
-                                      '',
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    color: AppColor.black,
-                                  ),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        // الحالة
-                        if (controller.invoice != null &&
-                            controller.invoice?.transaction?.transactions == 2)
-                          InkWell(
-                            onTap: () {
-                              controller.switchtransactions(
-                                  controller.invoice!.transaction!.id!);
-                            },
-                            child: Container(
-                              width: 45,
-                              height: 45,
-                              margin: const EdgeInsets.only(right: 8),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color:
-                                    controller.invoice?.transaction?.status == 1
-                                        // ignore: deprecated_member_use
-                                        ? Colors.red.withOpacity(0.1)
-                                        // ignore: deprecated_member_use
-                                        : Colors.green.withOpacity(0.1),
-                                border: Border.all(
-                                  color:
-                                      controller.invoice?.transaction?.status ==
-                                              1
-                                          ? Colors.red
-                                          : Colors.green,
-                                  width: 2,
-                                ),
-                              ),
-                              child: Icon(
-                                controller.invoice?.transaction?.status == 1
-                                    ? Icons.warning_amber_rounded
-                                    : Icons.check_circle_outline,
-                                color:
-                                    controller.invoice?.transaction?.status == 1
-                                        ? Colors.red
-                                        : Colors.green,
-                                size: 22,
-                              ),
-                            ),
-                          ),
-
-                        // الاتصال
-                        Container(
-                          margin: const EdgeInsets.all(10),
-                          padding: const EdgeInsets.all(1),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            // ignore: deprecated_member_use
-                            color: AppColor.backgroundcolor.withOpacity(0.1),
-                          ),
-                          child: IconButton(
-                            icon: const Icon(
-                              Icons.call,
-                              color: AppColor.backgroundcolor,
-                              size: 24,
-                            ),
-                            onPressed: () async {
-                              final Uri phoneUri = Uri(
-                                scheme: 'tel',
-                                path: controller
-                                        .invoice?.transaction?.phoneNumber ??
-                                    '',
-                              );
-                              if (await canLaunchUrl(phoneUri)) {
-                                await launchUrl(phoneUri);
-                              } else {
-                                Get.snackbar(
-                                    "Error".tr, "No connection can be made".tr);
-                              }
-                            },
-                          ),
-                        ),
-                      ],
+          color: AppColor.backgroundcolor,
+          child: Column(
+            children: [
+              // --- Header Profile Card ---
+              Container(
+                margin: const EdgeInsets.fromLTRB(16, 16, 16, 10),
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(20),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 15),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        controller.invoice?.transaction?.transactions == 2
-                            ? "Account_clint".tr
-                            : "Account_Supplier".tr,
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppColor.black,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Avatar
+                        Container(
+                          height: 70,
+                          width: 70,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: AppColor.backgroundcolor.withOpacity(0.1),
+                            border: Border.all(
+                                width: 2,
+                                color:
+                                    AppColor.backgroundcolor.withOpacity(0.3)),
+                          ),
+                          child: const Icon(
+                            Icons.person_rounded,
+                            size: 40,
+                            color: AppColor.backgroundcolor,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Price Total".tr,
-                              style: TextStyle(color: Colors.grey[700])),
-                          Row(
+                        const SizedBox(width: 16),
+                        // Main Info
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                "${controller.invoice?.sumPrice ?? 0} ",
+                                "${controller.invoice?.transaction?.name ?? ''} ${controller.invoice?.transaction?.familyName ?? ''}",
                                 style: const TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
                                   color: AppColor.black,
-                                  fontWeight: FontWeight.bold,
                                 ),
+                                overflow: TextOverflow.ellipsis,
                               ),
+                              const SizedBox(height: 4),
                               Text(
-                                "DA".tr,
+                                controller.invoice?.transaction?.transactions ==
+                                        2
+                                    ? "Account_clint".tr
+                                    : "Account_Supplier".tr,
                                 style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: AppColor.backgroundcolor,
+                                  fontWeight: FontWeight.w600,
                                 ),
                               ),
+                              const SizedBox(height: 8),
+                              // Sale Type Chip
+                              if (controller.invoice?.transaction
+                                          ?.customerSaleType !=
+                                      null &&
+                                  controller.invoice!.transaction!
+                                      .customerSaleType!.isNotEmpty)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 4),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.withOpacity(0.2),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    controller.invoice!.transaction!
+                                                .customerSaleType ==
+                                            "1"
+                                        ? "نوع البيع: تجزئة".tr
+                                        : controller.invoice!.transaction!
+                                                    .customerSaleType ==
+                                                "2"
+                                            ? "نوع البيع: نصف جملة".tr
+                                            : "نوع البيع: جملة".tr,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.orange,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                             ],
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("Paid-for".tr,
-                              style: TextStyle(color: Colors.grey[700])),
-                          Row(
-                            children: [
-                              Text(
-                                "${controller.invoice?.sumPaymentPrice ?? 0} ",
-                                style: TextStyle(
-                                  color: Colors.green[700],
-                                  fontWeight: FontWeight.bold,
+                        ),
+                        // Actions
+                        Column(
+                          children: [
+                            if (controller.invoice != null &&
+                                controller.invoice?.transaction?.transactions ==
+                                    2)
+                              InkWell(
+                                onTap: () {
+                                  controller.switchtransactions(
+                                      controller.invoice!.transaction!.id!);
+                                },
+                                borderRadius: BorderRadius.circular(50),
+                                child: Container(
+                                  width: 40,
+                                  height: 40,
+                                  margin: const EdgeInsets.only(bottom: 8),
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    color: controller
+                                                .invoice?.transaction?.status ==
+                                            1
+                                        ? Colors.red.withOpacity(0.1)
+                                        : Colors.green.withOpacity(0.1),
+                                  ),
+                                  child: Icon(
+                                    controller.invoice?.transaction?.status == 1
+                                        ? Icons.warning_amber_rounded
+                                        : Icons.check_circle_outline,
+                                    color: controller
+                                                .invoice?.transaction?.status ==
+                                            1
+                                        ? Colors.red
+                                        : Colors.green,
+                                    size: 22,
+                                  ),
                                 ),
                               ),
-                              Text(
-                                "DA".tr,
-                                style: TextStyle(
-                                  color: Colors.green[700],
-                                  fontWeight: FontWeight.bold,
+                            InkWell(
+                              onTap: () async {
+                                final Uri phoneUri = Uri(
+                                  scheme: 'tel',
+                                  path: controller
+                                          .invoice?.transaction?.phoneNumber ??
+                                      '',
+                                );
+                                if (await canLaunchUrl(phoneUri)) {
+                                  await launchUrl(phoneUri);
+                                } else {
+                                  Get.snackbar("Error".tr,
+                                      "No connection can be made".tr);
+                                }
+                              },
+                              borderRadius: BorderRadius.circular(50),
+                              child: Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color:
+                                      AppColor.backgroundcolor.withOpacity(0.1),
+                                ),
+                                child: const Icon(
+                                  Icons.call,
+                                  color: AppColor.backgroundcolor,
+                                  size: 20,
                                 ),
                               ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 5),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text("The rest".tr,
-                              style: TextStyle(color: Colors.grey[700])),
-                          Row(
-                            children: [
-                              Text(
-                                "${controller.getRemainingAmount()} ",
-                                style: TextStyle(
-                                  color: Colors.red[700],
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Text(
-                                "DA".tr,
-                                style: TextStyle(
-                                  color: Colors.red[700],
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                    ],
-                  ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    const Divider(height: 1),
+                    const SizedBox(height: 12),
+                    // Extra Details
+                    if (controller.invoice?.transaction?.phoneNumber != null &&
+                        controller
+                            .invoice!.transaction!.phoneNumber!.isNotEmpty)
+                      _buildInfoRow(Icons.phone_outlined,
+                          controller.invoice!.transaction!.phoneNumber!),
+                    if (controller.invoice?.transaction?.address != null &&
+                        controller.invoice!.transaction!.address!.isNotEmpty)
+                      _buildInfoRow(Icons.location_on_outlined,
+                          controller.invoice!.transaction!.address!),
+                    if (controller.invoice?.transaction?.supplierProducts !=
+                            null &&
+                        controller
+                            .invoice!.transaction!.supplierProducts!.isNotEmpty)
+                      _buildInfoRow(Icons.inventory_2_outlined,
+                          "${'يبيع:'.tr} ${controller.invoice!.transaction!.supplierProducts}"),
+                    if (controller.invoice?.transaction?.notes != null &&
+                        controller.invoice!.transaction!.notes!.isNotEmpty)
+                      _buildInfoRow(Icons.note_alt_outlined,
+                          "${'ملاحظات:'.tr} ${controller.invoice!.transaction!.notes}"),
+                  ],
                 ),
-              ],
-            ),
-            Container(
-              padding: const EdgeInsets.only(top: 15),
-              child: Column(
-                children: [
-                  Wrap(
-                    runSpacing: 10,
-                    children: [
-                      Custemtypeinvoices(
-                        onPressed: () {
-                          setState(() {
-                            controller.selectedIndex = 1;
-                          });
-                        },
-                        activte: controller.selectedIndex == 1,
-                        iconData: Icons.check_circle_outline,
-                      ),
-                      Custemtypeinvoices(
-                        onPressed: () {
-                          setState(() {
-                            controller.selectedIndex = 2;
-                          });
-                        },
-                        activte: controller.selectedIndex == 2,
-                        iconData: Icons.warning_amber_rounded,
-                      ),
-                      Custemtypeinvoices(
-                        onPressed: () {
-                          setState(() {
-                            controller.selectedIndex = 3;
-                          });
-                        },
-                        activte: controller.selectedIndex == 3,
-                        iconData: Icons.all_inclusive,
-                      ),
-                    ],
-                  ),
-                  Container(
-                    width: double.infinity,
-                    height: 1,
-                    color: Colors.grey[300],
-                  ),
-                ],
               ),
-            ),
-            const SizedBox(height: 10),
-            Handlingview(
-              statusrequest: controller.statusrequest,
-              iconData: Icons.receipt_long,
-              title: "لا يوجد فواتير".tr,
-              widget: SizedBox(
-                height: MediaQuery.of(context).size.height * 0.5,
-                child: ListView.builder(
-                  itemCount: controller.invoice?.invoices?.where((inv) {
+
+              // --- Stats Row ---
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Row(
+                  children: [
+                    _buildStatCard("Price Total".tr,
+                        "${controller.invoice?.sumPrice ?? 0}", Colors.blue),
+                    const SizedBox(width: 8),
+                    _buildStatCard(
+                        "Paid-for".tr,
+                        "${controller.invoice?.sumPaymentPrice ?? 0}",
+                        Colors.green),
+                    const SizedBox(width: 8),
+                    _buildStatCard("The rest".tr,
+                        "${controller.getRemainingAmount()}", Colors.redAccent),
+                  ],
+                ),
+              ),
+
+              // --- Filters ---
+              Container(
+                padding: const EdgeInsets.only(top: 15, bottom: 8),
+                child: Wrap(
+                  runSpacing: 10,
+                  alignment: WrapAlignment.center,
+                  children: [
+                    Custemtypeinvoices(
+                      onPressed: () {
+                        setState(() {
+                          controller.selectedIndex = 1;
+                        });
+                      },
+                      activte: controller.selectedIndex == 1,
+                      iconData: Icons.check_circle_outline,
+                    ),
+                    Custemtypeinvoices(
+                      onPressed: () {
+                        setState(() {
+                          controller.selectedIndex = 2;
+                        });
+                      },
+                      activte: controller.selectedIndex == 2,
+                      iconData: Icons.warning_amber_rounded,
+                    ),
+                    Custemtypeinvoices(
+                      onPressed: () {
+                        setState(() {
+                          controller.selectedIndex = 3;
+                        });
+                      },
+                      activte: controller.selectedIndex == 3,
+                      iconData: Icons.all_inclusive,
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 1),
+
+              // --- List View ---
+              Expanded(
+                child: Handlingview(
+                  statusrequest: controller.statusrequest,
+                  iconData: Icons.receipt_long,
+                  title: "لا يوجد فواتير".tr,
+                  widget: ListView.builder(
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: const EdgeInsets.only(top: 8, bottom: 80),
+                    itemCount: controller.invoice?.invoices?.where((inv) {
+                          if (controller.selectedIndex == 1) return inv.isPaid;
+                          if (controller.selectedIndex == 2) return !inv.isPaid;
+                          return true;
+                        }).length ??
+                        0,
+                    itemBuilder: (context, index) {
+                      final filteredInvoices =
+                          controller.invoice!.invoices!.where((inv) {
                         if (controller.selectedIndex == 1) return inv.isPaid;
                         if (controller.selectedIndex == 2) return !inv.isPaid;
                         return true;
-                      }).length ??
-                      0,
-                  itemBuilder: (context, index) {
-                    final filteredInvoices =
-                        controller.invoice!.invoices!.where((inv) {
-                      if (controller.selectedIndex == 1) return inv.isPaid;
-                      if (controller.selectedIndex == 2) return !inv.isPaid;
-                      return true;
-                    }).toList();
+                      }).toList();
 
-                    final inv = filteredInvoices[index];
-                    return TweenAnimationBuilder(
-                      tween: Tween<double>(begin: 0, end: 1),
-                      duration: Duration(milliseconds: 300 + (index * 2)),
-                      builder: (context, value, child) {
-                        return Opacity(
-                          opacity: value,
-                          child: Transform.translate(
-                            offset: Offset(50 * (1 - value), 0),
-                            child: child,
-                          ),
-                        );
-                      },
-                      child: Custemcartinvoice(
-                        day: inv.date?.substring(8, 10) ?? "",
-                        Mon: controller.getMonthAbbreviation(inv.date),
-                        Title: "#${inv.number ?? ''}",
-                        Status: inv.isPaid ? "Sincere".tr : 'Not Sincere'.tr,
-                        Price: formavalue((((double.parse(inv.invoiceSum.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0)) < 0 ? 0 : (double.parse(inv.invoiceSum!.toString())) - (inv.paymentPrice ?? 0) - (inv.discount ?? 0))),
-                        onTap: () {
-                          final selectedInvoiceData = InvoiceItem(
-                            id: inv.id,
-                            uuid: inv.uuid,
-                            transactionuuId: inv.transactionuuId,
-                            userId: inv.userId,
-                            number: inv.number,
-                            date: inv.date,
-                            paymentDate: inv.paymentDate,
-                            paymentPrice: inv.paymentPrice,
-                            discount: inv.discount,
-                            totalSales: inv.totalSales,
-                            debt: inv.debt,
-                            invoiceSum: inv.invoiceSum,
-                            name: controller.invoice!.transaction!.name,
-                            familyName:
-                                controller.invoice!.transaction!.familyName,
-                            phoneNumber:
-                                controller.invoice!.transaction!.phoneNumber,
+                      final inv = filteredInvoices[index];
+                      return TweenAnimationBuilder(
+                        tween: Tween<double>(begin: 0, end: 1),
+                        duration: Duration(milliseconds: 300 + (index * 50)),
+                        builder: (context, value, child) {
+                          return Opacity(
+                            opacity: value,
+                            child: Transform.translate(
+                              offset: Offset(0, 20 * (1 - value)),
+                              child: child,
+                            ),
                           );
-
-                          controller.gotoShowInvoice(selectedInvoiceData);
                         },
-                        // onEdit: () {
-                        //   showDialog(
-                        //     context: context,
-                        //     builder: (context) => CustemInvoiceDialog(
-                        //       title: "Edit invoices".tr,
-                        //       onPressed: () {
-                        //         controller.EditInvoice(inv.uuid!);
-                        //       },
-                        //       onback: () {
-                        //         Get.back();
-                        //       },
-                        //       Mycontroller: controller.dateController,
-                        //       form: controller.formstate,
-                        //     ),
-                        //   );
-                        // },
-                      ),
-                    );
-                  },
+                        child: Custemcartinvoice(
+                          day: inv.date?.substring(8, 10) ?? "",
+                          Mon: controller.getMonthAbbreviation(inv.date),
+                          Title: "#${inv.number ?? ''}",
+                          Status: inv.isPaid ? "Sincere".tr : 'Not Sincere'.tr,
+                          Price: formavalue((((double.tryParse(
+                                              inv.invoiceSum.toString()) ??
+                                          0) -
+                                      (inv.paymentPrice ?? 0) -
+                                      (inv.discount ?? 0)) <
+                                  0
+                              ? 0
+                              : (double.tryParse(inv.invoiceSum.toString()) ??
+                                      0) -
+                                  (inv.paymentPrice ?? 0) -
+                                  (inv.discount ?? 0))),
+                          onTap: () {
+                            final selectedInvoiceData = InvoiceItem(
+                              id: inv.id,
+                              uuid: inv.uuid,
+                              transactionuuId: inv.transactionuuId,
+                              userId: inv.userId,
+                              number: inv.number,
+                              date: inv.date,
+                              paymentDate: inv.paymentDate,
+                              paymentPrice: inv.paymentPrice,
+                              discount: inv.discount,
+                              totalSales: inv.totalSales,
+                              debt: inv.debt,
+                              invoiceSum: inv.invoiceSum,
+                              name: controller.invoice!.transaction!.name,
+                              familyName:
+                                  controller.invoice!.transaction!.familyName,
+                              phoneNumber:
+                                  controller.invoice!.transaction!.phoneNumber,
+                            );
+
+                            controller.gotoShowInvoice(selectedInvoiceData);
+                          },
+                        ),
+                      );
+                    },
+                  ),
                 ),
               ),
-            ),
-          ]),
+            ],
+          ),
         ),
       );
     });

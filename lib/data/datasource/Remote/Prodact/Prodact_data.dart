@@ -517,4 +517,25 @@ class ProdactData {
     print("===========================$result");
     return result;
   }
+
+  Future<List<Map<String, Object?>>> checkProductExistsByCode(String? barcode, String? productCode) async {
+    List<dynamic> args = [id];
+    String query = "SELECT * FROM products WHERE user_id = ? AND is_delete = 0 AND (";
+    List<String> conditions = [];
+
+    if (barcode != null && barcode.isNotEmpty) {
+      conditions.add("codepar = ?");
+      args.add(barcode);
+    }
+    if (productCode != null && productCode.isNotEmpty) {
+      conditions.add("product_code = ?");
+      args.add(productCode);
+    }
+
+    if (conditions.isEmpty) return [];
+
+    query += conditions.join(" OR ") + ")";
+
+    return await sqldb.readData(query, args);
+  }
 }

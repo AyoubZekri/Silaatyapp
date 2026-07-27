@@ -71,10 +71,19 @@ class SaleController extends GetxController {
     }
   }
 
-  void updateProductPrice(String uuid, double newPrice) {
+  bool updateProductPrice(String uuid, double newPrice) {
     final index = selectedProducts.indexWhere((item) => item['uuid'] == uuid);
     if (index != -1) {
       var item = selectedProducts[index];
+      if (type != 1) {
+        double minPrice = double.tryParse(item['min_selling_price']?.toString() ?? '0') ?? 0.0;
+        
+        if (minPrice > 0 && newPrice < minPrice) {
+          showSnackbar("تنبيه".tr, "لا يمكن أن يكون سعر البيع أقل من الحد الأدنى: $minPrice", Colors.red);
+          return false;
+        }
+      }
+
       if (type == 1) {
         item['price_Purchase'] = newPrice;
       } else {
@@ -84,7 +93,9 @@ class SaleController extends GetxController {
       selectedProducts[index] = Map<String, dynamic>.from(item);
       _calculateTotals();
       update();
+      return true;
     }
+    return false;
   }
 
   void deleteProduct(String uuid) {
@@ -254,6 +265,7 @@ class SaleController extends GetxController {
                     "total": price * weight,
                     "type_item": 2,
                     "quantity_item": productData['product_quantity'],
+                    "min_selling_price": double.tryParse(productData['min_selling_price']?.toString() ?? '0') ?? 0.0,
                   });
                 }
                 _calculateTotals();
@@ -345,6 +357,7 @@ class SaleController extends GetxController {
         "total": price * pendingAddedQuantity!,
         "type_item": typeItem,
         "quantity_item": pendingProduct!['product_quantity'],
+        "min_selling_price": double.tryParse(pendingProduct!['min_selling_price']?.toString() ?? '0') ?? 0.0,
       });
     }
 
@@ -469,6 +482,7 @@ class SaleController extends GetxController {
         "total": double.tryParse(draftedProduct[type == 1 ? 'product_price_purchase' : 'product_price'].toString()) ?? 0.0,
         "type_item": draftedProduct['type'],
         "quantity_item": "9999", // Unconstrained for draft products
+        "min_selling_price": double.tryParse(draftedProduct['min_selling_price']?.toString() ?? '0') ?? 0.0,
         "draft_data": draftedProduct // Save the payload to insert on payment
       });
       _calculateTotals();

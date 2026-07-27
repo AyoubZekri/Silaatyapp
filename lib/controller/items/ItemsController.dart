@@ -109,6 +109,7 @@ class Itemscontroller extends GetxController {
               "quantity": quantities[uuid] ?? 1,
               "quantity_item": item.productQuantity,
               "type_item": item.type,
+              "min_selling_price": item.minSellingPrice ?? 0.0,
             };
           } else {
             final originalItem = originalSelectedProducts.firstWhereOrNull((e) => e['uuid'] == uuid);

@@ -51,6 +51,10 @@ class Data {
   double? productPriceTotal;
   int ? type;
   int? codepar;
+  String? productCode;
+  int? itemsPerCarton;
+  int? quantityPerCarton;
+  double? minSellingPrice;
   String? createdAt;
   String? updatedAt;
 
@@ -73,6 +77,10 @@ class Data {
     this.productPriceTotal,
     this.codepar,
     this.type,
+    this.productCode,
+    this.itemsPerCarton,
+    this.quantityPerCarton,
+    this.minSellingPrice,
     this.createdAt,
     this.updatedAt,
   });
@@ -87,14 +95,19 @@ class Data {
     productName = json['product_name'];
     productImage = json['Product_image'];
     productDescription = json['product_description'];
-    productQuantity = json['product_quantity'];
+    productQuantity = json['product_quantity']?.toString();
     productPrice = _toDouble(json['product_price']);
     productPriceHalfWholesale = _toDouble(json['product_price_half_wholesale']);
     productPriceWholesale = _toDouble(json['product_price_wholesale']);
     productPricePurchase = _toDouble(json['product_price_purchase']);
     productPriceTotalPurchase = _toDouble(json['product_price_total_purchase']);
     type = json['type'];
-    productPriceTotal = _toDouble(json['product_price_total']);    codepar = json['codepar'];
+    productPriceTotal = _toDouble(json['product_price_total']);
+    codepar = json['codepar'];
+    productCode = json['product_code'];
+    itemsPerCarton = json['items_per_carton'];
+    quantityPerCarton = json['quantity_per_carton'];
+    minSellingPrice = _toDouble(json['min_selling_price']);
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
   }
@@ -119,6 +132,10 @@ class Data {
     data['product_price_total'] = this.productPriceTotal;
     data['type'] = this.type;
     data['codepar'] = this.codepar;
+    data['product_code'] = this.productCode;
+    data['items_per_carton'] = this.itemsPerCarton;
+    data['quantity_per_carton'] = this.quantityPerCarton;
+    data['min_selling_price'] = this.minSellingPrice;
     data['created_at'] = this.createdAt;
     data['updated_at'] = this.updatedAt;
     return data;

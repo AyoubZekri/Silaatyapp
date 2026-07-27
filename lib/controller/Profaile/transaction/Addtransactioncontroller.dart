@@ -13,6 +13,10 @@ class AddTransactionController extends GetxController {
   final nameController = TextEditingController();
   final familyNameController = TextEditingController();
   final phoneController = TextEditingController();
+  final addressController = TextEditingController();
+  final notesController = TextEditingController();
+  final supplierProductsController = TextEditingController();
+  int? customerSaleType;
 
   final formKey = GlobalKey<FormState>();
 
@@ -21,6 +25,7 @@ class AddTransactionController extends GetxController {
   Statusrequest statusRequest = Statusrequest.none;
 
   int? userid = Get.find<Myservices>().sharedPreferences?.getInt("id");
+  int get sellType => Get.find<Myservices>().sharedPreferences?.getInt("sell_type") ?? 3;
 
   @override
   void onInit() {
@@ -40,6 +45,10 @@ class AddTransactionController extends GetxController {
       'name': nameController.text.trim(),
       'family_name': familyNameController.text.trim(),
       'phone_number': phoneController.text.trim(),
+      'address': addressController.text.trim(),
+      'notes': notesController.text.trim(),
+      'supplier_products': supplierProductsController.text.trim(),
+      'customer_sale_type': customerSaleType?.toString() ?? '',
       "created_at": DateTime.now().toIso8601String(),
       "updated_at": DateTime.now().toIso8601String(),
     };
@@ -66,6 +75,9 @@ class AddTransactionController extends GetxController {
     nameController.dispose();
     familyNameController.dispose();
     phoneController.dispose();
+    addressController.dispose();
+    notesController.dispose();
+    supplierProductsController.dispose();
     super.onClose();
   }
 }
