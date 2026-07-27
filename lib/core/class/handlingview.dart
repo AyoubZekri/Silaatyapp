@@ -1,9 +1,6 @@
 import 'package:Silaaty/core/class/Statusrequest.dart';
-import 'package:Silaaty/core/constant/imageassets.DART';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:lottie/lottie.dart';
-import 'package:shimmer/shimmer.dart';
 
 import '../constant/Colorapp.dart';
 
