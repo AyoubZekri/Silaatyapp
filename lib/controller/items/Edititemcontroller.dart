@@ -36,6 +36,10 @@ class Edititemcontroller extends GetxController {
   final productCodeController = TextEditingController();
   final minSellingPriceController = TextEditingController();
 
+  bool isByCarton = false;
+  final itemsPerCartonController = TextEditingController();
+  final numberOfCartonsController = TextEditingController();
+
   double priceTotal = 0.0;
   double priceTotalPurchase = 0.0;
 
@@ -65,6 +69,21 @@ class Edititemcontroller extends GetxController {
       scanBarcode(context);
     }
     update();
+  }
+
+  void toggleByCarton(bool? value) {
+    isByCarton = value ?? false;
+    update();
+  }
+
+  void calculateCartonQuantity() {
+    if (isByCarton) {
+      final itemsPerCarton = double.tryParse(itemsPerCartonController.text) ?? 0.0;
+      final numberOfCartons = double.tryParse(numberOfCartonsController.text) ?? 0.0;
+      final total = itemsPerCarton * numberOfCartons;
+      quantityController.text = type == 2 ? total.toString() : total.toInt().toString();
+      calculateTotalPrice();
+    }
   }
 
   void selectType(int selectedType) {
@@ -242,10 +261,10 @@ class Edititemcontroller extends GetxController {
       'product_price_total': priceTotal.toString(),
       'product_price_total_purchase': priceTotalPurchase.toString(),
       'product_price_purchase': pricePurchaseController.text,
-      "codepar": barcodeToSave,
+      'codepar': barcodeToSave,
       'product_code': productCodeToSave,
-      'items_per_carton': null,
-      'quantity_per_carton': null,
+      'items_per_carton': isByCarton ? itemsPerCartonController.text : null,
+      'quantity_per_carton': isByCarton ? numberOfCartonsController.text : null,
       'min_selling_price': double.tryParse(minSellingPriceController.text) ?? 0.0,
       'updated_at': DateTime.now().toString().substring(0, 19),
     };
@@ -273,6 +292,8 @@ class Edititemcontroller extends GetxController {
     quantityController.addListener(calculateTotalPrice);
     priseController.addListener(calculateTotalPrice);
     pricePurchaseController.addListener(calculateTotalPrice);
+    itemsPerCartonController.addListener(calculateCartonQuantity);
+    numberOfCartonsController.addListener(calculateCartonQuantity);
   }
 
   void calculateTotalPrice() {
@@ -330,6 +351,16 @@ class Edititemcontroller extends GetxController {
     oldquantity = product.productQuantity ?? "";
     productCodeController.text = product.productCode ?? "";
     minSellingPriceController.text = product.minSellingPrice?.toString() ?? "";
+    
+    if (product.itemsPerCarton != null && product.quantityPerCarton != null) {
+      isByCarton = true;
+      itemsPerCartonController.text = product.itemsPerCarton.toString();
+      numberOfCartonsController.text = product.quantityPerCarton.toString();
+    } else {
+      isByCarton = false;
+      itemsPerCartonController.clear();
+      numberOfCartonsController.clear();
+    }
 
     print("============================$selectedtypeuuId");
   }
@@ -445,6 +476,8 @@ class Edititemcontroller extends GetxController {
     quantityController.dispose();
     productCodeController.dispose();
     minSellingPriceController.dispose();
+    itemsPerCartonController.dispose();
+    numberOfCartonsController.dispose();
     super.onClose();
   }
 }

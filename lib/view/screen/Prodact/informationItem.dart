@@ -198,6 +198,10 @@ class _InformationitemState extends State<Informationitem> {
                         const Divider(height: 30),
                         _infoRow("الكمية".tr,
                             "${product.productQuantity}${product.type == 2 ? "Kg" : ""}"),
+                        if (product.itemsPerCarton != null && product.quantityPerCarton != null) ...[
+                          _infoRow("الكمية في الكرتون".tr, product.itemsPerCarton.toString()),
+                          _infoRow("عدد الكراتين".tr, product.quantityPerCarton.toString()),
+                        ],
                         _infoRow(
                           "الإجمالي بيع".tr,
                           "${product.productPriceTotal != null ? formavalue(product.productPriceTotal!) : ''}",

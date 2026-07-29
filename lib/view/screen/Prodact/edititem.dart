@@ -251,21 +251,89 @@ class _EdititemState extends State<Edititem> {
                     //       validInput(val!, 20, 300, "username");
                     //       return null;
                     //     }),
-                      QuantityInput(
-                        initialValue: controller.type == 2
-                            ? (double.tryParse(
-                                    controller.quantityController.text) ??
-                                1.0)
-                            : ((int.tryParse(
-                                        controller.quantityController.text) ??
-                                    1)
-                                .toDouble()),
-                        Mycontroller: controller.quantityController,
-                        hintText: "Quantity".tr,
-                        label: "Quantity".tr,
-                        onChanged: controller.onQuantityChanged,
-                        isDecimal: controller.type == 2,
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: controller.isByCarton ? AppColor.primarycolor : Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: controller.isByCarton ? AppColor.backgroundcolor : Colors.grey.shade300,
+                          width: 2,
+                        ),
                       ),
+                      child: Column(
+                        children: [
+                          CheckboxListTile(
+                            title: Text(
+                              "إضافة بالكرتون".tr,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: controller.isByCarton ? AppColor.backgroundcolor : Colors.black87,
+                              ),
+                            ),
+                            value: controller.isByCarton,
+                            activeColor: AppColor.backgroundcolor,
+                            checkColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            side: BorderSide(
+                              color: controller.isByCarton ? AppColor.backgroundcolor : Colors.grey.shade400,
+                              width: 2,
+                            ),
+                            onChanged: (value) {
+                              controller.toggleByCarton(value);
+                            },
+                          ),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                            child: controller.isByCarton
+                                ? Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: Column(
+                                      children: [
+                                        Custemtextfromfild(
+                                          MyController: controller.itemsPerCartonController,
+                                          keyboardType: TextInputType.number,
+                                          hintText: "الكمية في الكرتون".tr,
+                                          label: "الكمية في الكرتون".tr,
+                                          iconData: Icons.format_list_numbered,
+                                          enabled: true,
+                                        ),
+                                        Custemtextfromfild(
+                                          MyController: controller.numberOfCartonsController,
+                                          keyboardType: TextInputType.number,
+                                          hintText: "عدد الكراتين".tr,
+                                          label: "عدد الكراتين".tr,
+                                          iconData: Icons.view_module,
+                                          enabled: true,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    QuantityInput(
+                      initialValue: controller.type == 2
+                          ? (double.tryParse(
+                                  controller.quantityController.text) ??
+                              1.0)
+                          : ((int.tryParse(
+                                      controller.quantityController.text) ??
+                                  1)
+                              .toDouble()),
+                      Mycontroller: controller.quantityController,
+                      hintText: controller.isByCarton ? "الكمية الإجمالية".tr : "Quantity".tr,
+                      label: controller.isByCarton ? "الكمية الإجمالية".tr : "Quantity".tr,
+                      onChanged: controller.onQuantityChanged,
+                      isDecimal: controller.type == 2,
+                      readOnly: controller.isByCarton,
+                    ),
                     Custemtextfromfild(
                       MyController: controller.priseController,
                       keyboardType: TextInputType.number,

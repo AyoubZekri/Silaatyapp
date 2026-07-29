@@ -37,6 +37,10 @@ class Additemscontroller extends GetxController {
   final productCodeController = TextEditingController();
   final minSellingPriceController = TextEditingController();
 
+  bool isByCarton = false;
+  final itemsPerCartonController = TextEditingController();
+  final numberOfCartonsController = TextEditingController();
+
   double priceTotal = 0.0;
   double priceTotalPurchase = 0.0;
 
@@ -63,6 +67,21 @@ class Additemscontroller extends GetxController {
       scanBarcode(context);
     }
     update();
+  }
+
+  void toggleByCarton(bool? value) {
+    isByCarton = value ?? false;
+    update();
+  }
+
+  void calculateCartonQuantity() {
+    if (isByCarton) {
+      final itemsPerCarton = double.tryParse(itemsPerCartonController.text) ?? 0.0;
+      final numberOfCartons = double.tryParse(numberOfCartonsController.text) ?? 0.0;
+      final total = itemsPerCarton * numberOfCartons;
+      quantityController.text = type == 2 ? total.toString() : total.toInt().toString();
+      calculateTotalPrice();
+    }
   }
 
   void typeProduct(int types) {
@@ -236,8 +255,8 @@ class Additemscontroller extends GetxController {
         'type': type,
         'codepar': barcodeToSave,
         'product_code': productCodeToSave,
-        'items_per_carton': null,
-        'quantity_per_carton': null,
+        'items_per_carton': isByCarton ? itemsPerCartonController.text : null,
+        'quantity_per_carton': isByCarton ? numberOfCartonsController.text : null,
         'min_selling_price':
             double.tryParse(minSellingPriceController.text) ?? 0.0,
         "created_at": DateTime.now().toIso8601String(),
@@ -335,6 +354,8 @@ class Additemscontroller extends GetxController {
     quantityController.addListener(calculateTotalPrice);
     priseController.addListener(calculateTotalPrice);
     pricePurchaseController.addListener(calculateTotalPrice);
+    itemsPerCartonController.addListener(calculateCartonQuantity);
+    numberOfCartonsController.addListener(calculateCartonQuantity);
   }
 
   void calculateTotalPrice() {
@@ -478,6 +499,9 @@ class Additemscontroller extends GetxController {
     productCodeController.clear();
     minSellingPriceController.clear();
     quantityController.text = "1";
+    itemsPerCartonController.clear();
+    numberOfCartonsController.clear();
+    isByCarton = false;
     getCategoris();
     selectedtypeuuid = null;
     file = null;

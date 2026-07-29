@@ -21,6 +21,7 @@ class QuantityInput extends StatefulWidget {
   final double initialValue;
   final Function(double) onChanged;
   final bool isDecimal;
+  final bool readOnly;
 
   const QuantityInput({
     super.key,
@@ -30,6 +31,7 @@ class QuantityInput extends StatefulWidget {
     required this.hintText,
     this.Mycontroller,
     this.isDecimal = false,
+    this.readOnly = false,
   });
 
   @override
@@ -102,6 +104,7 @@ class _QuantityInputState extends State<QuantityInput> {
           Expanded(
             child: TextFormField(
               controller: _controller,
+              readOnly: widget.readOnly,
               keyboardType: widget.isDecimal
                   ? const TextInputType.numberWithOptions(decimal: true)
                   : TextInputType.number,
