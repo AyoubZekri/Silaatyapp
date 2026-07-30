@@ -1219,6 +1219,8 @@ class MyTranslation extends Translations {
           "email_password_wrong": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
           "noInternet": "لا يوجد اتصال بالإنترنت",
           "تسجيل الدخول كـ": "Login as",
+          "خطأ": "Error",
+          "حدث خطأ غير معروف": "An unknown error occurred",
         },
       };
 }

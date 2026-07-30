@@ -225,7 +225,7 @@ class InvoiceItem {
       saleType: json['sale_type'] != null ? int.tryParse(json['sale_type'].toString()) : 1,
       totalSales: double.tryParse(json['total_sales']?.toString() ?? '0'),
       debt: double.tryParse(json['debt']?.toString() ?? '0'),
-      invoiceSum: double.tryParse(json['invoice_sum']?.toString() ?? '0'),
+      invoiceSum: double.tryParse((json['invoice_sum'] ?? json['total_sales'])?.toString() ?? '0'),
       name: json['name'],
       transactions: json['transactions'],
       familyName: json['family_name'],

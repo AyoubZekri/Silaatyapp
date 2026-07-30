@@ -33,6 +33,9 @@ class PaymentController extends GetxController {
   Saledata saledata = Saledata();
   ProdactData prodactData = ProdactData(Get.find());
   int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
+  int? sellerid = Get.find<Myservices>().sharedPreferences?.getInt("sellerid");
+  String? loginType =
+      Get.find<Myservices>().sharedPreferences?.getString("loginType");
   Statusrequest statusrequest = Statusrequest.none;
 
   Future<void> addSale({bool printInvoice = false}) async {
@@ -43,14 +46,16 @@ class PaymentController extends GetxController {
         var draftDataSale = draftPayload['draft_data_sale'];
         var file = draftPayload['file'];
 
-        final insertResult = await prodactData.addProduct(draftData, draftDataSale, file);
+        final insertResult =
+            await prodactData.addProduct(draftData, draftDataSale, file);
         if (insertResult != true) {
-          showSnackbar("error".tr, "فشل في حفظ المنتج الجديد: ${item['name']}", Colors.red);
+          showSnackbar("error".tr, "فشل في حفظ المنتج الجديد: ${item['name']}",
+              Colors.red);
           statusrequest = Statusrequest.failure;
           update();
           return;
         }
-        
+
         // IMPORTANT: prodactData.addProduct generates a new UUID and mutates draftData.
         // We must update the item's uuid so the final sale points to the inserted product in the database.
         item['uuid'] = draftData['uuid'];
@@ -74,7 +79,7 @@ class PaymentController extends GetxController {
       "created_at": DateTime.now().toIso8601String(),
       "Payment_price": paymentController.text,
       "sale_type": saleType,
-      "seller_id": id,
+      "seller_id": loginType == "saller" ? sellerid : id,
     };
 
     List<Map<String, Object?>> dataSale = products.map((item) {
@@ -89,7 +94,7 @@ class PaymentController extends GetxController {
         "invoie_uuid": uuidinvoice,
         "type_sales": (type == 1 ? 1 : 2), // 1 = in 2 = on 3
         "user_id": id,
-        "seller_id": id,
+        "seller_id": loginType == "saller" ? sellerid : id,
         "created_at": DateTime.now().toIso8601String(),
         "product_price_purchase": item["price_Purchase"],
         "product_name": item["name"],
@@ -130,7 +135,7 @@ class PaymentController extends GetxController {
           print("Background print error: $e");
         });
       }
-      
+
       // showSnackbar("success".tr, "add_success".tr, Colors.green);
     } else {
       showSnackbar("error".tr, "operation_failed".tr, Colors.red);

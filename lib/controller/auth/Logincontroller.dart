@@ -42,11 +42,18 @@ class Logincontroller extends GetxController {
     if (formData!.validate()) {
       statusrequest = Statusrequest.loadeng;
       update();
-      String? fcmToken = await FirebaseMessaging.instance.getToken();
-      print("FCM Token: $fcmToken");
+      String? fcmToken;
       bool isSeller = loginType == "بائع";
+
+      try {
+        fcmToken = await FirebaseMessaging.instance.getToken();
+      } catch (e) {
+        print("Error getting FCM Token: $e");
+        fcmToken = "";
+      }
+      print("FCM Token: $fcmToken");
       var response = await logenData.postdata(
-          Password.text, Email.text, fcmToken!, isSeller);
+          Password.text, Email.text, fcmToken ?? "", isSeller);
       if (response == Statusrequest.serverfailure) {
         showSnackbar("error".tr, "noInternet".tr, Colors.red);
       }
@@ -287,7 +294,8 @@ class Logincontroller extends GetxController {
           } else if (response["message"] == "حسابك ليس بائع") {
             showSnackbar("تحذير".tr, "الحساب نوعه ليس بائع".tr, Colors.orange);
           } else {
-            showSnackbar("Warning".tr, "email_password_wrong".tr, Colors.orange);
+            showSnackbar(
+                "Warning".tr, "email_password_wrong".tr, Colors.orange);
           }
         }
       } else {

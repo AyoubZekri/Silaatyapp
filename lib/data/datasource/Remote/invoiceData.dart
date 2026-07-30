@@ -179,7 +179,7 @@ class Invoicedata {
     final transactionuuId = data["transaction_uuid"];
 
     final invoices = await db.readData(
-      "SELECT * FROM invoies WHERE user_id = ? AND Transaction_uuid = ? ",
+      "SELECT * FROM invoies WHERE user_id = ? AND Transaction_uuid = ? ORDER BY invoies_date DESC",
       [id, transactionuuId],
     );
 
