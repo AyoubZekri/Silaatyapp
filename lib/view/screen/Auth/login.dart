@@ -9,6 +9,8 @@ import 'package:Silaaty/view/widget/Auth/login/custemtitle.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:Silaaty/view/widget/addItem/CustemDropDownField.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 
 import '../../../core/class/handlingview.dart';
 import '../../../core/constant/imageassets.DART';
@@ -49,6 +51,69 @@ class Login extends StatelessWidget {
                             Custemtextbody(Body: "12".tr),
                             const SizedBox(
                               height: 30,
+                            ),
+                            GetBuilder<Logincontroller>(
+                              builder: (controller) => Container(
+                                margin: const EdgeInsets.only(top: 30),
+                                child: DropdownButtonFormField2<String>(
+                                  value: controller.loginType,
+                                  decoration: InputDecoration(
+                                    floatingLabelBehavior: FloatingLabelBehavior.always,
+                                    contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 15),
+                                    label: Container(
+                                      margin: const EdgeInsets.symmetric(horizontal: 9),
+                                      child: Text("تسجيل الدخول كـ".tr),
+                                    ),
+                                    border: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(30),
+                                    ),
+                                  ),
+                                  iconStyleData: const IconStyleData(
+                                    icon: Padding(
+                                      padding: EdgeInsets.only(right: 15),
+                                      child: Icon(Icons.keyboard_arrow_down, color: AppColor.grey),
+                                    ),
+                                  ),
+                                  dropdownStyleData: DropdownStyleData(
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.white,
+                                      border: Border.all(
+                                        color: const Color.fromARGB(255, 203, 201, 201),
+                                      ),
+                                    ),
+                                    elevation: 8,
+                                  ),
+                                  isExpanded: true,
+                                  items: ["مشرف", "بائع"].map((String value) {
+                                    return DropdownMenuItem<String>(
+                                      value: value,
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            value == "مشرف" ? Icons.admin_panel_settings_outlined : Icons.person_outline,
+                                            color: AppColor.backgroundcolor,
+                                          ),
+                                          const SizedBox(width: 15),
+                                          Text(
+                                            value.tr,
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              fontWeight: FontWeight.bold,
+                                              color: AppColor.backgroundcolor,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList(),
+                                  onChanged: (String? newValue) {
+                                    if (newValue != null) {
+                                      controller.changeLoginType(newValue);
+                                    }
+                                  },
+                                ),
+                              ),
                             ),
                             Custemtextformauth(
                               MyController: controller.Email,

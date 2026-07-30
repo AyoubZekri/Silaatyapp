@@ -36,4 +36,13 @@ class Profailcontroller extends GetxController {
   gotoprofaileedit() {
     Get.toNamed(Approutes.profaile);
   }
+
+  bool get isPermanentAccess {
+    final loginType = myServices.sharedPreferences?.getString("loginType") ?? "admin";
+    if (loginType == "saller") {
+      return Supscription == 6 || Supscription == 14;
+    } else {
+      return Supscription == 5 || Supscription == 6 || Supscription == 13 || Supscription == 14;
+    }
+  }
 }

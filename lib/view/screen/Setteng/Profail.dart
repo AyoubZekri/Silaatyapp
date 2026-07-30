@@ -98,8 +98,7 @@ class _ProfailState extends State<Profail> {
                               ),
                               Customditails(
                                 Title: "ينتهي في ".tr,
-                                body: controller.Supscription == 5 ||
-                                        controller.Supscription == 6
+                                body: controller.isPermanentAccess
                                     ? "وصول دائم للتطبيق".tr
                                     : (controller.dateexperiment != null &&
                                             controller.dateexperiment!.length >=

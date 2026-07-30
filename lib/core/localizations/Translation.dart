@@ -1208,7 +1208,17 @@ class MyTranslation extends Translations {
           "سلع": "Items",
           "معاينة التذكرة": "Preview Ticket",
           "هل تريد حذف هذا المنتج من الفاتورة؟": "Do you want to delete this product from the invoice?",
-
+          "الحساب نوعه ليس بائع": "The account type is not a seller",
+          "نوع الحساب ليس مشرف": "The account type is not an admin",
+          "تحذير": "Warning",
+          "بائع": "Seller",
+          "مشرف": "Admin",
+          "Warning": "تحذير",
+          "error": "خطأ",
+          "contact_admin": "حدث خطأ ما، يرجى التواصل مع المشرف",
+          "email_password_wrong": "البريد الإلكتروني أو كلمة المرور غير صحيحة",
+          "noInternet": "لا يوجد اتصال بالإنترنت",
+          "تسجيل الدخول كـ": "Login as",
         },
       };
 }

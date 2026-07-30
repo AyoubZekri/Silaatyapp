@@ -9,6 +9,8 @@ class Approutes {
   static const String Edititemsen = "/Edititemsen";
   static const String splashScreen = "/SplashScreen";
   static const String activationExpiredPage = "/activationExpiredPage";
+  static const String upgradeRequiredPage = "/upgradeRequiredPage";
+  static const String Homesaller = "/Homesaller";
 
   static const String profaile = "/Profaile";
   static const String notification = "/notification";

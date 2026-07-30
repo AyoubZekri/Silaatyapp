@@ -71,63 +71,98 @@ class _SplashScreenState extends State<SplashScreen>
     await Future.delayed(const Duration(milliseconds: 0));
 
     if (token != null && token.isNotEmpty) {
+      String? loginType =
+          myServices.sharedPreferences?.getString("loginType") ?? "admin";
       String? experimentDateString =
           myServices.sharedPreferences?.getString("date_experiment");
 
       int status = myServices.sharedPreferences?.getInt("Status") ?? 0;
 
-      if (status == 0 || status == 1) {
-        String? email = myServices.sharedPreferences?.getString("email") ?? "";
-        Get.offAllNamed(Approutes.VerifiycodeSignUp, arguments: {
-          "email": email,
-        });
-        return;
-      }
-
-      if (status == 5 || status == 6 || status == 13 || status == 14) {
-        Get.offAllNamed(Approutes.HomeScreen);
-        return;
-      }
-
-      if (status == 2 ||
-          status == 3 ||
-          status == 4 ||
-          status == 11 ||
-          status == 12) {
-        if (experimentDateString != null && experimentDateString.isNotEmpty) {
-          DateTime experimentDate = DateTime.parse(experimentDateString);
-
-          DateTime now = DateTime.now();
-
-          DateTime today = DateTime(now.year, now.month, now.day);
-
-          DateTime expireDate = DateTime(
-            experimentDate.year,
-            experimentDate.month,
-            experimentDate.day,
-          );
-
-          bool isValid = today.isBefore(expireDate);
-
-          if (isValid) {
-            Get.offAllNamed(Approutes.HomeScreen);
-          } else {
-            Get.offAllNamed(
-              Approutes.activationExpiredPage,
+      if (loginType == "saller") {
+        if (status == 3 ||
+            status == 5 ||
+            status == 7 ||
+            status == 8 ||
+            status == 9 ||
+            status == 10 ||
+            status == 11 ||
+            status == 13) {
+          Get.offAllNamed(Approutes.upgradeRequiredPage);
+        } else if (status == 6 || status == 14) {
+          Get.offAllNamed(Approutes.Homesaller, arguments: {"fromlogin": 1});
+        } else if (status == 2 || status == 4 || status == 12) {
+          if (experimentDateString != null && experimentDateString.isNotEmpty) {
+            DateTime experimentDate = DateTime.parse(experimentDateString);
+            DateTime now = DateTime.now();
+            DateTime today = DateTime(now.year, now.month, now.day);
+            DateTime expireDate = DateTime(
+              experimentDate.year,
+              experimentDate.month,
+              experimentDate.day,
             );
+            bool isValid = today.isBefore(expireDate);
+
+            if (isValid) {
+              Get.offAllNamed(Approutes.Homesaller,
+                  arguments: {"fromlogin": 1});
+            } else {
+              Get.offAllNamed(Approutes.activationExpiredPage);
+            }
+          } else {
+            Get.offAllNamed(Approutes.activationExpiredPage);
           }
         } else {
-          Get.offAllNamed(
-            Approutes.activationExpiredPage,
-          );
+          Get.offAllNamed(Approutes.activationExpiredPage);
+        }
+        return;
+      } else {
+        // منطق المشرف (admin)
+        if (status == 0 || status == 1) {
+          String? email =
+              myServices.sharedPreferences?.getString("email") ?? "";
+          Get.offAllNamed(Approutes.VerifiycodeSignUp, arguments: {
+            "email": email,
+          });
+          return;
         }
 
+        if (status == 5 || status == 6 || status == 13 || status == 14) {
+          Get.offAllNamed(Approutes.HomeScreen, arguments: {"fromlogin": 1});
+          return;
+        }
+
+        if (status == 2 ||
+            status == 3 ||
+            status == 4 ||
+            status == 11 ||
+            status == 12) {
+          if (experimentDateString != null && experimentDateString.isNotEmpty) {
+            DateTime experimentDate = DateTime.parse(experimentDateString);
+            DateTime now = DateTime.now();
+            DateTime today = DateTime(now.year, now.month, now.day);
+            DateTime expireDate = DateTime(
+              experimentDate.year,
+              experimentDate.month,
+              experimentDate.day,
+            );
+
+            bool isValid = today.isBefore(expireDate);
+
+            if (isValid) {
+              Get.offAllNamed(Approutes.HomeScreen,
+                  arguments: {"fromlogin": 1});
+            } else {
+              Get.offAllNamed(Approutes.activationExpiredPage);
+            }
+          } else {
+            Get.offAllNamed(Approutes.activationExpiredPage);
+          }
+          return;
+        }
+
+        Get.offAllNamed(Approutes.activationExpiredPage);
         return;
       }
-
-      Get.offAllNamed(
-        Approutes.activationExpiredPage,
-      );
     } else {
       Get.offAllNamed(Approutes.Login);
     }

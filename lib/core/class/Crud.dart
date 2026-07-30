@@ -40,6 +40,10 @@ class Crud {
           Map responsebody = jsonDecode(response.body);
           print("============================$responsebody");
 
+          if (responsebody.containsKey("status") && responsebody.containsKey("message")) {
+            return Right(responsebody);
+          }
+
           return const Left(Statusrequest.failure);
         }
       } else {
@@ -107,6 +111,10 @@ class Crud {
         } else {
           Map responsebody = jsonDecode(response.body);
           print("❌ API Error Response: $responsebody");
+
+          if (responsebody.containsKey("status") && responsebody.containsKey("message")) {
+            return Right(responsebody);
+          }
 
           return const Left(Statusrequest.failure);
         }

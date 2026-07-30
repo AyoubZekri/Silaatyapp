@@ -5,6 +5,7 @@ class Applink {
 //  =============================Auth============================== //
 
   static const String login = "$server/User/Login";
+  static const String loginSeller = "$server/seller-user/login";
   static const String linkSignup = "$server/User/create";
   static const String updateUser = "$server/User/update";
   static const String verfiyCode= "$server/User/verifyCode";
@@ -17,6 +18,7 @@ class Applink {
 
   static const String logout = "$server/User/logout";
   static const String getUser = "$server/User/get";
+  static const String getSellerUser = "$server/Saller/get";
 
   // Sellers Management
   static const String sellerGet = "$server/seller-user";

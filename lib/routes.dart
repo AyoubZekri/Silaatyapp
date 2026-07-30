@@ -56,6 +56,7 @@ import 'view/screen/Statistice/PublicFinance.dart';
 import 'view/screen/Statistice/StatisticeReports.dart';
 import 'view/screen/Statistice/StockBalance.dart';
 import 'view/screen/activationExpiredPage.dart';
+import 'view/screen/Homesaller.dart';
 
 List<GetPage<dynamic>> routes = [
   GetPage(name: "/", page: () => const SplashScreen()),
@@ -82,6 +83,7 @@ List<GetPage<dynamic>> routes = [
       name: Approutes.resetpasswordsetting,
       page: () => const Resetpasswordsetting()),
 
+  GetPage(name: Approutes.Homesaller, page: () => const Homesaller()),
   GetPage(name: Approutes.HomeScreen, page: () => const Homescreen()),
   GetPage(name: Approutes.informationitem, page: () => const Informationitem()),
   GetPage(name: Approutes.edititemcontroller, page: () => const Edititem()),

@@ -5,11 +5,12 @@ class LoginData {
   Crud crud;
   LoginData(this.crud);
 
-  postdata(String password, String email, String fcm_Token) async {
-    var response = await crud.postData(Applink.login, {
+  postdata(String password, String email, String fcm_Token, bool isSeller) async {
+    String url = isSeller ? Applink.loginSeller : Applink.login;
+    var response = await crud.postData(url, {
       "email": email,
       "password": password,
-      "fcm_token": fcm_Token,
+      if (isSeller) "fcm_token": fcm_Token,
     });
     return response.fold((l) => l, (r) => r);
   }
@@ -19,8 +20,9 @@ class LoginData {
     return response.fold((l) => l, (r) => r);
   }
 
-  getUser() async {
-    var response = await crud.getData(Applink.getUser);
+  getUser(bool isSeller) async {
+    String url = isSeller ? Applink.getSellerUser : Applink.getUser;
+    var response = await crud.getData(url);
     return response.fold((l) => l, (r) => r);
   }
 }
