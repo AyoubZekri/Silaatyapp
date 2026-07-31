@@ -139,7 +139,8 @@ class _AdditemState extends State<Additem> {
                         items: [
                           DropdownMenuItem(value: 0, child: Text("Auto".tr)),
                           DropdownMenuItem(value: 1, child: Text("Manual".tr)),
-                          DropdownMenuItem(value: 2, child: Text("Scan".tr)),
+                          if (controller.type != 2)
+                            DropdownMenuItem(value: 2, child: Text("Scan".tr)),
                         ],
                         value: controller.barcodeMode,
                         onChanged: (val) {
@@ -147,13 +148,15 @@ class _AdditemState extends State<Additem> {
                             controller.toggleBarcodeMode(val, context);
                           }
                         },
-                        suffix: IconButton(
-                          icon: const Icon(Icons.qr_code_scanner,
-                              color: AppColor.backgroundcolor),
-                          onPressed: () {
-                            controller.scanBarcode(context);
-                          },
-                        ),
+                        suffix: controller.type == 2
+                            ? null
+                            : IconButton(
+                                icon: const Icon(Icons.qr_code_scanner,
+                                    color: AppColor.backgroundcolor),
+                                onPressed: () {
+                                  controller.scanBarcode(context);
+                                },
+                              ),
                       ),
 
                       Custemtextfromfild(
@@ -163,13 +166,15 @@ class _AdditemState extends State<Additem> {
                         label: "Barcode".tr,
                         iconData: Icons.qr_code,
                         enabled: controller.barcodeMode != 0,
-                        suffix: IconButton(
-                          icon: const Icon(Icons.qr_code_scanner,
-                              color: AppColor.backgroundcolor),
-                          onPressed: () {
-                            controller.scanBarcode(context);
-                          },
-                        ),
+                        suffix: controller.type == 2
+                            ? null
+                            : IconButton(
+                                icon: const Icon(Icons.qr_code_scanner,
+                                    color: AppColor.backgroundcolor),
+                                onPressed: () {
+                                  controller.scanBarcode(context);
+                                },
+                              ),
                       ),
                       Custemtextfromfild(
                         MyController: controller.productCodeController,

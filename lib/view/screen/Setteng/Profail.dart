@@ -114,16 +114,18 @@ class _ProfailState extends State<Profail> {
                     ),
                   ),
                 ),
-                SizedBox(
-                  height: 30,
-                ),
-                Custemcartbutton(
-                  ontap: () {
-                    controller.gotoprofaileedit();
-                  },
-                  Title: "إعدادات المتجر".tr,
-                  iconData: Icons.store,
-                ),
+                if (controller.loginType != "saller") ...[
+                  SizedBox(
+                    height: 30,
+                  ),
+                  Custemcartbutton(
+                    ontap: () {
+                      controller.gotoprofaileedit();
+                    },
+                    Title: "إعدادات المتجر".tr,
+                    iconData: Icons.store,
+                  ),
+                ],
               ],
             ),
           );

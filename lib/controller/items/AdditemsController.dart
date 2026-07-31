@@ -87,6 +87,9 @@ class Additemscontroller extends GetxController {
   void typeProduct(int types) {
     type = types;
     if (type == 2) {
+      if (barcodeMode == 2) {
+        barcodeMode = 0; // Fallback to Auto
+      }
       if (barcodeMode == 0) {
         barcodeController.text = generateBarcode();
       } else if (barcodeController.text.length != 5) {

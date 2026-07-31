@@ -92,7 +92,7 @@ class _HomesallerState extends State<Homesaller> {
                 ),
                 _buildGridItem(
                   icon: Icons.print_rounded,
-                  title: "اعدادات طابعة".tr,
+                  title: "Printer Settings".tr,
                   onTap: () {
                     final settengController = Get.put(Settengcontriller());
                     settengController.showPrinterSettingsSheet(context);
