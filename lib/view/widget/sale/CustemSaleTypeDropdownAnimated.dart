@@ -8,7 +8,7 @@ class CustemSaleTypeDropdownAnimated extends StatelessWidget {
   final int allowedSellType;
   final RxBool isExpanded = false.obs;
 
-  late final Map<int, String> saleTypes = {
+  Map<int, String> get saleTypes => {
     1: "تجزئة".tr,
     if (allowedSellType >= 2) 2: "نصف جملة".tr,
     if (allowedSellType >= 3) 3: "جملة".tr,
@@ -62,7 +62,9 @@ class CustemSaleTypeDropdownAnimated extends StatelessWidget {
           AnimatedContainer(
             duration: const Duration(milliseconds: 300),
             curve: Curves.easeInOut,
-            height: isExpanded.value ? saleTypes.length * 55.0 : 0.0,
+            height: isExpanded.value 
+                ? saleTypes.length * (Get.locale?.languageCode == 'ar' ? 55.0 : 70.0) 
+                : 0.0,
             margin: const EdgeInsets.only(top: 8),
             decoration: BoxDecoration(
               color: Colors.white,

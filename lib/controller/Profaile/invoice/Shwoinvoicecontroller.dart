@@ -23,6 +23,7 @@ import 'package:Silaaty/core/services/Services.dart';
 import '../../../core/functions/Snacpar.dart';
 import '../../../data/model/InvoiceModel.dart';
 import '../../../data/model/InvoiceSalesModel.dart';
+import 'package:Silaaty/data/datasource/Remote/transactiondata.dart';
 
 class Shwoinvoicecontroller extends GetxController {
   String? uuid;
@@ -36,6 +37,100 @@ class Shwoinvoicecontroller extends GetxController {
   InvoiceSalesData? productSale;
   InvoiceItem? invoices;
   Myservices myServices = Get.find();
+
+  TextEditingController oldDebtPaymentController =
+      TextEditingController(text: "0");
+  double oldDebtTotal = 0.0;
+  List<Map<String, dynamic>> unpaidInvoices = [];
+  Transactiondata transactiondata = Transactiondata(Get.find());
+  bool _isDistributing = false;
+
+  void handlePaymentChange() {
+    if (_isDistributing) return;
+
+    double payment = double.tryParse(paymentPrice.text) ?? 0.0;
+    double currentInvoiceMax = getRemainingAmount();
+
+    if (payment > currentInvoiceMax && currentInvoiceMax > 0) {
+      _isDistributing = true;
+      double excess = payment - currentInvoiceMax;
+
+      String newText = currentInvoiceMax
+          .toStringAsFixed(2)
+          .replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+      if (newText.endsWith('.'))
+        newText = newText.substring(0, newText.length - 1);
+
+      paymentPrice.text = newText;
+      paymentPrice.selection = TextSelection.collapsed(offset: newText.length);
+
+      String oldDebtText =
+          excess.toStringAsFixed(2).replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+      if (oldDebtText.endsWith('.'))
+        oldDebtText = oldDebtText.substring(0, oldDebtText.length - 1);
+      oldDebtPaymentController.text = oldDebtText;
+
+      _isDistributing = false;
+    }
+    update();
+  }
+
+  void handleOldDebtPaymentChange() {
+    if (_isDistributing) return;
+
+    double oldDebtPayment =
+        double.tryParse(oldDebtPaymentController.text) ?? 0.0;
+
+    if (oldDebtPayment > oldDebtTotal && oldDebtTotal > 0) {
+      _isDistributing = true;
+      double excess = oldDebtPayment - oldDebtTotal;
+
+      String newText = oldDebtTotal
+          .toStringAsFixed(2)
+          .replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+      if (newText.endsWith('.'))
+        newText = newText.substring(0, newText.length - 1);
+
+      oldDebtPaymentController.text = newText;
+      oldDebtPaymentController.selection =
+          TextSelection.collapsed(offset: newText.length);
+
+      double currentPayment = double.tryParse(paymentPrice.text) ?? 0.0;
+      double totalPayment = currentPayment + excess;
+
+      String payText = totalPayment
+          .toStringAsFixed(2)
+          .replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+      if (payText.endsWith('.'))
+        payText = payText.substring(0, payText.length - 1);
+
+      paymentPrice.text = payText;
+
+      _isDistributing = false;
+    }
+    update();
+  }
+
+  void fetchOldDebts() async {
+    if (invoices?.transactionuuId != null) {
+      var allUnpaid = await transactiondata
+          .getCustomerUnpaidInvoices(invoices!.transactionuuId!);
+      oldDebtTotal = 0.0;
+      unpaidInvoices = [];
+      for (var inv in allUnpaid) {
+        if (inv['uuid'] != invoices?.uuid) {
+          unpaidInvoices.add(inv);
+          oldDebtTotal += (inv['remaining_debt'] as num?)?.toDouble() ?? 0;
+        }
+      }
+
+      String oldDebtText = formavalue(oldDebtTotal);
+      if (oldDebtText != "0") {
+        oldDebtPaymentController.text = oldDebtText;
+      }
+      update();
+    }
+  }
 
   Statusrequest statusrequest = Statusrequest.none;
   TextEditingController paymentPrice = TextEditingController();
@@ -55,6 +150,14 @@ class Shwoinvoicecontroller extends GetxController {
       final modele = InvoiceSalesData.fromJson(result["data"]);
       productSale = modele;
       statusrequest = Statusrequest.success;
+
+      double remaining = getRemainingAmount();
+      String remainingText = formavalue(remaining);
+      if (remainingText != "0") {
+        paymentPrice.text = remainingText;
+      }
+
+      fetchOldDebts();
     } else {
       statusrequest = Statusrequest.failure;
     }
@@ -66,6 +169,22 @@ class Shwoinvoicecontroller extends GetxController {
       return showSnackbar(
           "تنبيه".tr, "مبلغ الدفع اكثر من المستحق".tr, Colors.orange);
     }
+
+    double additionalPayment =
+        double.tryParse(oldDebtPaymentController.text) ?? 0.0;
+    if (additionalPayment > 0) {
+      for (var inv in unpaidInvoices) {
+        if (additionalPayment <= 0) break;
+        double remaining = (inv['remaining_debt'] as num?)?.toDouble() ?? 0;
+        if (remaining > 0) {
+          double amountToPay =
+              (additionalPayment > remaining) ? remaining : additionalPayment;
+          await transactiondata.payOldDebt(inv['uuid'], amountToPay);
+          additionalPayment -= amountToPay;
+        }
+      }
+    }
+
     paymentpriceinvoise = double.parse(paymentPrice.text) + paymentpriceinvoise;
     Map<String, Object?> data = {
       "uuid": invuuid,
@@ -74,6 +193,7 @@ class Shwoinvoicecontroller extends GetxController {
     var result = await invoicedata.Editinvoise(data);
     if (result) {
       paymentPrice.clear();
+      oldDebtPaymentController.clear();
       Get.back();
       Get.find<RefreshService>().fire();
       Shwoinvoice();
@@ -173,15 +293,19 @@ class Shwoinvoicecontroller extends GetxController {
     final discount =
         double.tryParse(productSale?.discount.toString() ?? "0") ?? 0;
     double remaining = total - (paid + discount);
-    
+
     // Fix floating point precision
     remaining = double.parse(remaining.toStringAsFixed(3));
-    
+
     return remaining <= 0 ? 0 : remaining;
   }
 
   @override
   void onInit() {
+    super.onInit();
+    paymentPrice.addListener(handlePaymentChange);
+    oldDebtPaymentController.addListener(handleOldDebtPaymentChange);
+
     final args = Get.arguments;
     bool autoPrint = false;
     if (args != null) {
@@ -190,7 +314,7 @@ class Shwoinvoicecontroller extends GetxController {
       paymentpriceinvoise = invoices?.paymentPrice ?? 0;
       autoPrint = args["autoPrint"] ?? false;
     }
-    
+
     if (uuid != null) {
       Shwoinvoice().then((_) {
         if (autoPrint) {
@@ -200,7 +324,6 @@ class Shwoinvoicecontroller extends GetxController {
         }
       });
     }
-    super.onInit();
   }
 
   @override
@@ -377,7 +500,9 @@ class Shwoinvoicecontroller extends GetxController {
                   child: pw.Text(
                     "${'نوع البيع'.tr}: ${invoices!.saleType == 3 ? 'جملة'.tr : (invoices!.saleType == 2 ? 'نصف جملة'.tr : 'تجزئة'.tr)}",
                     style: pw.TextStyle(
-                      font: Get.locale?.languageCode == "ar" ? arabicFont : englishFont,
+                      font: Get.locale?.languageCode == "ar"
+                          ? arabicFont
+                          : englishFont,
                       fontSize: 12,
                     ),
                   ),
@@ -439,14 +564,23 @@ class Shwoinvoicecontroller extends GetxController {
                   children: [
                     _buildPdfRow(arabicFont, englishFont, "المجموع الفرعي".tr,
                         "${invoices!.totalSales} ${'DA'.tr}"),
+                    if (oldDebtTotal > 0)
+                      _buildPdfRow(arabicFont, englishFont, "الديون السابقة".tr,
+                          "$oldDebtTotal ${'DA'.tr}"),
                     if (invoices!.discount != 0)
                       _buildPdfRow(arabicFont, englishFont, "الخصم".tr,
                           "${invoices!.discount} ${'DA'.tr}"),
+                    if (oldDebtTotal > 0)
+                      _buildPdfRow(
+                          arabicFont,
+                          englishFont,
+                          "الإجمالي المطلوب".tr,
+                          "${(invoices!.totalSales ?? 0) + oldDebtTotal - (invoices!.discount ?? 0)} ${'DA'.tr}"),
                     _buildPdfRow(arabicFont, englishFont, "المدفوع".tr,
                         "${double.tryParse(productSale?.paymentprice.toString() ?? "0") ?? 0} ${'DA'.tr}"),
                     pw.Divider(color: PdfColor.fromHex("#4F46E5")),
                     _buildPdfRow(arabicFont, englishFont, "الباقي".tr,
-                        "${getRemainingAmount()} ${'DA'.tr}",
+                        "${getRemainingAmount() + oldDebtTotal} ${'DA'.tr}",
                         isBold: true),
                   ],
                 ),
@@ -727,9 +861,13 @@ class Shwoinvoicecontroller extends GetxController {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text("$label: ", style: const TextStyle(fontSize: 14, fontFamily: 'Cairo', color: Colors.black)),
+          Text("$label: ",
+              style: const TextStyle(
+                  fontSize: 14, fontFamily: 'Cairo', color: Colors.black)),
           Text(value,
-              textAlign: TextAlign.right, style: const TextStyle(fontSize: 14, fontFamily: 'Cairo', color: Colors.black)),
+              textAlign: TextAlign.right,
+              style: const TextStyle(
+                  fontSize: 14, fontFamily: 'Cairo', color: Colors.black)),
         ],
       ),
     );
@@ -837,14 +975,18 @@ class Shwoinvoicecontroller extends GetxController {
                         Text(
                           address,
                           style: const TextStyle(
-                              fontSize: 16, color: Colors.black, fontFamily: 'Cairo'),
+                              fontSize: 16,
+                              color: Colors.black,
+                              fontFamily: 'Cairo'),
                           textAlign: TextAlign.center,
                         ),
                         if (phoneNumber.isNotEmpty)
                           Text(
                             phoneNumber,
                             style: const TextStyle(
-                                fontSize: 15, color: Colors.black, fontFamily: 'Cairo'),
+                                fontSize: 15,
+                                color: Colors.black,
+                                fontFamily: 'Cairo'),
                           ),
                       ],
                     ),
@@ -861,16 +1003,20 @@ class Shwoinvoicecontroller extends GetxController {
                     children: [
                       Text(
                         "${'التاريخ'.tr}: ${invoices.date!.substring(0, 10)}",
-                        style:
-                            const TextStyle(fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
+                        style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontFamily: 'Cairo'),
                       ),
                       const SizedBox(width: 5),
                       Text(
                         invoices.date!.length > 16
                             ? invoices.date!.substring(11, 19)
                             : "",
-                        style:
-                            const TextStyle(fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
+                        style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontFamily: 'Cairo'),
                       ),
                     ],
                   ),
@@ -880,14 +1026,18 @@ class Shwoinvoicecontroller extends GetxController {
                     children: [
                       Text(
                         "${'رقم الفتورة'.tr}: ${invoices.number}",
-                        style:
-                            const TextStyle(fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
+                        style: const TextStyle(
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontFamily: 'Cairo'),
                       ),
                       const SizedBox(height: 5),
                       Text(
                         "${'الزبون'.tr}: $safeCustomerName",
                         style: const TextStyle(
-                            fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
+                            fontSize: 14,
+                            color: Colors.black,
+                            fontFamily: 'Cairo'),
                         textAlign: TextAlign.start,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -896,7 +1046,9 @@ class Shwoinvoicecontroller extends GetxController {
                         Text(
                           "${'نوع البيع'.tr}: ${invoices.saleType == 3 ? 'جملة'.tr : (invoices.saleType == 2 ? 'نصف جملة'.tr : 'تجزئة'.tr)}",
                           style: const TextStyle(
-                              fontSize: 14, color: Colors.black, fontFamily: 'Cairo'),
+                              fontSize: 14,
+                              color: Colors.black,
+                              fontFamily: 'Cairo'),
                           textAlign: TextAlign.start,
                         ),
                       ],
@@ -915,24 +1067,36 @@ class Shwoinvoicecontroller extends GetxController {
                           flex: 2,
                           child: Text("المنتج".tr,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  fontFamily: 'Cairo',
+                                  color: Colors.black))),
                       Expanded(
                           flex: 1,
                           child: Text('QTY'.tr,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  fontFamily: 'Cairo',
+                                  color: Colors.black))),
                       Expanded(
                           flex: 2,
                           child: Text("سعر الوحدة".tr,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo', color: Colors.black),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  fontFamily: 'Cairo',
+                                  color: Colors.black),
                               textAlign:
                                   isArabic ? TextAlign.left : TextAlign.right)),
                       Expanded(
                           flex: 2,
                           child: Text('السعر الإجمالي'.tr,
                               style: const TextStyle(
-                                  fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Cairo', color: Colors.black),
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  fontFamily: 'Cairo',
+                                  color: Colors.black),
                               textAlign:
                                   isArabic ? TextAlign.left : TextAlign.right)),
                     ],
@@ -952,25 +1116,39 @@ class Shwoinvoicecontroller extends GetxController {
                             Expanded(
                                 flex: 2,
                                 child: Text(p.productName,
-                                    style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        fontFamily: 'Cairo',
+                                        color: Colors.black))),
                             Expanded(
                                 flex: 1,
                                 child: Text("${p.quantity}",
-                                    style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        fontFamily: 'Cairo',
+                                        color: Colors.black))),
                             Expanded(
                                 flex: 2,
-                                child: Text("${p.unitPrice != null ? formavalue(p.unitPrice!) : ""}",
+                                child: Text(
+                                    "${p.unitPrice != null ? formavalue(p.unitPrice!) : ""}",
                                     textAlign: isArabic
                                         ? TextAlign.left
                                         : TextAlign.right,
-                                    style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        fontFamily: 'Cairo',
+                                        color: Colors.black))),
                             Expanded(
                                 flex: 2,
-                                child: Text("${p.subtotal != null ? formavalue(p.subtotal!) : ""}",
+                                child: Text(
+                                    "${p.subtotal != null ? formavalue(p.subtotal!) : ""}",
                                     textAlign: isArabic
                                         ? TextAlign.left
                                         : TextAlign.right,
-                                    style: const TextStyle(fontSize: 13, fontFamily: 'Cairo', color: Colors.black))),
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        fontFamily: 'Cairo',
+                                        color: Colors.black))),
                           ],
                         ),
                       )),
@@ -981,13 +1159,19 @@ class Shwoinvoicecontroller extends GetxController {
                     color: Colors.black,
                   ),
                   const SizedBox(height: 10),
-                  _buildAmountRow(
-                      "المجموع الفرعي".tr, "${invoices.totalSales} ${'DA'.tr}"),
+                  _buildAmountRow("المجموع الفرعي".tr,
+                      "${invoices.invoiceSum ?? invoices.totalSales ?? 0} ${'DA'.tr}"),
+                  if (oldDebtTotal > 0)
+                    _buildAmountRow(
+                        "الديون السابقة".tr, "$oldDebtTotal ${'DA'.tr}"),
                   if (double.tryParse(invoices.discount.toString()) != 0)
                     _buildAmountRow(
                         "الخصم".tr, "${invoices.discount!} ${'DA'.tr}"),
-                  _buildAmountRow("المدفوع".tr,
-                      "${double.tryParse(productSale?.paymentprice.toString() ?? "0") ?? 0} ${'DA'.tr}"),
+                  if (oldDebtTotal > 0)
+                    _buildAmountRow("الإجمالي المطلوب".tr,
+                        "${((invoices.invoiceSum ?? invoices.totalSales ?? 0) + oldDebtTotal - (invoices.discount ?? 0))} ${'DA'.tr}"),
+                  _buildAmountRow(
+                      "المدفوع".tr, "${invoices.paymentPrice ?? 0} ${'DA'.tr}"),
                   const SizedBox(height: 5),
                   Container(
                     margin: const EdgeInsets.symmetric(vertical: 8),
@@ -1001,12 +1185,18 @@ class Shwoinvoicecontroller extends GetxController {
                       Text(
                         "الباقي".tr,
                         style: const TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: Colors.black),
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Cairo',
+                            color: Colors.black),
                       ),
                       Text(
-                        "${formavalue(getRemainingAmount())} ${'DA'.tr}",
+                        "${formavalue(((invoices.invoiceSum ?? invoices.totalSales ?? 0) + oldDebtTotal - (invoices.discount ?? 0)) - (invoices.paymentPrice ?? 0))} ${'DA'.tr}",
                         style: const TextStyle(
-                            fontSize: 22, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: Colors.black),
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            fontFamily: 'Cairo',
+                            color: Colors.black),
                       ),
                     ],
                   ),
@@ -1023,7 +1213,10 @@ class Shwoinvoicecontroller extends GetxController {
                         Text(
                           "*** ${'THANK YOU'.tr} ***",
                           style: const TextStyle(
-                              fontSize: 16, fontWeight: FontWeight.bold, fontFamily: 'Cairo', color: Colors.black),
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              fontFamily: 'Cairo',
+                              color: Colors.black),
                         ),
                         const SizedBox(height: 20),
                         if (invoices.uuid != null)
@@ -1179,7 +1372,7 @@ class Shwoinvoicecontroller extends GetxController {
     // =========================
     // إنشاء Canvas بعرض الورق وتوسيط الصورة فيه
     // =========================
-    
+
     // حساب الإزاحة لتوسيط الفاتورة أفقياً داخل الكانفاس
     int offsetX = ((physicalWidthDots - image.width) / 2)
         .clamp(0, physicalWidthDots)
@@ -1223,11 +1416,10 @@ class Shwoinvoicecontroller extends GetxController {
       bytes.addAll([0x1D, 0x76, 0x30, 0x00]);
       bytes.add(widthBytes % 256);
       bytes.add(widthBytes ~/ 256);
-      
-      int chunkHeight = (y + 24 > centeredImage.height)
-          ? centeredImage.height - y
-          : 24;
-          
+
+      int chunkHeight =
+          (y + 24 > centeredImage.height) ? centeredImage.height - y : 24;
+
       bytes.add(chunkHeight % 256);
       bytes.add(chunkHeight ~/ 256);
 
@@ -1258,5 +1450,4 @@ class Shwoinvoicecontroller extends GetxController {
     bytes.addAll([0x1D, 0x56, 0x41, 0x00]); // Cut
     return bytes;
   }
-
 }

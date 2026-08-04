@@ -2,6 +2,7 @@ import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
 import 'package:Silaaty/data/model/InvoiceModel.dart';
 import 'package:Silaaty/controller/Profaile/invoice/Shwoinvoicecontroller.dart';
 import 'package:Silaaty/data/datasource/Remote/SaleData.dart';
+import 'package:Silaaty/data/datasource/Remote/transactiondata.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -27,10 +28,14 @@ class PaymentController extends GetxController {
 
   late TextEditingController paymentController;
   late TextEditingController discountController;
+  late TextEditingController oldDebtPaymentController;
 
+  double oldDebtTotal = 0.0;
+  List<Map<String, dynamic>> unpaidInvoices = [];
   double finalAmount = 0.0;
   GlobalKey<FormState> formstate = GlobalKey<FormState>();
   Saledata saledata = Saledata();
+  Transactiondata transactiondata = Transactiondata(Get.find());
   ProdactData prodactData = ProdactData(Get.find());
   int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
   int? sellerid = Get.find<Myservices>().sharedPreferences?.getInt("sellerid");
@@ -108,6 +113,20 @@ class PaymentController extends GetxController {
     print("==================================================$result");
 
     if (result["status"] == 1) {
+      double additionalPayment = double.tryParse(oldDebtPaymentController.text) ?? 0.0;
+      if (additionalPayment > 0) {
+        for (var inv in unpaidInvoices) {
+          if (additionalPayment <= 0) break;
+
+          double remaining = (inv['remaining_debt'] as num?)?.toDouble() ?? 0;
+          if (remaining > 0) {
+            double amountToPay = (additionalPayment > remaining) ? remaining : additionalPayment;
+            await transactiondata.payOldDebt(inv['uuid'], amountToPay);
+            additionalPayment -= amountToPay;
+          }
+        }
+      }
+
       Get.back(result: true);
       Get.find<RefreshService>().fire();
 
@@ -116,9 +135,10 @@ class PaymentController extends GetxController {
           uuid: uuidinvoice,
           name: name,
           familyName: familyName,
-          paymentPrice: double.tryParse(paymentController.text) ?? 0,
+          paymentPrice: (double.tryParse(paymentController.text) ?? 0) + (double.tryParse(oldDebtPaymentController.text) ?? 0),
           discount: double.tryParse(discountController.text) ?? 0,
           invoiceSum: totalprice,
+          debt: oldDebtTotal,
           number: data["invoies_numper"].toString(),
           date: data["invoies_date"].toString(),
         );
@@ -163,24 +183,99 @@ class PaymentController extends GetxController {
 
     discountController = TextEditingController(text: "0");
     paymentController = TextEditingController(text: "0");
+    oldDebtPaymentController = TextEditingController(text: "0");
 
     recalculateFinalAmount();
 
     discountController.addListener(recalculateFinalAmount);
-    paymentController.addListener(recalculateFinalAmount);
+    paymentController.addListener(handlePaymentChange);
+    oldDebtPaymentController.addListener(handleOldDebtPaymentChange);
 
     if (selectedCustomer == "virtualCustomer".tr) {
       paymentController = TextEditingController(text: formavalue(finalAmount));
     } else {
-      paymentController = TextEditingController(text: "0");
+      paymentController = TextEditingController(text: formavalue(finalAmount));
+      fetchOldDebts();
     }
+  }
+
+  void fetchOldDebts() async {
+    if (trn_uuid.isNotEmpty) {
+      unpaidInvoices = await transactiondata.getCustomerUnpaidInvoices(trn_uuid);
+      oldDebtTotal = 0.0;
+      for (var inv in unpaidInvoices) {
+        oldDebtTotal += (inv['remaining_debt'] as num?)?.toDouble() ?? 0;
+      }
+      
+      String oldDebtText = formavalue(oldDebtTotal);
+      if (oldDebtText != "0") {
+          oldDebtPaymentController.text = oldDebtText;
+      }
+      
+      recalculateFinalAmount();
+    }
+  }
+
+  bool _isDistributing = false;
+
+  void handlePaymentChange() {
+    if (_isDistributing) return;
+    
+    double payment = double.tryParse(paymentController.text) ?? 0.0;
+    double currentInvoiceTotal = totalprice - (double.tryParse(discountController.text) ?? 0.0);
+    
+    if (payment > currentInvoiceTotal && currentInvoiceTotal > 0) {
+      _isDistributing = true;
+      double excess = payment - currentInvoiceTotal;
+      
+      String newText = currentInvoiceTotal.toStringAsFixed(2).replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+      if (newText.endsWith('.')) newText = newText.substring(0, newText.length - 1);
+      
+      paymentController.text = newText;
+      paymentController.selection = TextSelection.collapsed(offset: newText.length);
+      
+      String oldDebtText = excess.toStringAsFixed(2).replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+      if (oldDebtText.endsWith('.')) oldDebtText = oldDebtText.substring(0, oldDebtText.length - 1);
+      oldDebtPaymentController.text = oldDebtText;
+      
+      _isDistributing = false;
+    }
+    recalculateFinalAmount();
+  }
+
+  void handleOldDebtPaymentChange() {
+    if (_isDistributing) return;
+    
+    double oldDebtPayment = double.tryParse(oldDebtPaymentController.text) ?? 0.0;
+    
+    if (oldDebtPayment > oldDebtTotal && oldDebtTotal > 0) {
+      _isDistributing = true;
+      double excess = oldDebtPayment - oldDebtTotal;
+      
+      String newText = oldDebtTotal.toStringAsFixed(2).replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+      if (newText.endsWith('.')) newText = newText.substring(0, newText.length - 1);
+      
+      oldDebtPaymentController.text = newText;
+      oldDebtPaymentController.selection = TextSelection.collapsed(offset: newText.length);
+      
+      double currentPayment = double.tryParse(paymentController.text) ?? 0.0;
+      double totalPayment = currentPayment + excess;
+      
+      String payText = totalPayment.toStringAsFixed(2).replaceAll(RegExp(r"([.]*0+)(?!.*\d)"), "");
+      if (payText.endsWith('.')) payText = payText.substring(0, payText.length - 1);
+      
+      paymentController.text = payText;
+      
+      _isDistributing = false;
+    }
+    recalculateFinalAmount();
   }
 
   void recalculateFinalAmount() {
     double total = totalprice;
     double discount = double.tryParse(discountController.text) ?? 0.0;
 
-    finalAmount = total - discount;
+    finalAmount = total + oldDebtTotal - discount;
     if (selectedCustomer == "virtualCustomer".tr) {
       paymentController.text = formavalue(finalAmount);
     }
@@ -192,6 +287,7 @@ class PaymentController extends GetxController {
   void onClose() {
     paymentController.dispose();
     discountController.dispose();
+    oldDebtPaymentController.dispose();
     super.onClose();
   }
 }

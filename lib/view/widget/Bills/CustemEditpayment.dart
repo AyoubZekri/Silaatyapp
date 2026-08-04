@@ -11,13 +11,19 @@ class CustemEditInvoiceDialog extends StatefulWidget {
   final Key? form;
   final String title;
 
+  final TextEditingController? oldDebtController;
+  final String? oldDebtLableText;
+
   const CustemEditInvoiceDialog(
       {super.key,
       this.Mycontroller,
+      this.oldDebtController,
       required this.onPressed,
       required this.onback,
       this.form,
-      required this.title, required this.lableText});
+      required this.title, 
+      required this.lableText,
+      this.oldDebtLableText});
 
   @override
   State<CustemEditInvoiceDialog> createState() => _AddInvoiceDialogState();
@@ -102,6 +108,29 @@ class _AddInvoiceDialogState extends State<CustemEditInvoiceDialog> {
                 ),
               ),
             ),
+            if (widget.oldDebtController != null) ...[
+              const SizedBox(height: 15),
+              TextFormField(
+                controller: widget.oldDebtController,
+                keyboardType: TextInputType.number,
+                decoration: InputDecoration(
+                  labelText: widget.oldDebtLableText ?? "الديون السابقة".tr,
+                  filled: true,
+                  fillColor: Colors.grey[100],
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.grey),
+                    borderRadius: BorderRadius.circular(30),
+                  ),
+                  suffixIcon: Icon(
+                    Icons.account_balance_wallet,
+                    color: AppColor.backgroundcolor,
+                  ),
+                ),
+              ),
+            ]
           ],
         ),
       ),

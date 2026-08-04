@@ -39,6 +39,7 @@ class Costumtextfildpatment extends StatelessWidget {
               errorStyle: const TextStyle(fontSize: 12),
               hintText: hintText,
               hintStyle: const TextStyle(fontSize: 14),
+              labelText: label,
               floatingLabelBehavior: FloatingLabelBehavior.always,
               enabled: enabled,
               contentPadding:

@@ -1,3 +1,4 @@
+import 'package:uuid/uuid.dart';
 import 'package:get/get.dart';
 import '../../../core/class/Sqldb.dart';
 import '../../../core/class/SyncServer.dart';
@@ -7,7 +8,9 @@ class Saledata {
   final SQLDB db = SQLDB();
   final SyncService _syncService = SyncService();
 
-  int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
+  int? get id => Get.find<Myservices>().sharedPreferences?.getInt("id");
+  String? get loginType => Get.find<Myservices>().sharedPreferences?.getString("loginType") ?? "admin";
+  int? get sellerId => Get.find<Myservices>().sharedPreferences?.getInt("sellerid");
 
   /// إضافة فاتورة مع منتجاتها
   Future<Map<String, dynamic>> addSale(
@@ -28,14 +31,25 @@ class Saledata {
           final quantitySold = sale["quantity"];
           final type = sale["type_sales"] as int;
 
-          await txn.rawUpdate(
-            '''
-          UPDATE products
-          SET product_quantity = MAX(product_quantity - ?, 0)
-          WHERE uuid = ?
-          ''',
-            [quantitySold, type == 1 ? 0 : productUuid],
-          );
+          if (loginType == 'seller' || loginType == 'saller') {
+            await txn.rawUpdate(
+              '''
+              UPDATE seller_stock
+              SET quantity = MAX(quantity - ?, 0)
+              WHERE product_uuid = ? AND seller_id = ? AND user_id = ?
+              ''',
+              [type == 1 ? 0 : quantitySold, productUuid, sellerId?.toString(), id],
+            );
+          } else {
+            await txn.rawUpdate(
+              '''
+            UPDATE products
+            SET product_quantity = MAX(product_quantity - ?, 0)
+            WHERE uuid = ?
+            ''',
+              [quantitySold, type == 1 ? 0 : productUuid],
+            );
+          }
         }
       });
 
@@ -54,34 +68,57 @@ class Saledata {
           sale,
         );
         final productUuid = sale["product_uuid"] as String;
-        final result = await db.readData(
-          '''
-          SELECT product_quantity 
-          from products
-          WHERE uuid = ?
-          ''',
-          [productUuid],
-        );
-
-        if (result.isEmpty) {
-          throw Exception("المنتج غير موجود في قاعدة البيانات: $productUuid");
-        }
-
-        final currentQuantity = result[0]["product_quantity"] as String;
         final type = sale["type_sales"] as int;
-        final quantitySold =
-            double.tryParse(sale["quantity"]?.toString() ?? "0") ?? 0.0;
-        final updatedProductData = {
-          "uuid": productUuid,
-          "quantity_delta": -(type == 1 ? 0.0 : quantitySold),
-        };
+        final quantitySold = double.tryParse(sale["quantity"]?.toString() ?? "0") ?? 0.0;
+        final quantityDelta = -(type == 1 ? 0.0 : quantitySold);
 
-        await _syncService.addToQueue(
-          "products",
-          productUuid,
-          "insert",
-          updatedProductData,
-        );
+        if (loginType == 'seller' || loginType == 'saller') {
+          final result = await db.readData(
+            '''
+            SELECT uuid 
+            from seller_stock
+            WHERE product_uuid = ? AND seller_id = ? AND user_id = ?
+            ''',
+            [productUuid, sellerId?.toString(), id],
+          );
+          if (result.isNotEmpty) {
+            final updatedSellerStockData = {
+              "uuid": result[0]["uuid"],
+              "quantity_delta": quantityDelta,
+            };
+            await _syncService.addToQueue(
+              "seller_stock",
+              updatedSellerStockData["uuid"] as String,
+              "update",
+              updatedSellerStockData,
+            );
+          }
+        } else {
+          final result = await db.readData(
+            '''
+            SELECT product_quantity 
+            from products
+            WHERE uuid = ?
+            ''',
+            [productUuid],
+          );
+
+          if (result.isEmpty) {
+            throw Exception("المنتج غير موجود في قاعدة البيانات: $productUuid");
+          }
+
+          final updatedProductData = {
+            "uuid": productUuid,
+            "quantity_delta": quantityDelta,
+          };
+
+          await _syncService.addToQueue(
+            "products",
+            productUuid,
+            "insert",
+            updatedProductData,
+          );
+        }
       }
 
       print("✅ Transaction completed successfully");
@@ -114,17 +151,6 @@ class Saledata {
       final double unitPrice =
           double.tryParse(sale['unit_price']?.toString() ?? "0") ?? 0;
 
-      final product = (await db.read(
-        'products',
-      )).firstWhere((e) => e['uuid'] == productUuid);
-
-      if (product.isEmpty) {
-        return {"status": 0, "error": "Product not found"};
-      }
-
-      final currentProductQty =
-          double.tryParse(product['product_quantity']?.toString() ?? "0") ?? 0;
-
       final invoice = (await db.read("invoies")).firstWhere(
         (e) => e["uuid"] == invoiceUuid,
         orElse: () => <String, Object?>{},
@@ -132,6 +158,41 @@ class Saledata {
 
       if (invoice.isEmpty) {
         return {"status": 0, "error": "Invoice not found"};
+      }
+
+      final isSellerInvoice = loginType == 'seller' || loginType == 'saller';
+      final invoiceSellerId = sellerId;
+
+      double currentProductQty = 0;
+      if (isSellerInvoice) {
+        final sellerStock = (await db.read("seller_stock")).firstWhere(
+          (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString() && e["user_id"] == id,
+          orElse: () => <String, Object?>{},
+        );
+          if (sellerStock.isEmpty) {
+            final newUuid = const Uuid().v4();
+            await db.insert("seller_stock", {
+              "uuid": newUuid,
+              "user_id": id,
+              "seller_id": invoiceSellerId.toString(),
+              "product_uuid": productUuid,
+              "quantity": 0,
+              "created_at": DateTime.now().toIso8601String(),
+              "updated_at": DateTime.now().toIso8601String(),
+            });
+            currentProductQty = 0;
+          } else {
+            currentProductQty = double.tryParse(sellerStock['quantity']?.toString() ?? "0") ?? 0;
+          }
+      } else {
+        final product = (await db.read('products')).firstWhere(
+          (e) => e['uuid'] == productUuid,
+          orElse: () => <String, dynamic>{}, 
+        );
+        if (product.isEmpty) {
+          return {"status": 0, "error": "Product not found"};
+        }
+        currentProductQty = double.tryParse(product['product_quantity']?.toString() ?? "0") ?? 0;
       }
 
       double paymentPrice =
@@ -174,15 +235,28 @@ class Saledata {
         } else {}
       }
 
-      final result2 = await db.update(
-        'products',
-        {
-          'product_quantity': newProductQty,
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-        'uuid = ?',
-        [productUuid],
-      );
+      int result2 = 0;
+      if (isSellerInvoice) {
+        result2 = await db.update(
+          'seller_stock',
+          {
+            'quantity': newProductQty,
+            'updated_at': DateTime.now().toIso8601String(),
+          },
+          'product_uuid = ? AND seller_id = ? AND user_id = ?',
+          [productUuid, invoiceSellerId?.toString(), id],
+        );
+      } else {
+        result2 = await db.update(
+          'products',
+          {
+            'product_quantity': newProductQty,
+            'updated_at': DateTime.now().toIso8601String(),
+          },
+          'uuid = ?',
+          [productUuid],
+        );
+      }
 
       final resultInv = await db.update(
         "invoies",
@@ -201,11 +275,25 @@ class Saledata {
           "subtotal": unitPrice * newQty,
           'updated_at': DateTime.now().toIso8601String(),
         });
-        await _syncService.addToQueue("products", productUuid, "update", {
-          "uuid": productUuid,
-          'quantity_delta': -(type == 1 ? 0.0 : diff),
-          'updated_at': DateTime.now().toIso8601String(),
-        });
+        if (isSellerInvoice) {
+          final sellerStock = (await db.read("seller_stock")).firstWhere(
+            (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString() && e["user_id"] == id,
+            orElse: () => <String, Object?>{},
+          );
+          if (sellerStock.isNotEmpty) {
+            await _syncService.addToQueue("seller_stock", sellerStock["uuid"] as String, "update", {
+              "uuid": sellerStock["uuid"],
+              'quantity_delta': -(type == 1 ? 0.0 : diff),
+              'updated_at': DateTime.now().toIso8601String(),
+            });
+          }
+        } else {
+          await _syncService.addToQueue("products", productUuid, "update", {
+            "uuid": productUuid,
+            'quantity_delta': -(type == 1 ? 0.0 : diff),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+        }
 
         await _syncService.addToQueue("invoies", invoiceUuid, "update", {
           "uuid": invoiceUuid,
@@ -238,84 +326,10 @@ class Saledata {
       final String invoiceUuid = sale['invoie_uuid'];
       final int type = sale['type_sales'] as int;
 
-      final double unitPrice =
-          double.tryParse(sale['unit_price']?.toString() ?? '0') ?? 0;
-
+      final double unitPrice = double.tryParse(sale['unit_price']?.toString() ?? '0') ?? 0;
       final double subtotal = unitPrice * qty;
 
-      /// 2. جلب المنتج
-      final product = (await db.read('products')).firstWhere(
-        (e) => e['uuid'] == productUuid,
-        orElse: () => <String, dynamic>{},
-      );
-
-      if (product.isNotEmpty) {
-        final restoreProduct = {
-          'is_delete': 0,
-          'updated_at': DateTime.now().toIso8601String(),
-        };
-
-        await db.update(
-          'products',
-          restoreProduct,
-          "uuid = ? AND user_id = ?",
-          [productUuid, id],
-        );
-
-        final syncProduct = {
-          'uuid': productUuid,
-          'is_delete': 0,
-          'updated_at': DateTime.now().toIso8601String(),
-        };
-
-        await _syncService.addToQueue(
-          'products',
-          productUuid,
-          'update',
-          syncProduct,
-        );
-
-        final String categoryUuid = product['categoris_uuid']?.toString() ?? '';
-
-        if (categoryUuid.isNotEmpty) {
-          final category = (await db.read('categoris')).firstWhere(
-            (e) => e['uuid'] == categoryUuid && e['user_id'] == id,
-            orElse: () => <String, dynamic>{},
-          );
-
-          if (category.isNotEmpty) {
-            final isDeleted =
-                category['is_delete'] == 1 || category['is_delete'] == "1";
-
-            if (isDeleted) {
-              // Restore الفئة
-              await db.update(
-                'categoris',
-                {
-                  'is_delete': 0,
-                  'updated_at': DateTime.now().toIso8601String(),
-                },
-                'uuid = ? AND user_id = ?',
-                [categoryUuid, id],
-              );
-
-              await _syncService.addToQueue(
-                'categoris',
-                categoryUuid,
-                'update',
-                {'uuid': categoryUuid, 'is_delete': 0},
-              );
-            }
-          }
-        }
-      }
-
-      final double currentQty =
-          double.tryParse(product['product_quantity']?.toString() ?? '0') ?? 0;
-
-      final double newProductQty = currentQty + (type == 1 ? 0 : qty);
-
-      /// 3. جلب الفاتورة
+      /// 2. جلب الفاتورة
       final invoice = (await db.read('invoies')).firstWhere(
         (e) => e['uuid'] == invoiceUuid,
         orElse: () => <String, dynamic>{},
@@ -325,27 +339,128 @@ class Saledata {
         return {"status": 0, "error": "Invoice not found"};
       }
 
-      double paymentPrice =
-          double.tryParse(invoice['Payment_price']?.toString() ?? '0') ?? 0;
+      final isSellerInvoice = loginType == 'seller' || loginType == 'saller';
+      final invoiceSellerId = sellerId;
 
+      double currentQty = 0;
+      if (isSellerInvoice) {
+        final sellerStock = (await db.read("seller_stock")).firstWhere(
+          (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString() && e["user_id"] == id,
+          orElse: () => <String, Object?>{},
+        );
+        if (sellerStock.isEmpty) {
+          final newUuid = const Uuid().v4();
+          await db.insert("seller_stock", {
+            "uuid": newUuid,
+            "user_id": id,
+            "seller_id": invoiceSellerId.toString(),
+            "product_uuid": productUuid,
+            "quantity": 0,
+            "created_at": DateTime.now().toIso8601String(),
+            "updated_at": DateTime.now().toIso8601String(),
+          });
+          currentQty = 0;
+        } else {
+          currentQty = double.tryParse(sellerStock['quantity']?.toString() ?? "0") ?? 0;
+        }
+      } else {
+        final product = (await db.read('products')).firstWhere(
+          (e) => e['uuid'] == productUuid,
+          orElse: () => <String, dynamic>{},
+        );
+
+        if (product.isNotEmpty) {
+          final restoreProduct = {
+            'is_delete': 0,
+            'updated_at': DateTime.now().toIso8601String(),
+          };
+
+          await db.update(
+            'products',
+            restoreProduct,
+            "uuid = ? AND user_id = ?",
+            [productUuid, id],
+          );
+
+          final syncProduct = {
+            'uuid': productUuid,
+            'is_delete': 0,
+            'updated_at': DateTime.now().toIso8601String(),
+          };
+
+          await _syncService.addToQueue(
+            'products',
+            productUuid,
+            'update',
+            syncProduct,
+          );
+
+          final String categoryUuid = product['categoris_uuid']?.toString() ?? '';
+
+          if (categoryUuid.isNotEmpty) {
+            final category = (await db.read('categoris')).firstWhere(
+              (e) => e['uuid'] == categoryUuid && e['user_id'] == id,
+              orElse: () => <String, dynamic>{},
+            );
+
+            if (category.isNotEmpty) {
+              final isDeleted = category['is_delete'] == 1 || category['is_delete'] == "1";
+
+              if (isDeleted) {
+                await db.update(
+                  'categoris',
+                  {
+                    'is_delete': 0,
+                    'updated_at': DateTime.now().toIso8601String(),
+                  },
+                  'uuid = ? AND user_id = ?',
+                  [categoryUuid, id],
+                );
+
+                await _syncService.addToQueue(
+                  'categoris',
+                  categoryUuid,
+                  'update',
+                  {'uuid': categoryUuid, 'is_delete': 0},
+                );
+              }
+            }
+          }
+          currentQty = double.tryParse(product['product_quantity']?.toString() ?? '0') ?? 0;
+        }
+      }
+
+      final double newProductQty = currentQty + (type == 1 ? 0 : qty);
+
+      double paymentPrice = double.tryParse(invoice['Payment_price']?.toString() ?? '0') ?? 0;
       paymentPrice -= subtotal;
       if (paymentPrice < 0) paymentPrice = 0;
 
-      /// تحقق واش باقي أي منتجات في الفاتورة
-      final remainingSales = (await db.read(
-        'sales',
-      )).where((e) => e['invoie_uuid'] == invoiceUuid).toList();
+      final remainingSales = (await db.read('sales')).where((e) => e['invoie_uuid'] == invoiceUuid).toList();
 
       /// 4. تحديث المخزون
-      final resultProduct = await db.update(
-        'products',
-        {
-          'product_quantity': newProductQty,
-          'updated_at': DateTime.now().toIso8601String(),
-        },
-        'uuid = ?',
-        [productUuid],
-      );
+      int resultProduct = 0;
+      if (isSellerInvoice) {
+        resultProduct = await db.update(
+          'seller_stock',
+          {
+            'quantity': newProductQty,
+            'updated_at': DateTime.now().toIso8601String(),
+          },
+          'product_uuid = ? AND seller_id = ? AND user_id = ?',
+          [productUuid, invoiceSellerId?.toString(), id],
+        );
+      } else {
+        resultProduct = await db.update(
+          'products',
+          {
+            'product_quantity': newProductQty,
+            'updated_at': DateTime.now().toIso8601String(),
+          },
+          'uuid = ?',
+          [productUuid],
+        );
+      }
 
       /// 5. تحديث الفاتورة أو حذفها إذا ما بقى حتى منتج
       int resultInvoice = 1;
@@ -390,10 +505,24 @@ class Saledata {
       });
 
       // Sync: تحديث المخزون المنتج
-      await _syncService.addToQueue('products', productUuid, 'update', {
-        'uuid': productUuid,
-        'quantity_delta': (type == 1 ? 0.0 : qty),
-      });
+      if (isSellerInvoice) {
+        final sellerStock = (await db.read("seller_stock")).firstWhere(
+          (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString() && e["user_id"] == id,
+          orElse: () => <String, Object?>{},
+        );
+        if (sellerStock.isNotEmpty) {
+          await _syncService.addToQueue("seller_stock", sellerStock["uuid"] as String, "update", {
+            "uuid": sellerStock["uuid"],
+            'quantity_delta': (type == 1 ? 0.0 : qty),
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+        }
+      } else {
+        await _syncService.addToQueue('products', productUuid, 'update', {
+          'uuid': productUuid,
+          'quantity_delta': (type == 1 ? 0.0 : qty),
+        });
+      }
 
       if (resultProduct > 0 && resultInvoice > 0 && resultSale > 0) {
         return {
@@ -442,104 +571,150 @@ class Saledata {
         return {"status": 1};
       }
 
+      final isSellerInvoice = loginType == 'seller' || loginType == 'saller';
+      final invoiceSellerId = sellerId;
+
       /// 3. معالجة كل منتج
       for (final sale in sales) {
         final double qty = sale['quantity'];
         final String productUuid = sale['product_uuid'];
         final int type = sale['type_sales'] as int;
 
-        /// جلب المنتج
-        final product = (await db.read('products')).firstWhere(
-          (e) => e['uuid'] == productUuid,
-          orElse: () => <String, dynamic>{},
-        );
-        if (product.isNotEmpty) {
-          final restoreProduct = {
-            'is_delete': 0,
-            'updated_at': DateTime.now().toIso8601String(),
-          };
-
-          await db.update(
-            'products',
-            restoreProduct,
-            "uuid = ? AND user_id = ?",
-            [productUuid, id],
+        double currentQty = 0;
+        if (isSellerInvoice) {
+          final sellerStock = (await db.read("seller_stock")).firstWhere(
+            (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString() && e["user_id"] == id,
+            orElse: () => <String, Object?>{},
+          );
+          if (sellerStock.isEmpty) {
+            final newUuid = const Uuid().v4();
+            await db.insert("seller_stock", {
+              "uuid": newUuid,
+              "user_id": id,
+              "seller_id": invoiceSellerId.toString(),
+              "product_uuid": productUuid,
+              "quantity": 0,
+              "created_at": DateTime.now().toIso8601String(),
+              "updated_at": DateTime.now().toIso8601String(),
+            });
+            currentQty = 0;
+          } else {
+            currentQty = double.tryParse(sellerStock['quantity']?.toString() ?? "0") ?? 0;
+          }
+        } else {
+          final product = (await db.read('products')).firstWhere(
+            (e) => e['uuid'] == productUuid,
+            orElse: () => <String, dynamic>{},
           );
 
-          final syncProduct = {
-            'uuid': productUuid,
-            'is_delete': 0,
-            'updated_at': DateTime.now().toIso8601String(),
-          };
+          if (product.isNotEmpty) {
+            final restoreProduct = {
+              'is_delete': 0,
+              'updated_at': DateTime.now().toIso8601String(),
+            };
 
-          await _syncService.addToQueue(
-            'products',
-            productUuid,
-            'update',
-            syncProduct,
-          );
-
-          final String categoryUuid =
-              product['categoris_uuid']?.toString() ?? '';
-
-          if (categoryUuid.isNotEmpty) {
-            final category = (await db.read('categoris')).firstWhere(
-              (e) => e['uuid'] == categoryUuid && e['user_id'] == id,
-              orElse: () => <String, dynamic>{},
+            await db.update(
+              'products',
+              restoreProduct,
+              "uuid = ? AND user_id = ?",
+              [productUuid, id],
             );
 
-            if (category.isNotEmpty) {
-              final isDeleted =
-                  category['is_delete'] == 1 || category['is_delete'] == "1";
+            final syncProduct = {
+              'uuid': productUuid,
+              'is_delete': 0,
+              'updated_at': DateTime.now().toIso8601String(),
+            };
 
-              if (isDeleted) {
-                // Restore الفئة
-                await db.update(
-                  'categoris',
-                  {
-                    'is_delete': 0,
-                    'updated_at': DateTime.now().toIso8601String(),
-                  },
-                  'uuid = ? AND user_id = ?',
-                  [categoryUuid, id],
-                );
+            await _syncService.addToQueue(
+              'products',
+              productUuid,
+              'update',
+              syncProduct,
+            );
 
-                await _syncService.addToQueue(
-                  'categoris',
-                  categoryUuid,
-                  'update',
-                  {'uuid': categoryUuid, 'is_delete': 0},
-                );
+            final String categoryUuid = product['categoris_uuid']?.toString() ?? '';
+
+            if (categoryUuid.isNotEmpty) {
+              final category = (await db.read('categoris')).firstWhere(
+                (e) => e['uuid'] == categoryUuid && e['user_id'] == id,
+                orElse: () => <String, dynamic>{},
+              );
+
+              if (category.isNotEmpty) {
+                final isDeleted = category['is_delete'] == 1 || category['is_delete'] == "1";
+
+                if (isDeleted) {
+                  await db.update(
+                    'categoris',
+                    {
+                      'is_delete': 0,
+                      'updated_at': DateTime.now().toIso8601String(),
+                    },
+                    'uuid = ? AND user_id = ?',
+                    [categoryUuid, id],
+                  );
+
+                  await _syncService.addToQueue(
+                    'categoris',
+                    categoryUuid,
+                    'update',
+                    {'uuid': categoryUuid, 'is_delete': 0},
+                  );
+                }
               }
             }
+            currentQty = double.tryParse(product['product_quantity']?.toString() ?? '0') ?? 0;
           }
         }
-
-        final double currentQty =
-            double.tryParse(product['product_quantity']?.toString() ?? '0') ??
-            0;
 
         final double newQty = currentQty + (type == 1 ? 0 : qty);
 
         /// تحديث المخزون
-        await db.update(
-          'products',
-          {
-            'product_quantity': newQty,
-            'updated_at': DateTime.now().toIso8601String(),
-          },
-          'uuid = ?',
-          [productUuid],
-        );
+        if (isSellerInvoice) {
+          await db.update(
+            'seller_stock',
+            {
+              'quantity': newQty,
+              'updated_at': DateTime.now().toIso8601String(),
+            },
+            'product_uuid = ? AND seller_id = ? AND user_id = ?',
+            [productUuid, invoiceSellerId?.toString(), id],
+          );
+        } else {
+          await db.update(
+            'products',
+            {
+              'product_quantity': newQty,
+              'updated_at': DateTime.now().toIso8601String(),
+            },
+            'uuid = ?',
+            [productUuid],
+          );
+        }
 
         /// حذف سطر البيع
         await db.delete('sales', 'uuid = ?', [sale['uuid']]);
 
         /// Sync
-        await _syncService.addToQueue('products', productUuid, 'update', {
-          'uuid': productUuid,
-          'quantity_delta': (type == 1 ? 0.0 : qty),
-        });
+        if (isSellerInvoice) {
+          final sellerStock = (await db.read("seller_stock")).firstWhere(
+            (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString() && e["user_id"] == id,
+            orElse: () => <String, Object?>{},
+          );
+          if (sellerStock.isNotEmpty) {
+            await _syncService.addToQueue("seller_stock", sellerStock["uuid"] as String, "update", {
+              "uuid": sellerStock["uuid"],
+              'quantity_delta': (type == 1 ? 0.0 : qty),
+              'updated_at': DateTime.now().toIso8601String(),
+            });
+          }
+        } else {
+          await _syncService.addToQueue('products', productUuid, 'update', {
+            'uuid': productUuid,
+            'quantity_delta': (type == 1 ? 0.0 : qty),
+          });
+        }
 
         await _syncService.addToQueue("sales", sale['uuid'], "update", {
           "uuid": sale['uuid'],

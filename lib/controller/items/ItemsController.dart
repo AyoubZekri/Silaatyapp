@@ -17,6 +17,7 @@ import '../../data/model/Product_Model.dart';
 class Itemscontroller extends GetxController {
   int type = 0;
   int saleType = 1;
+  String globalSaleUnit = 'piece';
   CategorisData categorisData = CategorisData(Get.find());
   ProdactData prodactData = ProdactData(Get.find());
   Myservices myservices = Get.find();
@@ -110,21 +111,56 @@ class Itemscontroller extends GetxController {
         .map((uuid) {
           final item = product.firstWhereOrNull((e) => e.uuid == uuid);
           if (item != null) {
+            num enteredQty = quantities[uuid] ?? 1;
+            num qty = enteredQty;
+            
+            if (globalSaleUnit == 'carton' && item.type != 2) {
+              num itemsPerCarton = num.tryParse(item.itemsPerCarton?.toString() ?? '0') ?? 0;
+              if (itemsPerCarton > 0) {
+                qty = enteredQty * itemsPerCarton;
+              }
+            }
+            
+            final price = type == 1 ? (item.productPricePurchase?.toDouble() ?? 0.0) : getSalePrice(item);
+            
             return {
               "uuid": item.uuid,
               "name": item.productName,
               "price": getSalePrice(item),
+              "product_price": item.productPrice,
+              "product_price_wholesale": item.productPriceWholesale,
+              "product_price_half_wholesale": item.productPriceHalfWholesale,
+              "product_price_purchase": item.productPricePurchase,
               "price_Purchase": item.productPricePurchase,
-              "quantity": quantities[uuid] ?? 1,
+              "quantity": qty,
+              "entered_quantity": enteredQty,
+              "sale_unit": globalSaleUnit,
+              "total": qty * price,
               "quantity_item": item.productQuantity,
               "type_item": item.type,
               "min_selling_price": item.minSellingPrice ?? 0.0,
+              "items_per_carton": item.itemsPerCarton,
             };
           } else {
             final originalItem = originalSelectedProducts.firstWhereOrNull((e) => e['uuid'] == uuid);
             if (originalItem != null) {
               final updatedItem = Map<String, dynamic>.from(originalItem);
-              updatedItem['quantity'] = quantities[uuid] ?? 1;
+              num enteredQty = quantities[uuid] ?? 1;
+              updatedItem['entered_quantity'] = enteredQty;
+              
+              if (updatedItem['sale_unit'] == 'carton' && updatedItem['type_item'] != 2) {
+                 num itemsPerCarton = num.tryParse(updatedItem['items_per_carton']?.toString() ?? '0') ?? 0;
+                 if (itemsPerCarton > 0) {
+                    updatedItem['quantity'] = enteredQty * itemsPerCarton;
+                 } else {
+                    updatedItem['quantity'] = enteredQty;
+                 }
+              } else {
+                 updatedItem['quantity'] = enteredQty;
+              }
+              
+              final price = type == 1 ? (updatedItem['price_Purchase'] ?? 0.0) : (updatedItem['price'] ?? 0.0);
+              updatedItem['total'] = updatedItem['quantity'] * price;
               return updatedItem;
             }
           }
@@ -347,10 +383,11 @@ class Itemscontroller extends GetxController {
       originalSelectedProducts = selected;
       type = args["type"] ?? 0;
       saleType = args["sale_type"] ?? 1;
-      print("=============================type$type, saleType$saleType");
+      globalSaleUnit = args["globalSaleUnit"] ?? 'piece';
+      print("=============================type$type, saleType$saleType, globalSaleUnit$globalSaleUnit");
       for (var p in selected) {
         final uuid = p['uuid'];
-        final qty = p['quantity'] ?? 1;
+        final qty = p['entered_quantity'] ?? p['quantity'] ?? 1;
         selectedUuids.add(uuid);
         quantities[uuid] = qty is int ? qty : (qty as num);
       }

@@ -7,6 +7,7 @@ import 'package:Silaaty/data/model/InvoiceModel.dart';
 import 'package:Silaaty/view/widget/Bills/CustemCartinvoice.dart';
 import 'package:Silaaty/view/widget/Bills/CustemTypeinvoice.dart';
 import 'package:Silaaty/view/widget/Bills/Custemaddinvoice.dart';
+import 'package:Silaaty/view/widget/Bills/CustemEditpayment.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -371,6 +372,38 @@ class _InvoicesState extends State<Invoices> with RouteAware {
                   ],
                 ),
               ),
+
+              if (double.tryParse(controller.getRemainingAmount().replaceAll(',', '')) != null && 
+                  double.parse(controller.getRemainingAmount().replaceAll(',', '')) > 0)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      controller.oldDebtPaymentController.text = controller.getRemainingAmount();
+                      showDialog(
+                          context: context,
+                          builder: (context) {
+                            return CustemEditInvoiceDialog(
+                                lableText: "المبلغ المدفوع".tr,
+                                Mycontroller: controller.oldDebtPaymentController,
+                                onPressed: () {
+                                  controller.payOldDebts();
+                                },
+                                onback: () {
+                                  Get.back();
+                                },
+                                title: "تسديد الديون دفعة واحدة".tr);
+                          });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      minimumSize: const Size(double.infinity, 45),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))
+                    ),
+                    icon: const Icon(Icons.payment, color: Colors.white),
+                    label: Text("تسديد الديون دفعة واحدة".tr, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                  ),
+                ),
 
               // --- Filters ---
               Container(

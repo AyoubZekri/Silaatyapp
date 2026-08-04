@@ -69,24 +69,24 @@ class _PaymentState extends State<Shwoinvoice> {
                     Container(
                       padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
-                          color: controller.getRemainingAmount() == 0
+                          color: (controller.getRemainingAmount() + controller.oldDebtTotal) == 0
                               ? const Color.fromARGB(94, 151, 215, 153)
                               : const Color.fromARGB(94, 246, 157, 150),
                           borderRadius: BorderRadius.circular(10)),
                       child: Row(
                         children: [
                           Icon(
-                            controller.getRemainingAmount() == 0
+                            (controller.getRemainingAmount() + controller.oldDebtTotal) == 0
                                 ? Icons.check_circle_outline
                                 : Icons.cancel_outlined,
-                            color: controller.getRemainingAmount() == 0
+                            color: (controller.getRemainingAmount() + controller.oldDebtTotal) == 0
                                 ? Colors.green
                                 : Colors.red,
                           ),
                           SizedBox(
                             width: 10,
                           ),
-                          Text(controller.getRemainingAmount() == 0
+                          Text((controller.getRemainingAmount() + controller.oldDebtTotal) == 0
                               ? "مدفوع".tr
                               : "غير مدفوع".tr),
                         ],
@@ -269,11 +269,16 @@ class _PaymentState extends State<Shwoinvoice> {
                                     ? formavalue(controller.productSale!.discount!)
                                     : "",
                           ),
+                          if (controller.oldDebtTotal > 0)
+                            Costumcartdetailspayment(
+                              title: "الديون السابقة".tr,
+                              body: formavalue(controller.oldDebtTotal),
+                            ),
                           Costumcartdetailspayment(
-                            title: "الإجمالي".tr,
+                            title: controller.oldDebtTotal > 0 ? "الإجمالي المطلوب".tr : "الإجمالي".tr,
                             body: controller.productSale == null
                                 ? ""
-                                : formavalue((controller.productSale!.sumPrice ?? 0) - (controller.productSale?.discount ?? 0)),
+                                : formavalue((controller.productSale!.sumPrice ?? 0) - (controller.productSale?.discount ?? 0) + controller.oldDebtTotal),
                           ),
                           Costumcartdetailspayment(
                             title: "المدفوع".tr,
@@ -290,7 +295,7 @@ class _PaymentState extends State<Shwoinvoice> {
                                       fontSize: 20,
                                       fontWeight: FontWeight.bold)),
                               Text(
-                                formavalue(controller.getRemainingAmount()),
+                                formavalue(controller.getRemainingAmount() + controller.oldDebtTotal),
                                 style: TextStyle(
                                     color: AppColor.black,
                                     fontSize: 20,
@@ -315,17 +320,19 @@ class _PaymentState extends State<Shwoinvoice> {
                               showDialog(
                                   context: context,
                                   builder: (context) {
-                                    return CustemEditInvoiceDialog(
-                                        lableText: "المبلغ المدفوع".tr,
-                                        Mycontroller: controller.paymentPrice,
-                                        onPressed: () {
-                                          controller.Editinvoise(
-                                              controller.uuid!);
-                                        },
-                                        onback: () {
-                                          Get.back();
-                                        },
-                                        title: "دفع مستحقات الفاتورة".tr);
+                                      return CustemEditInvoiceDialog(
+                                          lableText: "الدفعة (للفاتورة الحالية)".tr,
+                                          Mycontroller: controller.paymentPrice,
+                                          oldDebtController: controller.oldDebtTotal > 0 ? controller.oldDebtPaymentController : null,
+                                          oldDebtLableText: "دفع الديون القديمة".tr,
+                                          onPressed: () {
+                                            controller.Editinvoise(
+                                                controller.uuid!);
+                                          },
+                                          onback: () {
+                                            Get.back();
+                                          },
+                                          title: "دفع مستحقات الفاتورة".tr);
                                   });
                             },
                             iconData: Icons.payment,

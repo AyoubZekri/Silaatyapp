@@ -3,6 +3,7 @@ import 'package:Silaaty/core/constant/routes.dart';
 import 'package:Silaaty/core/functions/FormatQuantity.dart';
 import 'package:Silaaty/data/datasource/Remote/invoiceData.dart';
 import 'package:Silaaty/data/model/InvoiceModel.dart';
+import 'package:Silaaty/data/datasource/Remote/transactiondata.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -15,6 +16,7 @@ class InvoicesController extends GetxController {
   int selectedIndex = 3;
   String? uuid;
   late TextEditingController dateController;
+  late TextEditingController oldDebtPaymentController;
   GlobalKey<FormState> formstate = GlobalKey<FormState>();
 
   Statusrequest statusrequest = Statusrequest.none;
@@ -147,9 +149,37 @@ class InvoicesController extends GetxController {
     }
   }
 
+  Future<void> payOldDebts() async {
+    double amount = double.tryParse(oldDebtPaymentController.text) ?? 0.0;
+    if (amount <= 0 || uuid == null) return;
+
+    Transactiondata transactiondata = Transactiondata(Get.find());
+    var unpaidInvoices = await transactiondata.getCustomerUnpaidInvoices(uuid!);
+
+    double additionalPayment = amount;
+    for (var inv in unpaidInvoices) {
+      if (additionalPayment <= 0) break;
+
+      double remaining = (inv['remaining_debt'] as num?)?.toDouble() ?? 0;
+      if (remaining > 0) {
+        double amountToPay =
+            (additionalPayment > remaining) ? remaining : additionalPayment;
+        await transactiondata.payOldDebt(inv['uuid'], amountToPay);
+        additionalPayment -= amountToPay;
+      }
+    }
+
+    oldDebtPaymentController.clear();
+    Get.back();
+    showInvoice();
+    Get.find<RefreshService>().fire();
+    showSnackbar("success".tr, "تم تسديد الدفعة بنجاح".tr, Colors.green);
+  }
+
   @override
   void onInit() {
     dateController = TextEditingController();
+    oldDebtPaymentController = TextEditingController();
     uuid = Get.arguments["uuid"];
     showInvoice();
     super.onInit();
@@ -159,15 +189,16 @@ class InvoicesController extends GetxController {
     final total = invoice?.sumPrice ?? 0.0;
     final paid = invoice?.sumPaymentPrice ?? 0.0;
     double remaining = total - paid;
-    
+
     remaining = double.parse(remaining.toStringAsFixed(3));
-    
+
     return formavalue(remaining <= 0 ? 0 : remaining);
   }
 
   @override
   void dispose() {
     dateController.dispose();
+    oldDebtPaymentController.dispose();
     super.dispose();
   }
 

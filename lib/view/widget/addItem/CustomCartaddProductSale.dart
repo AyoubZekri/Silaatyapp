@@ -11,7 +11,7 @@ class Customcartaddproductsale extends StatelessWidget {
   final String? imgitems;
   final String Title;
   final String Price;
-  final num Body;
+  final String Body;
 
   final bool image;
   final int type;
@@ -143,7 +143,7 @@ class Customcartaddproductsale extends StatelessWidget {
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                formatQuantity(Body),
+                                Body,
                                 style:
                                     Theme.of(context).textTheme.headlineLarge,
                               ),

@@ -12,6 +12,12 @@ import '../../data/datasource/Remote/transactiondata.dart';
 class SaleController extends GetxController {
   int? type;
   RxInt saleType = 1.obs; // 1 = Retail, 2 = Half Wholesale, 3 = Wholesale
+  RxString globalSaleUnit = 'piece'.obs; // 'piece' or 'carton'
+  
+  void setGlobalSaleUnit(String unit) {
+    globalSaleUnit.value = unit;
+    update();
+  }
   late int userSellType = Get.find<Myservices>().sharedPreferences?.getInt("sell_type") ?? 3;
   RxString selectedCustomer = ''.obs;
   List<String> get customers => [
@@ -37,6 +43,15 @@ class SaleController extends GetxController {
     for (var product in products) {
       final exists = selectedProducts.any((p) => p['uuid'] == product['uuid']);
       if (!exists) {
+        if (globalSaleUnit.value == 'carton' && product['type_item'] != 2) {
+           num itemsPerCarton = num.tryParse(product['items_per_carton']?.toString() ?? '0') ?? 0;
+           if (itemsPerCarton > 0) {
+              product['quantity'] = itemsPerCarton.toDouble();
+              product['entered_quantity'] = 1.0;
+              product['sale_unit'] = 'carton';
+              product['total'] = product['quantity'] * product[type == 1 ? 'price_Purchase' : 'price'];
+           }
+        }
         selectedProducts.add(product);
       }
     }
@@ -45,7 +60,7 @@ class SaleController extends GetxController {
     update();
   }
 
-  void updateQuantity(String uuid, num newQuantity) {
+  void updateQuantity(String uuid, num newQuantity, {String? unit, num? enteredQty}) {
     final index = selectedProducts.indexWhere((item) => item['uuid'] == uuid);
     if (index != -1) {
       var item = selectedProducts[index];
@@ -54,6 +69,8 @@ class SaleController extends GetxController {
 
       if (newQuantity <= maxQty || type == 1) {
         item['quantity'] = newQuantity;
+        if (unit != null) item['sale_unit'] = unit;
+        if (enteredQty != null) item['entered_quantity'] = enteredQty;
 
         final price = type == 1
             ? (item['price_Purchase'] ?? 0) as num
@@ -250,6 +267,7 @@ class SaleController extends GetxController {
 
                 if (existingIndex != null) {
                   selectedProducts[existingIndex]['quantity'] += weight;
+                  selectedProducts[existingIndex]['entered_quantity'] = (selectedProducts[existingIndex]['entered_quantity'] ?? 0) + weight;
                   selectedProducts[existingIndex]['total'] = (type == 1
                           ? selectedProducts[existingIndex]['price_Purchase']
                           : selectedProducts[existingIndex]['price']) *
@@ -261,10 +279,17 @@ class SaleController extends GetxController {
                     "uuid": uuid,
                     "name": name,
                     type == 1 ? "price_Purchase" : "price": price,
+                    "product_price": productData['product_price'],
+                    "product_price_wholesale": productData['product_price_wholesale'],
+                    "product_price_half_wholesale": productData['product_price_half_wholesale'],
+                    "product_price_purchase": productData['product_price_purchase'],
                     "quantity": weight,
+                    "entered_quantity": weight,
+                    "sale_unit": "piece",
                     "total": price * weight,
                     "type_item": 2,
                     "quantity_item": productData['product_quantity'],
+                    "items_per_carton": productData['items_per_carton'],
                     "min_selling_price": double.tryParse(productData['min_selling_price']?.toString() ?? '0') ?? 0.0,
                   });
                 }
@@ -331,6 +356,7 @@ class SaleController extends GetxController {
 
   Map<String, dynamic>? pendingProduct;
   double? pendingAddedQuantity;
+  double? pendingEnteredQuantity;
   int? pendingExistingIndex;
 
   void confirmPendingProduct() {
@@ -342,6 +368,7 @@ class SaleController extends GetxController {
 
     if (pendingExistingIndex != null && pendingExistingIndex != -1) {
       selectedProducts[pendingExistingIndex!]['quantity'] += pendingAddedQuantity!;
+      selectedProducts[pendingExistingIndex!]['entered_quantity'] = (selectedProducts[pendingExistingIndex!]['entered_quantity'] ?? 0) + (pendingEnteredQuantity ?? pendingAddedQuantity!);
       selectedProducts[pendingExistingIndex!]['total'] = (type == 1
               ? selectedProducts[pendingExistingIndex!]['price_Purchase']
               : selectedProducts[pendingExistingIndex!]['price']) *
@@ -353,10 +380,17 @@ class SaleController extends GetxController {
         "uuid": uuid,
         "name": name,
         type == 1 ? "price_Purchase" : "price": price,
+        "product_price": pendingProduct!['product_price'],
+        "product_price_wholesale": pendingProduct!['product_price_wholesale'],
+        "product_price_half_wholesale": pendingProduct!['product_price_half_wholesale'],
+        "product_price_purchase": pendingProduct!['product_price_purchase'],
         "quantity": pendingAddedQuantity,
+        "entered_quantity": pendingEnteredQuantity,
+        "sale_unit": pendingProduct!['sale_unit'] ?? 'piece',
         "total": price * pendingAddedQuantity!,
         "type_item": typeItem,
         "quantity_item": pendingProduct!['product_quantity'],
+        "items_per_carton": pendingProduct!['items_per_carton'],
         "min_selling_price": double.tryParse(pendingProduct!['min_selling_price']?.toString() ?? '0') ?? 0.0,
       });
     }
@@ -364,6 +398,7 @@ class SaleController extends GetxController {
     _calculateTotals();
     pendingProduct = null;
     pendingAddedQuantity = null;
+    pendingEnteredQuantity = null;
     pendingExistingIndex = null;
     lastScannedTime = null; // reset debounce
     update();
@@ -372,6 +407,7 @@ class SaleController extends GetxController {
   void cancelPendingProduct() {
     pendingProduct = null;
     pendingAddedQuantity = null;
+    pendingEnteredQuantity = null;
     pendingExistingIndex = null;
     lastScannedTime = null; // reset debounce
     update();
@@ -439,12 +475,27 @@ class SaleController extends GetxController {
       }
 
       double addedQuantity = 1.0;
+      double enteredQuantity = 1.0;
+      String saleUnit = 'piece';
+
       if (typeItem == 2 && scaleWeight != null && scaleWeight != 0) {
         addedQuantity = scaleWeight;
+        enteredQuantity = scaleWeight;
+      } else {
+        if (globalSaleUnit.value == 'carton') {
+          num itemsPerCarton = num.tryParse(productData['items_per_carton']?.toString() ?? '0') ?? 0;
+          if (itemsPerCarton > 0) {
+            addedQuantity = itemsPerCarton.toDouble();
+            enteredQuantity = 1.0;
+            saleUnit = 'carton';
+          }
+        }
       }
 
       pendingProduct = productData;
+      pendingProduct!['sale_unit'] = saleUnit;
       pendingAddedQuantity = addedQuantity;
+      pendingEnteredQuantity = enteredQuantity;
       pendingExistingIndex = existingIndex;
 
       _calculateTotals();
@@ -460,7 +511,12 @@ class SaleController extends GetxController {
   void gotoaddproductNewSale() async {
     final result = await Get.toNamed(
       Approutes.addProductSale,
-      arguments: {"selectedProducts": selectedProducts, "type": type, "sale_type": saleType.value},
+      arguments: {
+        "selectedProducts": selectedProducts,
+        "type": type,
+        "sale_type": saleType.value,
+        "globalSaleUnit": globalSaleUnit.value
+      },
     );
     if (result != null && result is List) {
       final updatedList = List<Map<String, dynamic>>.from(result);
@@ -480,10 +536,15 @@ class SaleController extends GetxController {
         "uuid": draftedProduct['uuid'],
         "name": draftedProduct['product_name'],
         type == 1 ? "price_Purchase" : "price": double.tryParse(draftedProduct[type == 1 ? 'product_price_purchase' : 'product_price'].toString()) ?? 0.0,
+        "product_price": draftedProduct['product_price'],
+        "product_price_wholesale": draftedProduct['product_price_wholesale'],
+        "product_price_half_wholesale": draftedProduct['product_price_half_wholesale'],
+        "product_price_purchase": draftedProduct['product_price_purchase'],
         "quantity": 1,
         "total": double.tryParse(draftedProduct[type == 1 ? 'product_price_purchase' : 'product_price'].toString()) ?? 0.0,
         "type_item": draftedProduct['type'],
         "quantity_item": "9999", // Unconstrained for draft products
+        "items_per_carton": draftedProduct['items_per_carton'],
         "min_selling_price": double.tryParse(draftedProduct['min_selling_price']?.toString() ?? '0') ?? 0.0,
         "draft_data": draftedProduct // Save the payload to insert on payment
       });
@@ -549,26 +610,24 @@ class SaleController extends GetxController {
   void changeSaleType(int newType) {
     if (saleType.value == newType) return;
     
-    if (selectedProducts.isNotEmpty) {
-      Get.defaultDialog(
-        title: "تنبيه".tr,
-        middleText: "تغيير نوع البيع سيؤدي إلى إفراغ القائمة. هل توافق؟".tr,
-        onConfirm: () {
-          saleType.value = newType;
-          selectedProducts.clear();
-          _calculateTotals();
-          update();
-          Get.back();
-        },
-        onCancel: () {},
-        textConfirm: "نعم".tr,
-        textCancel: "لا".tr,
-        confirmTextColor: AppColor.white,
-      );
-    } else {
-      saleType.value = newType;
-      update();
+    saleType.value = newType;
+
+    if (type != 1) {
+      for (var i = 0; i < selectedProducts.length; i++) {
+        var item = selectedProducts[i];
+        
+        // Recalculate price
+        double newPrice = _getSalePrice(item);
+        
+        item['price'] = newPrice;
+        item['total'] = newPrice * item['quantity'];
+        
+        selectedProducts[i] = Map<String, dynamic>.from(item);
+      }
     }
+    
+    _calculateTotals();
+    update();
   }
 
   @override

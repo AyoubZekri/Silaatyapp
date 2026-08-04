@@ -196,8 +196,35 @@ class _InformationitemState extends State<Informationitem> {
                             "${product.productPriceWholesale != null ? formavalue(product.productPriceWholesale!) : ''} ${'دينار'.tr}",
                           ),
                         const Divider(height: 30),
-                        _infoRow("الكمية".tr,
-                            "${product.productQuantity}${product.type == 2 ? "Kg" : ""}"),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 4),
+                          child: Row(
+                            children: [
+                              Expanded(child: Text("الكمية".tr, style: const TextStyle(fontSize: 16))),
+                              Text("${product.productQuantity}${product.type == 2 ? "Kg" : ""}", style: const TextStyle(fontWeight: FontWeight.bold)),
+                              const SizedBox(width: 10),
+                              InkWell(
+                                onTap: () {
+                                  controller.showStockLocationsDialog(context);
+                                },
+                                child: Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                  decoration: BoxDecoration(
+                                    color: AppColor.backgroundcolor.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Row(
+                                    children: [
+                                      const Icon(Icons.location_on, size: 16, color: AppColor.backgroundcolor),
+                                      const SizedBox(width: 4),
+                                      Text("أماكن التواجد".tr, style: const TextStyle(color: AppColor.backgroundcolor, fontWeight: FontWeight.bold, fontSize: 12)),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                         if (product.itemsPerCarton != null && product.quantityPerCarton != null) ...[
                           _infoRow("الكمية في الكرتون".tr, product.itemsPerCarton.toString()),
                           _infoRow("عدد الكراتين".tr, product.quantityPerCarton.toString()),

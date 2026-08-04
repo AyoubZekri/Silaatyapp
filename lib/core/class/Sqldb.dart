@@ -20,7 +20,7 @@ class SQLDB {
     Database mydb = await openDatabase(
       path,
       onCreate: _onCreate,
-      version: 2,
+      version: 3,
       onUpgrade: _onUpgrade,
     );
     return mydb;
@@ -101,6 +101,35 @@ class SQLDB {
       await db.execute('ALTER TABLE transactions ADD COLUMN notes TEXT');
       await db.execute(
           'ALTER TABLE transactions ADD COLUMN customer_sale_type TEXT');
+    }
+
+    if (oldversion < 3) {
+      await db.execute('''
+      CREATE TABLE seller_stocks (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE,
+        user_id INTEGER NOT NULL,
+        seller_id TEXT NOT NULL,
+        product_uuid TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+      ''');
+
+      await db.execute('''
+      CREATE TABLE stock_transfers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE,
+        user_id TEXT NOT NULL,
+        seller_id TEXT NOT NULL,
+        product_uuid TEXT NOT NULL,
+        quantity_sent INTEGER NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+      ''');
+   
     }
   }
 
@@ -285,6 +314,33 @@ class SQLDB {
       user_id INTEGER NOT NULL
     )
   ''');
+
+    /// جدول مخزون البائعين
+    await db.execute('''
+      CREATE TABLE seller_stock (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE,
+        user_id TEXT NOT NULL,
+        seller_id TEXT NOT NULL,
+        product_uuid TEXT NOT NULL,
+        quantity INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+      ''');
+
+    await db.execute('''
+      CREATE TABLE stock_transfers (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE,
+        user_id TEXT NOT NULL,
+        seller_id TEXT NOT NULL,
+        product_uuid TEXT NOT NULL,
+        quantity_sent INTEGER NOT NULL,
+        created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+        updated_at TEXT DEFAULT CURRENT_TIMESTAMP
+      )
+      ''');
 
     await batch.commit();
     print(

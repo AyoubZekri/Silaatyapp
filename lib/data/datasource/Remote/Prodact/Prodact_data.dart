@@ -15,7 +15,12 @@ class ProdactData {
   final SQLDB sqldb = SQLDB();
   final SyncService _syncService = SyncService();
 
-  int? id = Get.find<Myservices>().sharedPreferences?.getInt("id");
+  int? get id => Get.find<Myservices>().sharedPreferences?.getInt("id");
+  String? get loginType =>
+      Get.find<Myservices>().sharedPreferences?.getString("loginType") ??
+      "admin";
+  int? get sellerId =>
+      Get.find<Myservices>().sharedPreferences?.getInt("sellerid");
 
   ProdactData(this.crud);
 
@@ -334,10 +339,23 @@ class ProdactData {
     final categorieId = data["Categorie_id"];
     final query = data["query"];
 
-    final result = await sqldb.readData(
-      "SELECT * FROM products WHERE  user_id = ? AND product_name LIKE ? AND categorie_id = ? AND is_delete=0",
-      [id, '%$query%', categorieId],
-    );
+    List<Map<String, Object?>> result;
+    if (loginType == 'seller' || loginType == 'saller') {
+      final rawResult = await sqldb.readData(
+        "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.user_id = ? AND s.user_id = ? AND p.product_name LIKE ? AND p.categorie_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
+        [id, id, '%$query%', categorieId, sellerId?.toString()],
+      );
+      result = rawResult.map((e) {
+        final m = Map<String, Object?>.from(e);
+        m['product_quantity'] = m['seller_quantity'];
+        return m;
+      }).toList();
+    } else {
+      result = await sqldb.readData(
+        "SELECT * FROM products WHERE  user_id = ? AND product_name LIKE ? AND categorie_id = ? AND is_delete=0",
+        [id, '%$query%', categorieId],
+      );
+    }
     return result;
   }
 
@@ -345,16 +363,40 @@ class ProdactData {
       Map<String, Object?> data) async {
     final categorieId = data["Categoris_id"];
     final List<Map<String, Object?>> result;
-    if (categorieId == 2) {
-      result = await sqldb.readData(
-        "SELECT * FROM products WHERE product_quantity <= 0 AND user_id = ? AND is_delete=0",
-        [id],
-      );
+    if (loginType == 'seller' || loginType == 'saller') {
+      if (categorieId == 2) {
+        final rawResult = await sqldb.readData(
+          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE s.quantity <= 0 AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ?",
+          [id, id, sellerId?.toString()],
+        );
+        result = rawResult.map((e) {
+          final m = Map<String, Object?>.from(e);
+          m['product_quantity'] = m['seller_quantity'];
+          return m;
+        }).toList();
+      } else {
+        final rawResult = await sqldb.readData(
+          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.categorie_id = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
+          [categorieId, id, id, sellerId?.toString()],
+        );
+        result = rawResult.map((e) {
+          final m = Map<String, Object?>.from(e);
+          m['product_quantity'] = m['seller_quantity'];
+          return m;
+        }).toList();
+      }
     } else {
-      result = await sqldb.readData(
-        "SELECT * FROM products WHERE categorie_id = ? AND user_id = ? AND is_delete=0",
-        [categorieId, id],
-      );
+      if (categorieId == 2) {
+        result = await sqldb.readData(
+          "SELECT * FROM products WHERE product_quantity <= 0 AND user_id = ? AND is_delete=0",
+          [id],
+        );
+      } else {
+        result = await sqldb.readData(
+          "SELECT * FROM products WHERE categorie_id = ? AND user_id = ? AND is_delete=0",
+          [categorieId, id],
+        );
+      }
     }
 
     return result;
@@ -366,17 +408,40 @@ class ProdactData {
     final categorisuuId = data["Categoris_uuid"];
     print("========$categorisuuId");
     final List<Map<String, Object?>> result;
-    if (categorieId == 2) {
-      print("======n");
-      result = await sqldb.readData(
-        "SELECT * FROM products WHERE product_quantity <= 0 AND categoris_uuid = ? AND user_id = ? AND is_delete=0",
-        [categorisuuId, id],
-      );
+    if (loginType == 'seller' || loginType == 'saller') {
+      if (categorieId == 2) {
+        final rawResult = await sqldb.readData(
+          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE s.quantity <= 0 AND p.categoris_uuid = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ?",
+          [categorisuuId, id, id, sellerId?.toString()],
+        );
+        result = rawResult.map((e) {
+          final m = Map<String, Object?>.from(e);
+          m['product_quantity'] = m['seller_quantity'];
+          return m;
+        }).toList();
+      } else {
+        final rawResult = await sqldb.readData(
+          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.categorie_id = ? AND p.categoris_uuid = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
+          [categorieId, categorisuuId, id, id, sellerId?.toString()],
+        );
+        result = rawResult.map((e) {
+          final m = Map<String, Object?>.from(e);
+          m['product_quantity'] = m['seller_quantity'];
+          return m;
+        }).toList();
+      }
     } else {
-      result = await sqldb.readData(
-        "SELECT * FROM products WHERE categorie_id = ? AND categoris_uuid = ? AND user_id = ? AND is_delete=0 ",
-        [categorieId, categorisuuId, id],
-      );
+      if (categorieId == 2) {
+        result = await sqldb.readData(
+          "SELECT * FROM products WHERE product_quantity <= 0 AND categoris_uuid = ? AND user_id = ? AND is_delete=0",
+          [categorisuuId, id],
+        );
+      } else {
+        result = await sqldb.readData(
+          "SELECT * FROM products WHERE categorie_id = ? AND categoris_uuid = ? AND user_id = ? AND is_delete=0 ",
+          [categorieId, categorisuuId, id],
+        );
+      }
     }
 
     return result;
@@ -510,17 +575,32 @@ class ProdactData {
   Future<List<Map<String, Object?>>> searchpro(Map data) async {
     final query = data["codepar"];
 
-    final result = await sqldb.readData(
-      "SELECT * FROM products WHERE user_id = ? AND codepar = ?",
-      [id, query],
-    );
+    List<Map<String, Object?>> result;
+    if (loginType == 'seller' || loginType == 'saller') {
+      final rawResult = await sqldb.readData(
+        "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.user_id = ? AND s.user_id = ? AND p.codepar = ? AND s.seller_id = ? AND s.quantity > 0",
+        [id, id, query, sellerId?.toString()],
+      );
+      result = rawResult.map((e) {
+        final m = Map<String, Object?>.from(e);
+        m['product_quantity'] = m['seller_quantity'];
+        return m;
+      }).toList();
+    } else {
+      result = await sqldb.readData(
+        "SELECT * FROM products WHERE user_id = ? AND codepar = ?",
+        [id, query],
+      );
+    }
     print("===========================$result");
     return result;
   }
 
-  Future<List<Map<String, Object?>>> checkProductExistsByCode(String? barcode, String? productCode) async {
+  Future<List<Map<String, Object?>>> checkProductExistsByCode(
+      String? barcode, String? productCode) async {
     List<dynamic> args = [id];
-    String query = "SELECT * FROM products WHERE user_id = ? AND is_delete = 0 AND (";
+    String query =
+        "SELECT * FROM products WHERE user_id = ? AND is_delete = 0 AND (";
     List<String> conditions = [];
 
     if (barcode != null && barcode.isNotEmpty) {

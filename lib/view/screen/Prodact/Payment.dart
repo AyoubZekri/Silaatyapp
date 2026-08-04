@@ -58,6 +58,7 @@ class _PaymentState extends State<Payment> {
                   title: "التاريخ".tr,
                   body: controller.currentDate.toString(),
                 ),
+
                 Container(
                   height: 50,
                 ),
@@ -67,11 +68,11 @@ class _PaymentState extends State<Payment> {
                 ),
                 Costumtextfildpatment(
                   MyController: controller.paymentController,
-                  hintText: "Payment".tr,
-                  label: "Payment".tr,
+                  hintText: "المبلغ المدفوع".tr,
+                  label: "الدفعة (للفاتورة الحالية)".tr,
                   iconData: Icons.payment_outlined,
                   valid: (Val) {
-                    return validInput(Val!, 100, 5, "Email");
+                    return null;
                   },
                   enabled: controller.selectedCustomer == "virtualCustomer".tr
                       ? false
@@ -83,15 +84,29 @@ class _PaymentState extends State<Payment> {
                     controller.update();
                   },
                   MyController: controller.discountController,
-                  hintText: "Discount".tr,
-                  label: "Discount".tr,
+                  hintText: "قيمة الخصم".tr,
+                  label: "الخصم".tr,
                   iconData: Icons.discount_outlined,
                   valid: (Val) {
-                    return validInput(Val!, 100, 5, "Email");
+                    return null;
                   },
                   enabled: true,
                   keyboardType: TextInputType.number,
                 ),
+                if (controller.oldDebtTotal > 0) ...[
+                  SizedBox(height: 10),
+                  Costumtextfildpatment(
+                    MyController: controller.oldDebtPaymentController,
+                    hintText: "المبلغ المدفوع للديون السابقة".tr,
+                    label: "دفع الديون القديمة".tr,
+                    iconData: Icons.payment_outlined,
+                    valid: (Val) {
+                      return null;
+                    },
+                    enabled: true,
+                    keyboardType: TextInputType.number,
+                  ),
+                ],
                 SizedBox(
                   height: 20,
                 ),
@@ -111,6 +126,11 @@ class _PaymentState extends State<Payment> {
                         title: "الخصم".tr,
                         body: controller.discountController.text,
                       ),
+                      if (controller.oldDebtTotal > 0)
+                        Costumcartdetailspayment(
+                          title: "الديون القديمة".tr,
+                          body: formavalue(controller.oldDebtTotal),
+                        ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -140,7 +160,7 @@ class _PaymentState extends State<Payment> {
                             controller.statusrequest == Statusrequest.loadeng,
                         onPressed: () {
                           if (!validInputsnak(controller.paymentController.text,
-                              1, 20, "Name".tr)) {
+                              0, 20, "Name".tr, empty: false)) {
                             return;
                           }
                           controller.addSale(printInvoice: true);
@@ -157,7 +177,7 @@ class _PaymentState extends State<Payment> {
                             controller.statusrequest == Statusrequest.loadeng,
                         onPressed: () {
                           if (!validInputsnak(controller.paymentController.text,
-                              1, 20, "Name".tr)) {
+                              0, 20, "Name".tr, empty: false)) {
                             return;
                           }
                           controller.addSale(printInvoice: false);

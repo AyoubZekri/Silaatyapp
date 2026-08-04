@@ -7,6 +7,9 @@ import 'package:Silaaty/core/class/Statusrequest.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:Silaaty/core/constant/routes.dart';
 import 'package:Silaaty/data/datasource/Remote/Prodact/Prodact_data.dart';
+import 'package:Silaaty/data/datasource/Remote/SellerData.dart';
+import 'package:Silaaty/core/class/Crud.dart';
+import 'package:Silaaty/core/class/Sqldb.dart';
 import 'package:Silaaty/data/model/Product_Model.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
@@ -82,41 +85,240 @@ class Informationitemcontroller extends GetxController {
       showSnackbar("error".tr, "الكمية يجب أن تكون أكبر من 0".tr, Colors.red);
       return;
     }
-    final double quantity =
-        double.parse(InfoProduct.first.productQuantity ?? "0") +
-            double.parse(quantityController.text);
+    final double oldQty =
+        double.parse(InfoProduct.first.productQuantity ?? "0");
+    final double addedQty = double.parse(quantityController.text);
+    final double newQty = oldQty + addedQty;
+
     final data = {
       "uuid": uuid,
-      'product_quantity': quantity,
+      'product_quantity': newQty,
+      'product_name': InfoProduct.first.productName ?? "",
+      'product_price_purchase': InfoProduct.first.productPricePurchase ?? 0.0,
       'updated_at': DateTime.now().toIso8601String(),
     };
 
-    Map<String, Object?> dataSale = {
-      "uuid": Uuid().v4(),
-      "product_uuid": uuid,
-      "product_name": InfoProduct.first.productName ?? "",
-      "quantity": double.parse(quantityController.text),
-      "unit_price": InfoProduct.first.productPricePurchase ?? "0",
-      "subtotal": double.parse(quantityController.text) *
-          double.parse(InfoProduct.first.productPricePurchase.toString()),
-      "type_sales": 3, // 1 = in 2 = out 3
-      "user_id": id,
-      "created_at": DateTime.now().toIso8601String(),
-    };
+    var result = await prodactData.updateProduct(data, oldQty, newQty);
 
-    final result = await prodactData.updateQuantityProduct(data, dataSale);
-    print("========================================$result");
-    if (result) {
-      Get.find<RefreshService>().fire();
+    print("============================================== $result");
+
+    if (result == true) {
       Get.back();
       quantityController.clear();
       getProdact();
-    } else {
-      showSnackbar("error".tr, "operation_failed".tr, Colors.red);
       statusrequest = Statusrequest.failure;
     }
 
     update();
+  }
+
+  void showStockLocationsDialog(BuildContext context) async {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColor.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+        content: const SizedBox(
+          height: 100,
+          child: Center(
+              child:
+                  CircularProgressIndicator(color: AppColor.backgroundcolor)),
+        ),
+      ),
+    );
+
+    List<Map<String, dynamic>> locations = [];
+    double totalQuantity = 0.0;
+
+    if (InfoProduct.isNotEmpty) {
+      double warehouseQty =
+          double.tryParse(InfoProduct.first.productQuantity ?? "0") ?? 0.0;
+      totalQuantity += warehouseQty;
+      locations.add({
+        'name': 'المستودع الرئيسي'.tr,
+        'quantity': InfoProduct.first.productQuantity ?? "0",
+        'icon': Icons.warehouse_rounded,
+        'color': Colors.blue,
+      });
+    }
+
+    try {
+      SellerData sellerData = SellerData(Get.find<Crud>());
+      var response = await sellerData.getSellers();
+      List sellers = [];
+      if (response != null && response['status'] == 1) {
+        sellers = response['data']['sellers'] ?? [];
+      }
+
+      SQLDB sqldb = SQLDB();
+      var stockData = await sqldb.readData('''
+        SELECT seller_id, quantity FROM seller_stock WHERE product_uuid = ? AND user_id = ? AND quantity > 0
+      ''', [uuid, id]);
+
+      for (var stock in stockData) {
+        String sellerId = stock['seller_id'].toString();
+        String quantity = stock['quantity'].toString();
+        double sellerQty = double.tryParse(quantity) ?? 0.0;
+        totalQuantity += sellerQty;
+
+        String sellerName = "بائع غير معروف".tr;
+        for (var seller in sellers) {
+          if (seller['id'].toString() == sellerId) {
+            sellerName = seller['name'];
+            break;
+          }
+        }
+
+        locations.add({
+          'name': sellerName,
+          'quantity': quantity,
+          'icon': Icons.storefront_rounded,
+          'color': Colors.orange,
+        });
+      }
+    } catch (e) {
+      print("Error fetching stock locations: $e");
+    }
+
+    Get.back(); // Close loading dialog
+
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        child: Container(
+          width: double.infinity,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 20,
+                spreadRadius: 5,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: const BoxDecoration(
+                  color: AppColor.backgroundcolor,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+                ),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.location_on,
+                            color: Colors.white, size: 28),
+                        const SizedBox(width: 8),
+                        Text(
+                          "أماكن تواجد المنتج".tr,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "${'الإجمالي'.tr}: ${totalQuantity == totalQuantity.truncateToDouble() ? totalQuantity.truncate() : totalQuantity.toStringAsFixed(2)} ${InfoProduct.isNotEmpty && InfoProduct.first.type == 2 ? "Kg" : ""}",
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white70,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.all(16),
+                  itemCount: locations.length,
+                  separatorBuilder: (context, index) =>
+                      const Divider(height: 20),
+                  itemBuilder: (context, index) {
+                    final loc = locations[index];
+                    return Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: loc['color'].withOpacity(0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child:
+                              Icon(loc['icon'], color: loc['color'], size: 24),
+                        ),
+                        const SizedBox(width: 15),
+                        Expanded(
+                          child: Text(
+                            loc['name'],
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                            ),
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 12, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: loc['color'].withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(
+                                color: loc['color'].withOpacity(0.3)),
+                          ),
+                          child: Text(
+                            "${loc['quantity']} ${InfoProduct.first.type == 2 ? "Kg" : ""}",
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.bold,
+                              color: loc['color'],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  },
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: SizedBox(
+                  width: double.infinity,
+                  height: 45,
+                  child: ElevatedButton(
+                    onPressed: () => Get.back(),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey.shade200,
+                      foregroundColor: Colors.black87,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                    child: Text("إغلاق".tr,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   void showWidthSelectionDialog({

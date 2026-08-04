@@ -163,4 +163,94 @@ class Transactiondata {
       return [];
     }
   }
+
+  Future<List<Map<String, dynamic>>> getCustomerUnpaidInvoices(
+      String transactionUuid) async {
+    try {
+      final invoiesRows = await _db.readData(
+        "SELECT id, uuid, Payment_price, discount, invoies_date FROM invoies WHERE Transaction_uuid = ? ORDER BY invoies_date ASC",
+        [transactionUuid],
+      );
+
+      List<Map<String, dynamic>> unpaidInvoices = [];
+
+      for (var inv in invoiesRows) {
+        String invUuid = inv["uuid"] as String;
+        // المبلغ المدفوع من الفاتورة (سواء كانت دفعة قديمة أو جديدة)
+        double payment = (inv["Payment_price"] as num?)?.toDouble() ?? 0;
+        // الخصم المطبق على الفاتورة
+        double discount = (inv["discount"] as num?)?.toDouble() ?? 0;
+
+        final salesRows = await _db.readData(
+          "SELECT subtotal as price FROM sales WHERE invoie_uuid = ?",
+          [invUuid],
+        );
+
+        // إجمالي قيمة الفاتورة
+        double totalAmount = 0;
+        for (var sale in salesRows) {
+          totalAmount += (sale["price"] as num?)?.toDouble() ?? 0;
+        }
+
+        // الدين المتبقي (المبلغ الإجمالي - ما تم دفعه - الخصم)
+        double remainingDebt = totalAmount - payment - discount;
+
+        if (remainingDebt > 0.001) {
+          // Floating point comparison tolerance
+          unpaidInvoices.add({
+            "uuid": invUuid,
+            "total_amount": totalAmount, // إجمالي الفاتورة
+            "paid_amount": payment, // الدفعات
+            "discount": discount, // الخصم
+            "remaining_debt": remainingDebt, // الدين المتبقي
+            "invoies_date": inv[
+                "invoies_date"], // تاريخ الفاتورة (يحدد ما إذا كان الدين قديماً أو جديداً)
+          });
+        }
+      }
+
+      return unpaidInvoices;
+    } catch (e) {
+      print("Error in getCustomerUnpaidInvoices: $e");
+      return [];
+    }
+  }
+
+  Future<bool> payOldDebt(String invoiceUuid, double additionalPayment) async {
+    try {
+      final invoiesRows = await _db.readData(
+        "SELECT Payment_price FROM invoies WHERE uuid = ?",
+        [invoiceUuid],
+      );
+
+      if (invoiesRows.isNotEmpty) {
+        double currentPayment =
+            (invoiesRows.first["Payment_price"] as num?)?.toDouble() ?? 0;
+        double newPayment = currentPayment + additionalPayment;
+
+        final result = await _db.update(
+          "invoies",
+          {
+            'Payment_price': newPayment,
+            'updated_at': DateTime.now().toIso8601String(),
+          },
+          "uuid = ?",
+          [invoiceUuid],
+        );
+
+        if (result > 0) {
+          await _syncService.addToQueue("invoies", invoiceUuid, "update", {
+            "uuid": invoiceUuid,
+            'Payment_price': newPayment,
+            'updated_at': DateTime.now().toIso8601String(),
+          });
+          return true;
+        }
+      }
+      return false;
+    } catch (e) {
+      print("Error in payOldDebt: $e");
+      return false;
+    }
+  }
 }

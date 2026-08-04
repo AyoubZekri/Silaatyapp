@@ -127,7 +127,8 @@ class SyncService {
           }
         } catch (e) {
           print("❌ استثناء: $e");
-          if (e is SocketException || e.toString().contains('SocketException')) {
+          if (e is SocketException ||
+              e.toString().contains('SocketException')) {
             print("📴 انقطاع الاتصال، إيقاف الرفع لجدول $table...");
             return;
           }
@@ -468,6 +469,8 @@ class SyncService {
 
     await pushQueue("categoris");
     await pushQueue("products");
+    await pushQueue("seller_stocks");
+    await pushQueue("stock_transfers");
     await pushQueue("transactions");
     await pushQueue("invoies");
     await pushQueue("sales");
@@ -477,6 +480,8 @@ class SyncService {
 
     await pullFromServer("categoris");
     await pullFromServer("products");
+    await pullFromServer("seller_stocks");
+    await pullFromServer("stock_transfers");
     await pullFromServer("transactions");
     await pullFromServer("invoies");
     await pullFromServer("sales");

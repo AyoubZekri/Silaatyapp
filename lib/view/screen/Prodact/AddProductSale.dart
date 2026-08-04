@@ -328,46 +328,53 @@ class _AddProductSaleState extends State<AddProductSale> {
                                       },
                                       child: Customcartaddproductsale(
                                         type: item.type ?? 1,
-                                        isSelected:
-                                            controller.isSelected(item.uuid!),
-                                        quantity:
-                                            controller.getQuantity(item.uuid!),
+                                        isSelected: controller.isSelected(item.uuid!),
+                                        quantity: controller.getQuantity(item.uuid!),
                                         onTap: () {
-                                          if (item.type == 2 &&
-                                              !controller
-                                                  .isSelected(item.uuid!)) {
-                                            _showWeightPriceDialog(
-                                                controller, item);
+                                          if (item.type == 2 && !controller.isSelected(item.uuid!)) {
+                                            _showWeightPriceDialog(controller, item);
                                           } else {
-                                            final maxQty = num.tryParse(
-                                                    item.productQuantity ??
-                                                        '0') ??
-                                                0;
-                                            controller.toggleSelect(
-                                                item.uuid!, maxQty);
+                                            num maxQty = num.tryParse(item.productQuantity ?? '0') ?? 0;
+                                            if (controller.globalSaleUnit == 'carton' && item.type != 2) {
+                                              num itemsPerCarton = num.tryParse(item.itemsPerCarton?.toString() ?? '0') ?? 0;
+                                              if (itemsPerCarton > 0) {
+                                                maxQty = (maxQty / itemsPerCarton).floor();
+                                              }
+                                            }
+                                            controller.toggleSelect(item.uuid!, maxQty);
                                           }
                                         },
                                         onIncrement: () {
-                                          final maxQty = num.tryParse(
-                                                  item.productQuantity ??
-                                                      '0') ??
-                                              0;
+                                          num maxQty = num.tryParse(item.productQuantity ?? '0') ?? 0;
+                                          if (controller.globalSaleUnit == 'carton' && item.type != 2) {
+                                            num itemsPerCarton = num.tryParse(item.itemsPerCarton?.toString() ?? '0') ?? 0;
+                                            if (itemsPerCarton > 0) {
+                                              maxQty = (maxQty / itemsPerCarton).floor();
+                                            }
+                                          }
                                           if (item.type == 2) {
-                                            _showWeightPriceDialog(
-                                                controller, item);
+                                            _showWeightPriceDialog(controller, item);
                                           } else {
-                                            controller.increment(
-                                                item.uuid!, maxQty);
+                                            controller.increment(item.uuid!, maxQty);
                                           }
                                         },
-                                        onDecrement: () =>
-                                            controller.decrement(item.uuid!),
+                                        onDecrement: () => controller.decrement(item.uuid!),
                                         image: true,
                                         imgitems: item.productImage,
                                         Title: item.productName ?? '',
-                                        Body: num.tryParse(
-                                                item.productQuantity ?? '0') ??
-                                            0,
+                                        Body: (() {
+                                          num totalQty = num.tryParse(item.productQuantity ?? '0') ?? 0;
+                                          if (item.type == 2) {
+                                            return "${formatQuantity(totalQty)} ${'kg'.tr}";
+                                          }
+                                          if (controller.globalSaleUnit == 'carton') {
+                                            num itemsPerCarton = num.tryParse(item.itemsPerCarton?.toString() ?? '0') ?? 0;
+                                            if (itemsPerCarton > 0) {
+                                              return "${formatQuantity((totalQty / itemsPerCarton).floor())} كرتون";
+                                            }
+                                          }
+                                          return "${formatQuantity(totalQty)} حبة";
+                                        })(),
                                         Price: formavalue(controller.getSalePrice(item)),
                                         uuid: item.uuid!,
                                       ),
