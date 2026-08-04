@@ -63,6 +63,50 @@ class Informationitemcontroller extends GetxController {
   }
 
   deleteProdact(String uid) async {
+    SQLDB sqldb = SQLDB();
+    var stockData = await sqldb.readData('''
+      SELECT SUM(quantity) as total_qty FROM seller_stock WHERE product_uuid = ? AND quantity > 0
+    ''', [uid]);
+
+    double sellerQty = 0;
+    if (stockData.isNotEmpty && stockData[0]['total_qty'] != null) {
+      sellerQty = double.tryParse(stockData[0]['total_qty'].toString()) ?? 0.0;
+    }
+
+    if (sellerQty > 0) {
+      Get.dialog(
+        AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+          title: Row(
+            children: [
+              const Icon(Icons.warning_amber_rounded, color: Colors.orange, size: 30),
+              const SizedBox(width: 10),
+              Text("تنبيه".tr, style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.red)),
+            ],
+          ),
+          content: Text(
+            "لا يمكن حذف هذا المنتج لوجود كمية منه ( $sellerQty ) لدى البائعين. الرجاء استرجاع الكمية من البائعين أولاً.".tr,
+            style: const TextStyle(fontSize: 16),
+          ),
+          actions: [
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColor.backgroundcolor,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
+              onPressed: () => Get.back(),
+              child: Text("حسناً".tr, style: const TextStyle(color: Colors.white)),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
     update();
     Map<String, Object?> data = {'uuid': uid};
     var result = await prodactData.deleteProdact(data);

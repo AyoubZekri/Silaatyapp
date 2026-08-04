@@ -563,11 +563,11 @@ class Shwoinvoicecontroller extends GetxController {
                 child: pw.Column(
                   children: [
                     _buildPdfRow(arabicFont, englishFont, "المجموع الفرعي".tr,
-                        "${invoices!.totalSales} ${'DA'.tr}"),
+                        "${invoices!.invoiceSum ?? invoices!.totalSales ?? 0} ${'DA'.tr}"),
                     if (oldDebtTotal > 0)
                       _buildPdfRow(arabicFont, englishFont, "الديون السابقة".tr,
                           "$oldDebtTotal ${'DA'.tr}"),
-                    if (invoices!.discount != 0)
+                    if (double.tryParse(invoices!.discount.toString()) != 0 && double.tryParse(invoices!.discount.toString()) != null)
                       _buildPdfRow(arabicFont, englishFont, "الخصم".tr,
                           "${invoices!.discount} ${'DA'.tr}"),
                     if (oldDebtTotal > 0)
@@ -575,12 +575,12 @@ class Shwoinvoicecontroller extends GetxController {
                           arabicFont,
                           englishFont,
                           "الإجمالي المطلوب".tr,
-                          "${(invoices!.totalSales ?? 0) + oldDebtTotal - (invoices!.discount ?? 0)} ${'DA'.tr}"),
+                          "${(invoices!.invoiceSum ?? invoices!.totalSales ?? 0) + oldDebtTotal - (invoices!.discount ?? 0)} ${'DA'.tr}"),
                     _buildPdfRow(arabicFont, englishFont, "المدفوع".tr,
-                        "${double.tryParse(productSale?.paymentprice.toString() ?? "0") ?? 0} ${'DA'.tr}"),
+                        "${invoices!.paymentPrice ?? 0} ${'DA'.tr}"),
                     pw.Divider(color: PdfColor.fromHex("#4F46E5")),
                     _buildPdfRow(arabicFont, englishFont, "الباقي".tr,
-                        "${getRemainingAmount() + oldDebtTotal} ${'DA'.tr}",
+                        "${((invoices!.invoiceSum ?? invoices!.totalSales ?? 0) + oldDebtTotal - (invoices!.discount ?? 0) - (invoices!.paymentPrice ?? 0))} ${'DA'.tr}",
                         isBold: true),
                   ],
                 ),

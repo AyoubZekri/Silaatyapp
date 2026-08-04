@@ -107,38 +107,48 @@ class _CustemStockTransferDialogState extends State<CustemStockTransferDialog> {
                   ],
                 ),
                 value: selectedProductUuid,
-                items: widget.products.map((product) {
-                  return DropdownMenuItem<String>(
-                    value: widget.isReturn ? product['product_uuid'] : product['uuid'],
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Expanded(
-                          child: Text(
-                            "${product['product_name']}",
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: widget.isReturn ? Colors.orange.shade50 : AppColor.backgroundcolor.withOpacity(0.1),
-                            borderRadius: BorderRadius.circular(8),
-                          ),
-                          child: Text(
-                            "${'الكمية'.tr}: ${widget.isReturn ? product['quantity'] : product['product_quantity']}",
-                            style: TextStyle(
-                              color: widget.isReturn ? Colors.orange.shade800 : AppColor.backgroundcolor,
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
+                items: () {
+                  var seen = <String>{};
+                  var uniqueProducts = widget.products.where((product) {
+                    String val = widget.isReturn ? product['product_uuid'] : product['uuid'];
+                    if (seen.contains(val)) return false;
+                    seen.add(val);
+                    return true;
+                  }).toList();
+                  
+                  return uniqueProducts.map((product) {
+                    return DropdownMenuItem<String>(
+                      value: widget.isReturn ? product['product_uuid'] : product['uuid'],
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Expanded(
+                            child: Text(
+                              "${product['product_name']}",
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontWeight: FontWeight.bold),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: widget.isReturn ? Colors.orange.shade50 : AppColor.backgroundcolor.withOpacity(0.1),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: Text(
+                              "${'الكمية'.tr}: ${widget.isReturn ? product['quantity'] : product['product_quantity']}",
+                              style: TextStyle(
+                                color: widget.isReturn ? Colors.orange.shade800 : AppColor.backgroundcolor,
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }).toList();
+                }(),
                 onChanged: (value) {
                   setState(() {
                     selectedProductUuid = value;

@@ -129,7 +129,6 @@ class SQLDB {
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
       ''');
-   
     }
   }
 
