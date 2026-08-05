@@ -11,6 +11,7 @@ import 'package:get/get.dart';
 
 import '../../../core/class/handlingview.dart';
 import '../../widget/addItem/CustomAddquntetyproductdialog.dart';
+import 'package:Silaaty/core/services/Services.dart';
 
 class Informationitem extends StatefulWidget {
   const Informationitem({super.key});
@@ -22,6 +23,7 @@ class Informationitem extends StatefulWidget {
 class _InformationitemState extends State<Informationitem> {
   @override
   Widget build(BuildContext context) {
+    int accountType = Get.find<Myservices>().sharedPreferences?.getInt("account_type") ?? 1;
     Informationitemcontroller controller = Get.put(Informationitemcontroller());
     return Scaffold(
       backgroundColor: AppColor.white,
@@ -202,26 +204,28 @@ class _InformationitemState extends State<Informationitem> {
                             children: [
                               Expanded(child: Text("الكمية".tr, style: const TextStyle(fontSize: 16))),
                               Text("${product.productQuantity}${product.type == 2 ? "Kg" : ""}", style: const TextStyle(fontWeight: FontWeight.bold)),
-                              const SizedBox(width: 10),
-                              InkWell(
-                                onTap: () {
-                                  controller.showStockLocationsDialog(context);
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                  decoration: BoxDecoration(
-                                    color: AppColor.backgroundcolor.withOpacity(0.1),
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Row(
-                                    children: [
-                                      const Icon(Icons.location_on, size: 16, color: AppColor.backgroundcolor),
-                                      const SizedBox(width: 4),
-                                      Text("أماكن التواجد".tr, style: const TextStyle(color: AppColor.backgroundcolor, fontWeight: FontWeight.bold, fontSize: 12)),
-                                    ],
+                              if (accountType == 2) ...[
+                                const SizedBox(width: 10),
+                                InkWell(
+                                  onTap: () {
+                                    controller.showStockLocationsDialog(context);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: AppColor.backgroundcolor.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        const Icon(Icons.location_on, size: 16, color: AppColor.backgroundcolor),
+                                        const SizedBox(width: 4),
+                                        Text("أماكن التواجد".tr, style: const TextStyle(color: AppColor.backgroundcolor, fontWeight: FontWeight.bold, fontSize: 12)),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
+                              ],
                             ],
                           ),
                         ),

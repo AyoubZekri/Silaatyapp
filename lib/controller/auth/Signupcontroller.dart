@@ -26,6 +26,14 @@ class SignupControllerImp extends SignupController {
   Statusrequest statusrequest = Statusrequest.none;
   bool obscureText = true;
   bool obscureText2 = true;
+  int accountType = 1;
+
+  void changeAccountType(int? val) {
+    if (val != null) {
+      accountType = val;
+      update();
+    }
+  }
 
   showPassword() {
     obscureText = obscureText == true ? false : true;
@@ -43,7 +51,7 @@ class SignupControllerImp extends SignupController {
       statusrequest = Statusrequest.loadeng;
       update();
       var response = await signupData.postdata(Username.text, Password.text,
-          Email.text, Phone.text, confermPassword.text, familyname.text);
+          Email.text, Phone.text, confermPassword.text, familyname.text, accountType);
       if (response == Statusrequest.serverfailure) {
         showSnackbar("error".tr, "noInternet".tr, Colors.red);
       }

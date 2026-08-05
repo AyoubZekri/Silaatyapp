@@ -28,6 +28,7 @@ class Informationitemcontroller extends GetxController {
 
   late int? id = myservices.sharedPreferences?.getInt("id");
   int get sellType => myservices.sharedPreferences?.getInt("sell_type") ?? 3;
+  int get accountType => myservices.sharedPreferences?.getInt("account_type") ?? 1;
 
   ProdactData prodactData = ProdactData(Get.find());
   Statusrequest statusrequest = Statusrequest.none;
@@ -69,7 +70,7 @@ class Informationitemcontroller extends GetxController {
     ''', [uid]);
 
     double sellerQty = 0;
-    if (stockData.isNotEmpty && stockData[0]['total_qty'] != null) {
+    if (accountType == 2 && stockData.isNotEmpty && stockData[0]['total_qty'] != null) {
       sellerQty = double.tryParse(stockData[0]['total_qty'].toString()) ?? 0.0;
     }
 

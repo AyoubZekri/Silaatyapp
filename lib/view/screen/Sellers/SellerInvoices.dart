@@ -10,6 +10,7 @@ import 'package:Silaaty/view/widget/Bills/Custemaddinvoice.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:Silaaty/core/services/Services.dart';
 
 import '../../../main.dart';
 
@@ -43,6 +44,7 @@ class _SellerInvoicesState extends State<SellerInvoices> with RouteAware {
 
   @override
   Widget build(BuildContext context) {
+    int accountType = Get.find<Myservices>().sharedPreferences?.getInt("account_type") ?? 1;
     return GetBuilder<SellerInvoicesController>(builder: (controller) {
       return Scaffold(
         backgroundColor: AppColor.white,
@@ -162,54 +164,56 @@ class _SellerInvoicesState extends State<SellerInvoices> with RouteAware {
                           ],
                         ),
                       ),
-                      const SizedBox(height: 15),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColor.backgroundcolor,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                      if (accountType == 2) ...[
+                        const SizedBox(height: 15),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColor.backgroundcolor,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                ),
+                                onPressed: () => controller.openSendStockDialog(),
+                                icon: const Icon(Icons.add_shopping_cart, size: 20),
+                                label: Text("تزويد المخزون".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                               ),
-                              onPressed: () => controller.openSendStockDialog(),
-                              icon: const Icon(Icons.add_shopping_cart, size: 20),
-                              label: Text("تزويد المخزون".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                             ),
-                          ),
-                          const SizedBox(width: 10),
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.orange.shade700,
-                                foregroundColor: Colors.white,
-                                padding: const EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.orange.shade700,
+                                  foregroundColor: Colors.white,
+                                  padding: const EdgeInsets.symmetric(vertical: 12),
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                                ),
+                                onPressed: () => controller.openReturnStockDialog(),
+                                icon: const Icon(Icons.remove_shopping_cart, size: 20),
+                                label: Text("استرجاع".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                               ),
-                              onPressed: () => controller.openReturnStockDialog(),
-                              icon: const Icon(Icons.remove_shopping_cart, size: 20),
-                              label: Text("استرجاع".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
                             ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 10),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue.shade700,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-                          ),
-                          onPressed: () => controller.showTransfersBottomSheet(),
-                          icon: const Icon(Icons.history, size: 20),
-                          label: Text("سجل التحويلات".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ],
                         ),
-                      ),
-                      const SizedBox(height: 10),
+                        const SizedBox(height: 10),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue.shade700,
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                            ),
+                            onPressed: () => controller.showTransfersBottomSheet(),
+                            icon: const Icon(Icons.history, size: 20),
+                            label: Text("سجل التحويلات".tr, style: const TextStyle(fontWeight: FontWeight.bold)),
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                      ],
                     ],
                   ),
                 ),

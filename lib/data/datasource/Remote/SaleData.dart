@@ -9,8 +9,13 @@ class Saledata {
   final SyncService _syncService = SyncService();
 
   int? get id => Get.find<Myservices>().sharedPreferences?.getInt("id");
-  String? get loginType => Get.find<Myservices>().sharedPreferences?.getString("loginType") ?? "admin";
-  int? get sellerId => Get.find<Myservices>().sharedPreferences?.getInt("sellerid");
+  String? get loginType =>
+      Get.find<Myservices>().sharedPreferences?.getString("loginType") ??
+      "admin";
+  int? get sellerId =>
+      Get.find<Myservices>().sharedPreferences?.getInt("sellerid");
+  int get accountType =>
+      Get.find<Myservices>().sharedPreferences?.getInt("account_type") ?? 1;
 
   /// إضافة فاتورة مع منتجاتها
   Future<Map<String, dynamic>> addSale(
@@ -31,7 +36,8 @@ class Saledata {
           final quantitySold = sale["quantity"];
           final type = sale["type_sales"] as int;
 
-          if (loginType == 'seller' || loginType == 'saller') {
+          if ((loginType == 'seller' || loginType == 'saller') &&
+              accountType == 2) {
             await txn.rawUpdate(
               '''
               UPDATE seller_stock
@@ -69,10 +75,12 @@ class Saledata {
         );
         final productUuid = sale["product_uuid"] as String;
         final type = sale["type_sales"] as int;
-        final quantitySold = double.tryParse(sale["quantity"]?.toString() ?? "0") ?? 0.0;
+        final quantitySold =
+            double.tryParse(sale["quantity"]?.toString() ?? "0") ?? 0.0;
         final quantityDelta = -quantitySold;
 
-        if (loginType == 'seller' || loginType == 'saller') {
+        if ((loginType == 'seller' || loginType == 'saller') &&
+            accountType == 2) {
           final result = await db.readData(
             '''
             SELECT uuid 
@@ -137,7 +145,8 @@ class Saledata {
     try {
       final sale = (await db.read(
         'sales',
-      )).firstWhere((e) => e['uuid'] == uuidSale);
+      ))
+          .firstWhere((e) => e['uuid'] == uuidSale);
 
       if (sale.isEmpty) {
         return {"status": 0, "error": "Sale not found"};
@@ -160,39 +169,45 @@ class Saledata {
         return {"status": 0, "error": "Invoice not found"};
       }
 
-      final isSellerInvoice = loginType == 'seller' || loginType == 'saller';
+      final isSellerInvoice =
+          (loginType == 'seller' || loginType == 'saller') && accountType == 2;
       final invoiceSellerId = sellerId;
 
       double currentProductQty = 0;
       if (isSellerInvoice) {
         final sellerStock = (await db.read("seller_stock")).firstWhere(
-          (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString(),
+          (e) =>
+              e["product_uuid"] == productUuid &&
+              e["seller_id"].toString() == invoiceSellerId?.toString(),
           orElse: () => <String, Object?>{},
         );
-          if (sellerStock.isEmpty) {
-            final newUuid = const Uuid().v4();
-            await db.insert("seller_stock", {
-              "uuid": newUuid,
-              "user_id": id,
-              "seller_id": invoiceSellerId.toString(),
-              "product_uuid": productUuid,
-              "quantity": 0,
-              "created_at": DateTime.now().toIso8601String(),
-              "updated_at": DateTime.now().toIso8601String(),
-            });
-            currentProductQty = 0;
-          } else {
-            currentProductQty = double.tryParse(sellerStock['quantity']?.toString() ?? "0") ?? 0;
-          }
+        if (sellerStock.isEmpty) {
+          final newUuid = const Uuid().v4();
+          await db.insert("seller_stock", {
+            "uuid": newUuid,
+            "user_id": id,
+            "seller_id": invoiceSellerId.toString(),
+            "product_uuid": productUuid,
+            "quantity": 0,
+            "created_at": DateTime.now().toIso8601String(),
+            "updated_at": DateTime.now().toIso8601String(),
+          });
+          currentProductQty = 0;
+        } else {
+          currentProductQty =
+              double.tryParse(sellerStock['quantity']?.toString() ?? "0") ?? 0;
+        }
       } else {
         final product = (await db.read('products')).firstWhere(
           (e) => e['uuid'] == productUuid,
-          orElse: () => <String, dynamic>{}, 
+          orElse: () => <String, dynamic>{},
         );
         if (product.isEmpty) {
           return {"status": 0, "error": "Product not found"};
         }
-        currentProductQty = double.tryParse(product['product_quantity']?.toString() ?? "0") ?? 0;
+        currentProductQty =
+            double.tryParse(product['product_quantity']?.toString() ?? "0") ??
+                0;
       }
 
       double paymentPrice =
@@ -269,7 +284,7 @@ class Saledata {
       );
 
       if (result2 > 0 && result1 > 0 && resultInv > 0) {
-        await _syncService.addToQueue("sales", "update", uuidSale, {
+        await _syncService.addToQueue("sales", uuidSale, "update", {
           "uuid": uuidSale,
           'quantity': newQty,
           "subtotal": unitPrice * newQty,
@@ -277,11 +292,14 @@ class Saledata {
         });
         if (isSellerInvoice) {
           final sellerStock = (await db.read("seller_stock")).firstWhere(
-            (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString(),
+            (e) =>
+                e["product_uuid"] == productUuid &&
+                e["seller_id"].toString() == invoiceSellerId?.toString(),
             orElse: () => <String, Object?>{},
           );
           if (sellerStock.isNotEmpty) {
-            await _syncService.addToQueue("seller_stock", sellerStock["uuid"] as String, "update", {
+            await _syncService.addToQueue(
+                "seller_stock", sellerStock["uuid"] as String, "update", {
               "uuid": sellerStock["uuid"],
               'quantity_delta': -diff,
               'updated_at': DateTime.now().toIso8601String(),
@@ -326,7 +344,8 @@ class Saledata {
       final String invoiceUuid = sale['invoie_uuid'];
       final int type = sale['type_sales'] as int;
 
-      final double unitPrice = double.tryParse(sale['unit_price']?.toString() ?? '0') ?? 0;
+      final double unitPrice =
+          double.tryParse(sale['unit_price']?.toString() ?? '0') ?? 0;
       final double subtotal = unitPrice * qty;
 
       /// 2. جلب الفاتورة
@@ -339,13 +358,16 @@ class Saledata {
         return {"status": 0, "error": "Invoice not found"};
       }
 
-      final isSellerInvoice = loginType == 'seller' || loginType == 'saller';
+      final isSellerInvoice =
+          (loginType == 'seller' || loginType == 'saller') && accountType == 2;
       final invoiceSellerId = sellerId;
 
       double currentQty = 0;
       if (isSellerInvoice) {
         final sellerStock = (await db.read("seller_stock")).firstWhere(
-          (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString(),
+          (e) =>
+              e["product_uuid"] == productUuid &&
+              e["seller_id"].toString() == invoiceSellerId?.toString(),
           orElse: () => <String, Object?>{},
         );
         if (sellerStock.isEmpty) {
@@ -361,7 +383,8 @@ class Saledata {
           });
           currentQty = 0;
         } else {
-          currentQty = double.tryParse(sellerStock['quantity']?.toString() ?? "0") ?? 0;
+          currentQty =
+              double.tryParse(sellerStock['quantity']?.toString() ?? "0") ?? 0;
         }
       } else {
         final product = (await db.read('products')).firstWhere(
@@ -395,7 +418,8 @@ class Saledata {
             syncProduct,
           );
 
-          final String categoryUuid = product['categoris_uuid']?.toString() ?? '';
+          final String categoryUuid =
+              product['categoris_uuid']?.toString() ?? '';
 
           if (categoryUuid.isNotEmpty) {
             final category = (await db.read('categoris')).firstWhere(
@@ -404,7 +428,8 @@ class Saledata {
             );
 
             if (category.isNotEmpty) {
-              final isDeleted = category['is_delete'] == 1 || category['is_delete'] == "1";
+              final isDeleted =
+                  category['is_delete'] == 1 || category['is_delete'] == "1";
 
               if (isDeleted) {
                 await db.update(
@@ -426,17 +451,22 @@ class Saledata {
               }
             }
           }
-          currentQty = double.tryParse(product['product_quantity']?.toString() ?? '0') ?? 0;
+          currentQty =
+              double.tryParse(product['product_quantity']?.toString() ?? '0') ??
+                  0;
         }
       }
 
       final double newProductQty = currentQty + qty;
 
-      double paymentPrice = double.tryParse(invoice['Payment_price']?.toString() ?? '0') ?? 0;
+      double paymentPrice =
+          double.tryParse(invoice['Payment_price']?.toString() ?? '0') ?? 0;
       paymentPrice -= subtotal;
       if (paymentPrice < 0) paymentPrice = 0;
 
-      final remainingSales = (await db.read('sales')).where((e) => e['invoie_uuid'] == invoiceUuid).toList();
+      final remainingSales = (await db.read('sales'))
+          .where((e) => e['invoie_uuid'] == invoiceUuid)
+          .toList();
 
       /// 4. تحديث المخزون
       int resultProduct = 0;
@@ -507,11 +537,14 @@ class Saledata {
       // Sync: تحديث المخزون المنتج
       if (isSellerInvoice) {
         final sellerStock = (await db.read("seller_stock")).firstWhere(
-          (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString(),
+          (e) =>
+              e["product_uuid"] == productUuid &&
+              e["seller_id"].toString() == invoiceSellerId?.toString(),
           orElse: () => <String, Object?>{},
         );
         if (sellerStock.isNotEmpty) {
-          await _syncService.addToQueue("seller_stock", sellerStock["uuid"] as String, "update", {
+          await _syncService.addToQueue(
+              "seller_stock", sellerStock["uuid"] as String, "update", {
             "uuid": sellerStock["uuid"],
             'quantity_delta': qty,
             'updated_at': DateTime.now().toIso8601String(),
@@ -554,7 +587,9 @@ class Saledata {
       /// 2. جلب جميع أسطر البيع المرتبطة بالفاتورة
       final sales = (await db.read(
         'sales',
-      )).where((e) => e['invoie_uuid'] == invoiceUuid).toList();
+      ))
+          .where((e) => e['invoie_uuid'] == invoiceUuid)
+          .toList();
 
       print("===================$sales");
 
@@ -571,7 +606,8 @@ class Saledata {
         return {"status": 1};
       }
 
-      final isSellerInvoice = loginType == 'seller' || loginType == 'saller';
+      final isSellerInvoice =
+          (loginType == 'seller' || loginType == 'saller') && accountType == 2;
       final invoiceSellerId = sellerId;
 
       /// 3. معالجة كل منتج
@@ -583,7 +619,9 @@ class Saledata {
         double currentQty = 0;
         if (isSellerInvoice) {
           final sellerStock = (await db.read("seller_stock")).firstWhere(
-            (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString(),
+            (e) =>
+                e["product_uuid"] == productUuid &&
+                e["seller_id"].toString() == invoiceSellerId?.toString(),
             orElse: () => <String, Object?>{},
           );
           if (sellerStock.isEmpty) {
@@ -599,7 +637,9 @@ class Saledata {
             });
             currentQty = 0;
           } else {
-            currentQty = double.tryParse(sellerStock['quantity']?.toString() ?? "0") ?? 0;
+            currentQty =
+                double.tryParse(sellerStock['quantity']?.toString() ?? "0") ??
+                    0;
           }
         } else {
           final product = (await db.read('products')).firstWhere(
@@ -633,7 +673,8 @@ class Saledata {
               syncProduct,
             );
 
-            final String categoryUuid = product['categoris_uuid']?.toString() ?? '';
+            final String categoryUuid =
+                product['categoris_uuid']?.toString() ?? '';
 
             if (categoryUuid.isNotEmpty) {
               final category = (await db.read('categoris')).firstWhere(
@@ -642,7 +683,8 @@ class Saledata {
               );
 
               if (category.isNotEmpty) {
-                final isDeleted = category['is_delete'] == 1 || category['is_delete'] == "1";
+                final isDeleted =
+                    category['is_delete'] == 1 || category['is_delete'] == "1";
 
                 if (isDeleted) {
                   await db.update(
@@ -664,7 +706,9 @@ class Saledata {
                 }
               }
             }
-            currentQty = double.tryParse(product['product_quantity']?.toString() ?? '0') ?? 0;
+            currentQty = double.tryParse(
+                    product['product_quantity']?.toString() ?? '0') ??
+                0;
           }
         }
 
@@ -699,11 +743,14 @@ class Saledata {
         /// Sync
         if (isSellerInvoice) {
           final sellerStock = (await db.read("seller_stock")).firstWhere(
-            (e) => e["product_uuid"] == productUuid && e["seller_id"].toString() == invoiceSellerId?.toString(),
+            (e) =>
+                e["product_uuid"] == productUuid &&
+                e["seller_id"].toString() == invoiceSellerId?.toString(),
             orElse: () => <String, Object?>{},
           );
           if (sellerStock.isNotEmpty) {
-            await _syncService.addToQueue("seller_stock", sellerStock["uuid"] as String, "update", {
+            await _syncService.addToQueue(
+                "seller_stock", sellerStock["uuid"] as String, "update", {
               "uuid": sellerStock["uuid"],
               'quantity_delta': qty,
               'updated_at': DateTime.now().toIso8601String(),

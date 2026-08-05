@@ -57,6 +57,9 @@ class Startpagecontrller extends GetxController {
           if (parentData["adresse"] != null) {
             myServices.sharedPreferences!.setString("adresse", parentData["adresse"]);
           }
+          if (parentData["account_type"] != null) {
+            myServices.sharedPreferences!.setInt("account_type", parentData["account_type"]);
+          }
           myServices.sharedPreferences!.setInt("Status", parentData["Status"]);
           
           if (parentData["date_experiment"] != null) {
@@ -91,6 +94,9 @@ class Startpagecontrller extends GetxController {
               .setInt("user_notify_status", user["user_notify_status"]);
           if (user["adresse"] != null)
             myServices.sharedPreferences!.setString("adresse", user["adresse"]);
+          if (user["account_type"] != null) {
+            myServices.sharedPreferences!.setInt("account_type", user["account_type"]);
+          }
           myServices.sharedPreferences!.setInt("Status", user["Status"]);
           print("==================================${user["date_experiment"]}");
           if (user["date_experiment"] != null) {

@@ -21,6 +21,8 @@ class ProdactData {
       "admin";
   int? get sellerId =>
       Get.find<Myservices>().sharedPreferences?.getInt("sellerid");
+  int get accountType =>
+      Get.find<Myservices>().sharedPreferences?.getInt("account_type") ?? 1;
 
   ProdactData(this.crud);
 
@@ -340,7 +342,7 @@ class ProdactData {
     final query = data["query"];
 
     List<Map<String, Object?>> result;
-    if (loginType == 'seller' || loginType == 'saller') {
+    if ((loginType == 'seller' || loginType == 'saller') && accountType == 2) {
       final rawResult = await sqldb.readData(
         "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.user_id = ? AND s.user_id = ? AND p.product_name LIKE ? AND p.categorie_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
         [id, id, '%$query%', categorieId, sellerId?.toString()],
@@ -363,7 +365,7 @@ class ProdactData {
       Map<String, Object?> data) async {
     final categorieId = data["Categoris_id"];
     final List<Map<String, Object?>> result;
-    if (loginType == 'seller' || loginType == 'saller') {
+    if ((loginType == 'seller' || loginType == 'saller') && accountType == 2) {
       if (categorieId == 2) {
         final rawResult = await sqldb.readData(
           "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE s.quantity <= 0 AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ?",
@@ -408,7 +410,7 @@ class ProdactData {
     final categorisuuId = data["Categoris_uuid"];
     print("========$categorisuuId");
     final List<Map<String, Object?>> result;
-    if (loginType == 'seller' || loginType == 'saller') {
+    if ((loginType == 'seller' || loginType == 'saller') && accountType == 2) {
       if (categorieId == 2) {
         final rawResult = await sqldb.readData(
           "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE s.quantity <= 0 AND p.categoris_uuid = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ?",
@@ -576,7 +578,7 @@ class ProdactData {
     final query = data["codepar"];
 
     List<Map<String, Object?>> result;
-    if (loginType == 'seller' || loginType == 'saller') {
+    if ((loginType == 'seller' || loginType == 'saller') && accountType == 2) {
       final rawResult = await sqldb.readData(
         "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.user_id = ? AND s.user_id = ? AND p.codepar = ? AND s.seller_id = ? AND s.quantity > 0",
         [id, id, query, sellerId?.toString()],

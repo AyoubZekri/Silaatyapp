@@ -96,6 +96,10 @@ class Logincontroller extends GetxController {
                 response["data"]["sellerData"]["parent"]["family_name"]);
             myServices.sharedPreferences!.setInt("user_notify_status",
                 response["data"]["sellerData"]["parent"]["user_notify_status"]);
+            if (response["data"]["sellerData"]["parent"]["account_type"] != null) {
+              myServices.sharedPreferences!.setInt("account_type",
+                  response["data"]["sellerData"]["parent"]["account_type"]);
+            }
             if (response["data"]["sellerData"]["parent"]["adresse"] != null) {
               myServices.sharedPreferences!.setString("adresse",
                   response["data"]["sellerData"]["parent"]["adresse"]);
@@ -198,6 +202,10 @@ class Logincontroller extends GetxController {
                 "family_name", response["data"]["user"]["user"]["family_name"]);
             myServices.sharedPreferences!.setInt("user_notify_status",
                 response["data"]["user"]["user"]["user_notify_status"]);
+            if (response["data"]["user"]["user"]["account_type"] != null) {
+              myServices.sharedPreferences!.setInt("account_type",
+                  response["data"]["user"]["user"]["account_type"]);
+            }
             if (response["data"]["user"]["user"]["adresse"] != null) {
               myServices.sharedPreferences!.setString(
                   "adresse", response["data"]["user"]["user"]["adresse"]);

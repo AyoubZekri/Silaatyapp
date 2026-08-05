@@ -1,6 +1,7 @@
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:dropdown_button2/dropdown_button2.dart';
 import '../../../controller/auth/Signupcontroller.dart';
 import '../../../core/class/Statusrequest.dart';
 import '../../../core/class/handlingview.dart';
@@ -137,6 +138,70 @@ class _SignupState extends State<Signup> {
                             },
                           ),
                         ),
+                        const SizedBox(height: 15),
+                        GetBuilder<SignupControllerImp>(
+                          builder: (controller) => Container(
+                            margin: const EdgeInsets.only(top: 15, left: 25, right: 25),
+                            child: DropdownButtonFormField2<int>(
+                              value: controller.accountType,
+                              decoration: InputDecoration(
+                                floatingLabelBehavior: FloatingLabelBehavior.always,
+                                contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 15),
+                                label: Container(
+                                  margin: const EdgeInsets.symmetric(horizontal: 9),
+                                  child: Text("نوع الحساب".tr),
+                                ),
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(30),
+                                ),
+                              ),
+                              iconStyleData: const IconStyleData(
+                                icon: Padding(
+                                  padding: EdgeInsets.only(right: 15),
+                                  child: Icon(Icons.keyboard_arrow_down, color: AppColor.grey),
+                                ),
+                              ),
+                              dropdownStyleData: DropdownStyleData(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(20),
+                                  color: Colors.white,
+                                  border: Border.all(
+                                    color: const Color.fromARGB(255, 203, 201, 201),
+                                  ),
+                                ),
+                                elevation: 8,
+                              ),
+                              isExpanded: true,
+                              items: [1, 2].map((int value) {
+                                return DropdownMenuItem<int>(
+                                  value: value,
+                                  child: Row(
+                                    children: [
+                                      Icon(
+                                        value == 1 ? Icons.storefront_outlined : Icons.local_shipping_outlined,
+                                        color: AppColor.backgroundcolor,
+                                      ),
+                                      const SizedBox(width: 15),
+                                      Text(
+                                        value == 1 ? "محل".tr : "موزع".tr,
+                                        style: const TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: AppColor.backgroundcolor,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              }).toList(),
+                              onChanged: (int? newValue) {
+                                if (newValue != null) {
+                                  controller.changeAccountType(newValue);
+                                }
+                              },
+                            ),
+                          ),
+                        ),const SizedBox(height: 20),
                         Custembuttonauth(
                                 isLoading: controller.statusrequest == Statusrequest.loadeng,
                                 onPressed: () {

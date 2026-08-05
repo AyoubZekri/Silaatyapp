@@ -36,41 +36,58 @@ class VerifiycodesignupControllerImp extends VerifiycodesignupController {
     if (Statusrequest.success == statusrequest) {
       if (response["status"] == 1) {
         print(response["data"]["token"]);
+        myServices.sharedPreferences!.setString("loginType", "admin");
         myServices.sharedPreferences!
             .setInt("id", response['data']["user"]['id']);
         myServices.sharedPreferences!
             .setString("email", response['data']["user"]['email']);
         myServices.sharedPreferences!
             .setString("name", response["data"]["user"]["name"]);
-        myServices.sharedPreferences!.setString(
-            "phone", response["data"]["user"]["phone_number"]);
-        myServices.sharedPreferences!.setString(
-            "family_name", response["data"]["user"]["family_name"]);
+        myServices.sharedPreferences!
+            .setString("phone", response["data"]["user"]["phone_number"]);
+        myServices.sharedPreferences!
+            .setString("family_name", response["data"]["user"]["family_name"]);
         myServices.sharedPreferences!.setInt("user_notify_status",
             response["data"]["user"]["user_notify_status"]);
+        if (response["data"]["user"]["account_type"] != null) {
+          myServices.sharedPreferences!
+              .setInt("account_type", response["data"]["user"]["account_type"]);
+        }
         if (response["data"]["user"]["adresse"] != null) {
-          myServices.sharedPreferences!.setString(
-              "adresse", response["data"]["user"]["adresse"]);
+          myServices.sharedPreferences!
+              .setString("adresse", response["data"]["user"]["adresse"]);
         }
 
         if (response["data"]["user"]["logo_stor"] != null) {
-          myServices.sharedPreferences!.setString(
-              "logo_stor", response["data"]["user"]["logo_stor"]);
+          myServices.sharedPreferences!
+              .setString("logo_stor", response["data"]["user"]["logo_stor"]);
         }
 
         myServices.sharedPreferences!
             .setInt("Status", response["data"]["user"]["Status"]);
         if (response["data"]["user"]["date_experiment"] != null) {
-          myServices.sharedPreferences!.setString("date_experiment",
-              response["data"]["user"]["date_experiment"]);
+          myServices.sharedPreferences!.setString(
+              "date_experiment", response["data"]["user"]["date_experiment"]);
+        }
+        if (response["data"]["user"]["sell_type"] != null) {
+          myServices.sharedPreferences!.setInt(
+              "sell_type",
+              int.tryParse(response["data"]["user"]["sell_type"].toString()) ??
+                  1);
+        }
+        if (response["data"]["user"]["max_sellers"] != null) {
+          myServices.sharedPreferences!.setInt(
+              "max_sellers",
+              int.tryParse(
+                      response["data"]["user"]["max_sellers"].toString()) ??
+                  0);
         }
         myServices.sharedPreferences!
             .setString("token", response["data"]["token"]);
         myServices.sharedPreferences!.setString("step", "2");
         DateTime? experimentDate;
 
-        final experimentDateStr =
-            response["data"]["user"]["date_experiment"];
+        final experimentDateStr = response["data"]["user"]["date_experiment"];
 
         if (experimentDateStr != null &&
             experimentDateStr.toString().isNotEmpty) {
