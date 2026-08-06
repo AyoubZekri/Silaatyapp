@@ -20,7 +20,7 @@ class SQLDB {
     Database mydb = await openDatabase(
       path,
       onCreate: _onCreate,
-      version: 3,
+      version: 4,
       onUpgrade: _onUpgrade,
     );
     return mydb;
@@ -105,7 +105,7 @@ class SQLDB {
 
     if (oldversion < 3) {
       await db.execute('''
-      CREATE TABLE seller_stocks (
+      CREATE TABLE IF NOT EXISTS seller_stocks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uuid TEXT UNIQUE,
         user_id INTEGER NOT NULL,
@@ -118,7 +118,7 @@ class SQLDB {
       ''');
 
       await db.execute('''
-      CREATE TABLE stock_transfers (
+      CREATE TABLE IF NOT EXISTS stock_transfers (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uuid TEXT UNIQUE,
         user_id TEXT NOT NULL,
@@ -129,6 +129,14 @@ class SQLDB {
         updated_at TEXT DEFAULT CURRENT_TIMESTAMP
       )
       ''');
+    }
+    
+    if (oldversion < 4) {
+      try {
+        await db.execute('ALTER TABLE seller_stock RENAME TO seller_stocks');
+      } catch (e) {
+        print("Table seller_stock might not exist or already renamed: \$e");
+      }
     }
   }
 
@@ -316,7 +324,7 @@ class SQLDB {
 
     /// جدول مخزون البائعين
     await db.execute('''
-      CREATE TABLE seller_stock (
+      CREATE TABLE seller_stocks (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         uuid TEXT UNIQUE,
         user_id TEXT NOT NULL,

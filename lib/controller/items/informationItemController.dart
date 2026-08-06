@@ -66,7 +66,7 @@ class Informationitemcontroller extends GetxController {
   deleteProdact(String uid) async {
     SQLDB sqldb = SQLDB();
     var stockData = await sqldb.readData('''
-      SELECT SUM(quantity) as total_qty FROM seller_stock WHERE product_uuid = ? AND quantity > 0
+      SELECT SUM(quantity) as total_qty FROM seller_stocks WHERE product_uuid = ? AND quantity > 0
     ''', [uid]);
 
     double sellerQty = 0;
@@ -198,7 +198,7 @@ class Informationitemcontroller extends GetxController {
 
       SQLDB sqldb = SQLDB();
       var stockData = await sqldb.readData('''
-        SELECT seller_id, quantity FROM seller_stock WHERE product_uuid = ? AND user_id = ? AND quantity > 0
+        SELECT seller_id, quantity FROM seller_stocks WHERE product_uuid = ? AND user_id = ? AND quantity > 0
       ''', [uuid, id]);
 
       for (var stock in stockData) {

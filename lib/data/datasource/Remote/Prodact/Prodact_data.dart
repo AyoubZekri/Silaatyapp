@@ -344,7 +344,7 @@ class ProdactData {
     List<Map<String, Object?>> result;
     if ((loginType == 'seller' || loginType == 'saller') && accountType == 2) {
       final rawResult = await sqldb.readData(
-        "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.user_id = ? AND s.user_id = ? AND p.product_name LIKE ? AND p.categorie_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
+        "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stocks s ON p.uuid = s.product_uuid WHERE p.user_id = ? AND s.user_id = ? AND p.product_name LIKE ? AND p.categorie_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
         [id, id, '%$query%', categorieId, sellerId?.toString()],
       );
       result = rawResult.map((e) {
@@ -368,7 +368,7 @@ class ProdactData {
     if ((loginType == 'seller' || loginType == 'saller') && accountType == 2) {
       if (categorieId == 2) {
         final rawResult = await sqldb.readData(
-          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE s.quantity <= 0 AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ?",
+          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stocks s ON p.uuid = s.product_uuid WHERE s.quantity <= 0 AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ?",
           [id, id, sellerId?.toString()],
         );
         result = rawResult.map((e) {
@@ -378,7 +378,7 @@ class ProdactData {
         }).toList();
       } else {
         final rawResult = await sqldb.readData(
-          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.categorie_id = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
+          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stocks s ON p.uuid = s.product_uuid WHERE p.categorie_id = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
           [categorieId, id, id, sellerId?.toString()],
         );
         result = rawResult.map((e) {
@@ -413,7 +413,7 @@ class ProdactData {
     if ((loginType == 'seller' || loginType == 'saller') && accountType == 2) {
       if (categorieId == 2) {
         final rawResult = await sqldb.readData(
-          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE s.quantity <= 0 AND p.categoris_uuid = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ?",
+          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stocks s ON p.uuid = s.product_uuid WHERE s.quantity <= 0 AND p.categoris_uuid = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ?",
           [categorisuuId, id, id, sellerId?.toString()],
         );
         result = rawResult.map((e) {
@@ -423,7 +423,7 @@ class ProdactData {
         }).toList();
       } else {
         final rawResult = await sqldb.readData(
-          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.categorie_id = ? AND p.categoris_uuid = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
+          "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stocks s ON p.uuid = s.product_uuid WHERE p.categorie_id = ? AND p.categoris_uuid = ? AND p.user_id = ? AND s.user_id = ? AND p.is_delete=0 AND s.seller_id = ? AND s.quantity > 0",
           [categorieId, categorisuuId, id, id, sellerId?.toString()],
         );
         result = rawResult.map((e) {
@@ -580,7 +580,7 @@ class ProdactData {
     List<Map<String, Object?>> result;
     if ((loginType == 'seller' || loginType == 'saller') && accountType == 2) {
       final rawResult = await sqldb.readData(
-        "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stock s ON p.uuid = s.product_uuid WHERE p.user_id = ? AND s.user_id = ? AND p.codepar = ? AND s.seller_id = ? AND s.quantity > 0",
+        "SELECT p.*, s.quantity as seller_quantity FROM products p JOIN seller_stocks s ON p.uuid = s.product_uuid WHERE p.user_id = ? AND s.user_id = ? AND p.codepar = ? AND s.seller_id = ? AND s.quantity > 0",
         [id, id, query, sellerId?.toString()],
       );
       result = rawResult.map((e) {

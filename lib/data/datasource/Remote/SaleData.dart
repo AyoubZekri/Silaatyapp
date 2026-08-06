@@ -40,7 +40,7 @@ class Saledata {
               accountType == 2) {
             await txn.rawUpdate(
               '''
-              UPDATE seller_stock
+              UPDATE seller_stocks
               SET quantity = MAX(quantity - ?, 0)
               WHERE product_uuid = ? AND seller_id = ?
               ''',
@@ -83,8 +83,8 @@ class Saledata {
             accountType == 2) {
           final result = await db.readData(
             '''
-            SELECT uuid 
-            from seller_stock
+            SELECT uuid, quantity 
+            from seller_stocks
             WHERE product_uuid = ? AND seller_id = ?
             ''',
             [productUuid, sellerId?.toString()],
@@ -92,10 +92,10 @@ class Saledata {
           if (result.isNotEmpty) {
             final updatedSellerStockData = {
               "uuid": result[0]["uuid"],
-              "quantity_delta": quantityDelta,
+              "quantity": result[0]["quantity"],
             };
             await _syncService.addToQueue(
-              "seller_stock",
+              "seller_stocks",
               updatedSellerStockData["uuid"] as String,
               "update",
               updatedSellerStockData,
@@ -117,13 +117,13 @@ class Saledata {
 
           final updatedProductData = {
             "uuid": productUuid,
-            "quantity_delta": quantityDelta,
+            "product_quantity": result[0]["product_quantity"],
           };
 
           await _syncService.addToQueue(
             "products",
             productUuid,
-            "insert",
+            "update",
             updatedProductData,
           );
         }
@@ -175,7 +175,7 @@ class Saledata {
 
       double currentProductQty = 0;
       if (isSellerInvoice) {
-        final sellerStock = (await db.read("seller_stock")).firstWhere(
+        final sellerStock = (await db.read("seller_stocks")).firstWhere(
           (e) =>
               e["product_uuid"] == productUuid &&
               e["seller_id"].toString() == invoiceSellerId?.toString(),
@@ -183,7 +183,7 @@ class Saledata {
         );
         if (sellerStock.isEmpty) {
           final newUuid = const Uuid().v4();
-          await db.insert("seller_stock", {
+          await db.insert("seller_stocks", {
             "uuid": newUuid,
             "user_id": id,
             "seller_id": invoiceSellerId.toString(),
@@ -253,7 +253,7 @@ class Saledata {
       int result2 = 0;
       if (isSellerInvoice) {
         result2 = await db.update(
-          'seller_stock',
+          'seller_stocks',
           {
             'quantity': newProductQty,
             'updated_at': DateTime.now().toIso8601String(),
@@ -291,7 +291,7 @@ class Saledata {
           'updated_at': DateTime.now().toIso8601String(),
         });
         if (isSellerInvoice) {
-          final sellerStock = (await db.read("seller_stock")).firstWhere(
+          final sellerStock = (await db.read("seller_stocks")).firstWhere(
             (e) =>
                 e["product_uuid"] == productUuid &&
                 e["seller_id"].toString() == invoiceSellerId?.toString(),
@@ -299,16 +299,16 @@ class Saledata {
           );
           if (sellerStock.isNotEmpty) {
             await _syncService.addToQueue(
-                "seller_stock", sellerStock["uuid"] as String, "update", {
+                "seller_stocks", sellerStock["uuid"] as String, "update", {
               "uuid": sellerStock["uuid"],
-              'quantity_delta': -diff,
+              'quantity': newProductQty,
               'updated_at': DateTime.now().toIso8601String(),
             });
           }
         } else {
           await _syncService.addToQueue("products", productUuid, "update", {
             "uuid": productUuid,
-            'quantity_delta': -diff,
+            'product_quantity': newProductQty,
             'updated_at': DateTime.now().toIso8601String(),
           });
         }
@@ -364,7 +364,7 @@ class Saledata {
 
       double currentQty = 0;
       if (isSellerInvoice) {
-        final sellerStock = (await db.read("seller_stock")).firstWhere(
+        final sellerStock = (await db.read("seller_stocks")).firstWhere(
           (e) =>
               e["product_uuid"] == productUuid &&
               e["seller_id"].toString() == invoiceSellerId?.toString(),
@@ -372,7 +372,7 @@ class Saledata {
         );
         if (sellerStock.isEmpty) {
           final newUuid = const Uuid().v4();
-          await db.insert("seller_stock", {
+          await db.insert("seller_stocks", {
             "uuid": newUuid,
             "user_id": id,
             "seller_id": invoiceSellerId.toString(),
@@ -472,7 +472,7 @@ class Saledata {
       int resultProduct = 0;
       if (isSellerInvoice) {
         resultProduct = await db.update(
-          'seller_stock',
+          'seller_stocks',
           {
             'quantity': newProductQty,
             'updated_at': DateTime.now().toIso8601String(),
@@ -536,7 +536,7 @@ class Saledata {
 
       // Sync: تحديث المخزون المنتج
       if (isSellerInvoice) {
-        final sellerStock = (await db.read("seller_stock")).firstWhere(
+        final sellerStock = (await db.read("seller_stocks")).firstWhere(
           (e) =>
               e["product_uuid"] == productUuid &&
               e["seller_id"].toString() == invoiceSellerId?.toString(),
@@ -544,16 +544,17 @@ class Saledata {
         );
         if (sellerStock.isNotEmpty) {
           await _syncService.addToQueue(
-              "seller_stock", sellerStock["uuid"] as String, "update", {
+              "seller_stocks", sellerStock["uuid"] as String, "update", {
             "uuid": sellerStock["uuid"],
-            'quantity_delta': qty,
+            'quantity': newProductQty,
             'updated_at': DateTime.now().toIso8601String(),
           });
         }
       } else {
         await _syncService.addToQueue('products', productUuid, 'update', {
           'uuid': productUuid,
-          'quantity_delta': qty,
+          'product_quantity': newProductQty,
+          'updated_at': DateTime.now().toIso8601String(),
         });
       }
 
@@ -618,7 +619,7 @@ class Saledata {
 
         double currentQty = 0;
         if (isSellerInvoice) {
-          final sellerStock = (await db.read("seller_stock")).firstWhere(
+          final sellerStock = (await db.read("seller_stocks")).firstWhere(
             (e) =>
                 e["product_uuid"] == productUuid &&
                 e["seller_id"].toString() == invoiceSellerId?.toString(),
@@ -626,7 +627,7 @@ class Saledata {
           );
           if (sellerStock.isEmpty) {
             final newUuid = const Uuid().v4();
-            await db.insert("seller_stock", {
+            await db.insert("seller_stocks", {
               "uuid": newUuid,
               "user_id": id,
               "seller_id": invoiceSellerId.toString(),
@@ -717,7 +718,7 @@ class Saledata {
         /// تحديث المخزون
         if (isSellerInvoice) {
           await db.update(
-            'seller_stock',
+            'seller_stocks',
             {
               'quantity': newQty,
               'updated_at': DateTime.now().toIso8601String(),
@@ -742,7 +743,7 @@ class Saledata {
 
         /// Sync
         if (isSellerInvoice) {
-          final sellerStock = (await db.read("seller_stock")).firstWhere(
+          final sellerStock = (await db.read("seller_stocks")).firstWhere(
             (e) =>
                 e["product_uuid"] == productUuid &&
                 e["seller_id"].toString() == invoiceSellerId?.toString(),
@@ -750,16 +751,17 @@ class Saledata {
           );
           if (sellerStock.isNotEmpty) {
             await _syncService.addToQueue(
-                "seller_stock", sellerStock["uuid"] as String, "update", {
+                "seller_stocks", sellerStock["uuid"] as String, "update", {
               "uuid": sellerStock["uuid"],
-              'quantity_delta': qty,
+              'quantity': newQty,
               'updated_at': DateTime.now().toIso8601String(),
             });
           }
         } else {
           await _syncService.addToQueue('products', productUuid, 'update', {
             'uuid': productUuid,
-            'quantity_delta': qty,
+            'product_quantity': newQty,
+            'updated_at': DateTime.now().toIso8601String(),
           });
         }
 

@@ -36,7 +36,7 @@ class SellerStockData {
 
     return await dbClient.rawQuery('''
       SELECT s.uuid, s.product_uuid, s.quantity, p.product_name, p.type, p.items_per_carton 
-      FROM seller_stock s
+      FROM seller_stocks s
       LEFT JOIN products p ON s.product_uuid = p.uuid
       WHERE s.seller_id = ? AND s.user_id = ?
     ''', [sellerUuid, adminId]);
@@ -65,6 +65,8 @@ class SellerStockData {
     bool success = false;
     String adminIdStr = adminId?.toString() ?? "0";
 
+    List<Future<void> Function()> syncOperations = [];
+
     await dbClient.transaction((txn) async {
       // 1. Check if admin has enough stock
       var productResult = await txn.rawQuery(
@@ -79,60 +81,97 @@ class SellerStockData {
         throw Exception("Not enough quantity in main stock");
 
       // 2. Deduct from admin stock
+      String updatedAdminQty = (currentAdminQty - quantityToSend).toString();
       await txn.rawUpdate(
           'UPDATE products SET product_quantity = ? WHERE uuid = ?',
-          [(currentAdminQty - quantityToSend).toString(), productUuid]);
+          [updatedAdminQty, productUuid]);
+      syncOperations.add(() => _syncService.addToQueue('products', productUuid, 'update', {
+        'product_quantity': updatedAdminQty
+      }));
 
       // 3. Add to seller stock
       var sellerStockResult = await txn.rawQuery(
-          'SELECT id, quantity FROM seller_stock WHERE seller_id = ? AND product_uuid = ? AND user_id = ?',
+          'SELECT id, uuid, quantity FROM seller_stocks WHERE seller_id = ? AND product_uuid = ? AND user_id = ?',
           [sellerUuid, productUuid, adminIdStr]);
 
       if (sellerStockResult.isEmpty) {
         // Insert new record
+        String newSellerStockUuid = _generateUuid();
+        String now = DateTime.now().toIso8601String();
         await txn.rawInsert('''
-          INSERT INTO seller_stock (uuid, user_id, seller_id, product_uuid, quantity, created_at, updated_at) 
+          INSERT INTO seller_stocks (uuid, user_id, seller_id, product_uuid, quantity, created_at, updated_at) 
           VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', [
-          _generateUuid(),
+          newSellerStockUuid,
           adminId,
           sellerUuid,
           productUuid,
           quantityToSend,
-          DateTime.now().toIso8601String(),
-          DateTime.now().toIso8601String()
+          now,
+          now
         ]);
+        syncOperations.add(() => _syncService.addToQueue('seller_stocks', newSellerStockUuid, 'insert', {
+          'user_id': adminId,
+          'seller_id': sellerUuid,
+          'product_uuid': productUuid,
+          'quantity': quantityToSend,
+          'created_at': now,
+          'updated_at': now
+        }));
       } else {
         // Update existing record
+        String existingUuid = sellerStockResult.first['uuid'].toString();
         double currentSellerQty =
             double.parse(sellerStockResult.first['quantity'].toString());
+        String now = DateTime.now().toIso8601String();
+        double updatedQty = currentSellerQty + quantityToSend;
         await txn.rawUpdate(
-            'UPDATE seller_stock SET quantity = ?, updated_at = ? WHERE seller_id = ? AND product_uuid = ? AND user_id = ?',
+            'UPDATE seller_stocks SET quantity = ?, updated_at = ? WHERE seller_id = ? AND product_uuid = ? AND user_id = ?',
             [
-              currentSellerQty + quantityToSend,
-              DateTime.now().toIso8601String(),
+              updatedQty,
+              now,
               sellerUuid,
               productUuid,
               adminIdStr
             ]);
+        syncOperations.add(() => _syncService.addToQueue('seller_stocks', existingUuid, 'update', {
+          'quantity': updatedQty,
+          'updated_at': now
+        }));
       }
 
       // 4. Record transfer
+      String transferUuid = _generateUuid();
+      String transferNow = DateTime.now().toIso8601String();
       await txn.rawInsert('''
         INSERT INTO stock_transfers (uuid, user_id, seller_id, product_uuid, quantity_sent, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       ''', [
-        _generateUuid(),
+        transferUuid,
         adminIdStr,
         sellerUuid,
         productUuid,
         quantityToSend,
-        DateTime.now().toIso8601String(),
-        DateTime.now().toIso8601String()
+        transferNow,
+        transferNow
       ]);
+      syncOperations.add(() => _syncService.addToQueue('stock_transfers', transferUuid, 'insert', {
+        'user_id': adminIdStr,
+        'seller_id': sellerUuid,
+        'product_uuid': productUuid,
+        'quantity_sent': quantityToSend,
+        'created_at': transferNow,
+        'updated_at': transferNow
+      }));
 
       success = true;
     });
+
+    if (success) {
+      for (var op in syncOperations) {
+        await op();
+      }
+    }
 
     return success;
   }
@@ -146,29 +185,38 @@ class SellerStockData {
     bool success = false;
     String adminIdStr = adminId?.toString() ?? "0";
 
+    List<Future<void> Function()> syncOperations = [];
+
     await dbClient.transaction((txn) async {
       // 1. Check if seller has enough stock
       var sellerStockResult = await txn.rawQuery(
-          'SELECT quantity FROM seller_stock WHERE seller_id = ? AND product_uuid = ? AND user_id = ?',
+          'SELECT uuid, quantity FROM seller_stocks WHERE seller_id = ? AND product_uuid = ? AND user_id = ?',
           [sellerUuid, productUuid, adminIdStr]);
       if (sellerStockResult.isEmpty)
         throw Exception("Seller does not have this product");
 
+      String existingUuid = sellerStockResult.first['uuid'].toString();
       double currentSellerQty =
           double.parse(sellerStockResult.first['quantity'].toString());
       if (currentSellerQty < quantityToReturn)
         throw Exception("Seller does not have enough quantity to return");
 
       // 2. Deduct from seller stock
+      String now = DateTime.now().toIso8601String();
+      double updatedSellerQty = currentSellerQty - quantityToReturn;
       await txn.rawUpdate(
-          'UPDATE seller_stock SET quantity = ?, updated_at = ? WHERE seller_id = ? AND product_uuid = ? AND user_id = ?',
+          'UPDATE seller_stocks SET quantity = ?, updated_at = ? WHERE seller_id = ? AND product_uuid = ? AND user_id = ?',
           [
-            currentSellerQty - quantityToReturn,
-            DateTime.now().toIso8601String(),
+            updatedSellerQty,
+            now,
             sellerUuid,
             productUuid,
             adminIdStr
           ]);
+      syncOperations.add(() => _syncService.addToQueue('seller_stocks', existingUuid, 'update', {
+        'quantity': updatedSellerQty,
+        'updated_at': now
+      }));
 
       // 3. Add back to admin stock
       var productResult = await txn.rawQuery(
@@ -178,27 +226,47 @@ class SellerStockData {
         double currentAdminQty = double.tryParse(
                 productResult.first['product_quantity'].toString()) ??
             0.0;
+        String updatedAdminQty = (currentAdminQty + quantityToReturn).toString();
         await txn.rawUpdate(
             'UPDATE products SET product_quantity = ? WHERE uuid = ?',
-            [(currentAdminQty + quantityToReturn).toString(), productUuid]);
+            [updatedAdminQty, productUuid]);
+        syncOperations.add(() => _syncService.addToQueue('products', productUuid, 'update', {
+          'product_quantity': updatedAdminQty
+        }));
       }
 
       // 4. Record transfer (negative quantity represents return)
+      String transferUuid = _generateUuid();
+      String transferNow = DateTime.now().toIso8601String();
       await txn.rawInsert('''
         INSERT INTO stock_transfers (uuid, user_id, seller_id, product_uuid, quantity_sent, created_at, updated_at)
         VALUES (?, ?, ?, ?, ?, ?, ?)
       ''', [
-        _generateUuid(),
+        transferUuid,
         adminIdStr,
         sellerUuid,
         productUuid,
         -quantityToReturn,
-        DateTime.now().toIso8601String(),
-        DateTime.now().toIso8601String()
+        transferNow,
+        transferNow
       ]);
+      syncOperations.add(() => _syncService.addToQueue('stock_transfers', transferUuid, 'insert', {
+        'user_id': adminIdStr,
+        'seller_id': sellerUuid,
+        'product_uuid': productUuid,
+        'quantity_sent': -quantityToReturn,
+        'created_at': transferNow,
+        'updated_at': transferNow
+      }));
 
       success = true;
     });
+
+    if (success) {
+      for (var op in syncOperations) {
+        await op();
+      }
+    }
 
     return success;
   }
