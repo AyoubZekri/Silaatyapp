@@ -26,6 +26,7 @@ class Customaddquntetyproductdialog extends StatefulWidget {
   final Key? form;
   final String title;
   final bool isDecimal;
+  final Widget? cartonWidget;
 
   const Customaddquntetyproductdialog(
       {super.key,
@@ -36,6 +37,7 @@ class Customaddquntetyproductdialog extends StatefulWidget {
       this.form,
       required this.title,
       this.isDecimal = false,
+      this.cartonWidget,
       required this.onChanged});
 
   @override
@@ -175,6 +177,7 @@ class _AddInvoiceDialogState extends State<Customaddquntetyproductdialog> {
                 ],
               ),
             ),
+            if (widget.cartonWidget != null) widget.cartonWidget!,
           ],
         ),
       ),

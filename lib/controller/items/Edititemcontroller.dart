@@ -355,7 +355,23 @@ class Edititemcontroller extends GetxController {
     if (product.itemsPerCarton != null && product.quantityPerCarton != null) {
       isByCarton = true;
       itemsPerCartonController.text = product.itemsPerCarton.toString();
-      numberOfCartonsController.text = product.quantityPerCarton.toString();
+      
+      double totalQty = double.tryParse(product.productQuantity?.toString() ?? "0") ?? 0.0;
+      double itemsPerCarton = double.tryParse(product.itemsPerCarton.toString()) ?? 1.0;
+      
+      if (itemsPerCarton > 0) {
+        double cartons = totalQty / itemsPerCarton;
+        if (cartons == cartons.toInt()) {
+          numberOfCartonsController.text = cartons.toInt().toString();
+        } else {
+          numberOfCartonsController.text = cartons.toStringAsFixed(3).replaceAll(RegExp(r'0*$'), '').replaceAll(RegExp(r'\.$'), '');
+        }
+      } else {
+        numberOfCartonsController.text = product.quantityPerCarton.toString();
+      }
+      
+      // Restore the exact quantity to avoid precision loss from the listener recalculation
+      quantityController.text = product.productQuantity ?? "";
     } else {
       isByCarton = false;
       itemsPerCartonController.clear();

@@ -44,6 +44,24 @@ class Informationitemcontroller extends GetxController {
     );
   }
 
+  bool isByCarton = false;
+  final numberOfCartonsController = TextEditingController();
+
+  void toggleByCarton(bool? value) {
+    isByCarton = value ?? false;
+    update();
+  }
+
+  void calculateCartonQuantity() {
+    if (isByCarton && InfoProduct.isNotEmpty) {
+      final itemsPerCarton = double.tryParse(InfoProduct.first.itemsPerCarton.toString()) ?? 1.0;
+      final numberOfCartons = double.tryParse(numberOfCartonsController.text) ?? 0.0;
+      final total = itemsPerCarton * numberOfCartons;
+      quantityController.text = InfoProduct.first.type == 2 ? total.toString() : total.toInt().toString();
+      update();
+    }
+  }
+
   getProdact() async {
     Map<String, Object?> data = {'uuid': uuid};
     var result = await prodactData.ShwoProdact(data);
@@ -150,6 +168,8 @@ class Informationitemcontroller extends GetxController {
     if (result == true) {
       Get.back();
       quantityController.clear();
+      numberOfCartonsController.clear();
+      isByCarton = false;
       getProdact();
       statusrequest = Statusrequest.failure;
     }
@@ -537,6 +557,14 @@ class Informationitemcontroller extends GetxController {
     super.onInit();
     uuid = Get.arguments['uuid'];
     getProdact();
+    numberOfCartonsController.addListener(calculateCartonQuantity);
+  }
+
+  @override
+  void onClose() {
+    quantityController.dispose();
+    numberOfCartonsController.dispose();
+    super.onClose();
   }
 
   List<int> convertImageToTSPL(img.Image image) {

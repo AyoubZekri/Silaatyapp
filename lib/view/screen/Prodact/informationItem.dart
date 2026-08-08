@@ -43,8 +43,27 @@ class _InformationitemState extends State<Informationitem> {
           if (controller.InfoProduct.isEmpty) {
             return const Center(child: CircularProgressIndicator());
           }
-
           final product = controller.InfoProduct[0];
+          
+          double totalQty = double.tryParse(product.productQuantity?.toString() ?? "0") ?? 0.0;
+          double price = double.tryParse(product.productPrice?.toString() ?? "0") ?? 0.0;
+          double pricePurchase = double.tryParse(product.productPricePurchase?.toString() ?? "0") ?? 0.0;
+          
+          double realTotalSale = totalQty * price;
+          double realTotalPurchase = totalQty * pricePurchase;
+
+          String remainingCartons = product.quantityPerCarton?.toString() ?? "0";
+          if (product.itemsPerCarton != null && product.itemsPerCarton.toString() != "0") {
+            double itemsPerCarton = double.tryParse(product.itemsPerCarton.toString()) ?? 1.0;
+            if (itemsPerCarton > 0) {
+              double cartons = totalQty / itemsPerCarton;
+              if (cartons == cartons.toInt()) {
+                remainingCartons = cartons.toInt().toString();
+              } else {
+                remainingCartons = cartons.toStringAsFixed(3).replaceAll(RegExp(r'0*$'), '').replaceAll(RegExp(r'\.$'), '');
+              }
+            }
+          }
 
           return Handlingview(
             statusrequest: controller.statusrequest,
@@ -124,26 +143,50 @@ class _InformationitemState extends State<Informationitem> {
                                 showDialog(
                                   context: context,
                                   builder: (context) {
-                                    return Customaddquntetyproductdialog(
-                                      isDecimal:
-                                          controller.InfoProduct.first.type ==
-                                              2,
-                                      Mycontroller:
-                                          controller.quantityController,
-                                      value: double.tryParse(
-                                            controller.quantityController.text,
-                                          ) ??
-                                          1,
-                                      onPressed: () {
-                                        controller.editquantityProduct();
-                                      },
-                                      onback: () {
-                                        Get.back();
-                                      },
-                                      title: 'إضافة كمية جديدة'.tr,
-                                      onChanged: (double p1) {
-                                        controller.onQuantityChanged(p1);
-                                      },
+                                    return GetBuilder<Informationitemcontroller>(
+                                      builder: (controller) => Customaddquntetyproductdialog(
+                                        isDecimal: controller.InfoProduct.first.type == 2,
+                                        Mycontroller: controller.quantityController,
+                                        value: double.tryParse(controller.quantityController.text) ?? 1,
+                                        onPressed: () {
+                                          controller.editquantityProduct();
+                                        },
+                                        onback: () {
+                                          Get.back();
+                                          controller.quantityController.clear();
+                                          controller.numberOfCartonsController.clear();
+                                          controller.isByCarton = false;
+                                          controller.update();
+                                        },
+                                        title: 'إضافة كمية جديدة'.tr,
+                                        onChanged: (double p1) {
+                                          controller.onQuantityChanged(p1);
+                                        },
+                                        cartonWidget: (controller.InfoProduct.first.itemsPerCarton != null && controller.InfoProduct.first.itemsPerCarton.toString() != "0")
+                                            ? Column(
+                                                children: [
+                                                  CheckboxListTile(
+                                                    title: Text("إضافة بالكرتون".tr, style: const TextStyle(fontWeight: FontWeight.bold, color: AppColor.backgroundcolor)),
+                                                    value: controller.isByCarton,
+                                                    activeColor: AppColor.backgroundcolor,
+                                                    onChanged: controller.toggleByCarton,
+                                                  ),
+                                                  if (controller.isByCarton)
+                                                    Padding(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                                      child: TextFormField(
+                                                        controller: controller.numberOfCartonsController,
+                                                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                                                        decoration: InputDecoration(
+                                                          labelText: "عدد الكراتين".tr,
+                                                          border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+                                                        ),
+                                                      ),
+                                                    ),
+                                                ],
+                                              )
+                                            : null,
+                                      ),
                                     );
                                   },
                                 );
@@ -229,17 +272,17 @@ class _InformationitemState extends State<Informationitem> {
                             ],
                           ),
                         ),
-                        if (product.itemsPerCarton != null && product.quantityPerCarton != null) ...[
+                        if (product.itemsPerCarton != null && product.quantityPerCarton != null && product.itemsPerCarton.toString() != "0") ...[
                           _infoRow("الكمية في الكرتون".tr, product.itemsPerCarton.toString()),
-                          _infoRow("عدد الكراتين".tr, product.quantityPerCarton.toString()),
+                          _infoRow("عدد الكراتين المتبقية".tr, remainingCartons),
                         ],
                         _infoRow(
                           "الإجمالي بيع".tr,
-                          "${product.productPriceTotal != null ? formavalue(product.productPriceTotal!) : ''}",
+                          "${formavalue(realTotalSale)}",
                         ),
                         _infoRow(
                           "الإجمالي شراء".tr,
-                          "${product.productPriceTotalPurchase != null ? formavalue(product.productPriceTotalPurchase!) : ''}",
+                          "${formavalue(realTotalPurchase)}",
                         ),
                         const Divider(height: 30),
                         _infoRow(
