@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -691,6 +692,28 @@ class Shwoinvoicecontroller extends GetxController {
 
       int printerWidth = savedWidth;
 
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.locationWhenInUse,
+      ].request();
+
+      if ((statuses[Permission.bluetoothConnect] != PermissionStatus.granted &&
+           statuses[Permission.bluetoothScan] != PermissionStatus.granted) ||
+           statuses[Permission.locationWhenInUse] != PermissionStatus.granted) {
+        if (statuses[Permission.bluetoothConnect] == PermissionStatus.permanentlyDenied ||
+            statuses[Permission.bluetoothScan] == PermissionStatus.permanentlyDenied ||
+            statuses[Permission.locationWhenInUse] == PermissionStatus.permanentlyDenied) {
+          showSnackbar("تنبيه".tr, "تم رفض الصلاحية نهائياً. سيتم فتح الإعدادات لتفعيلها يدوياً.".tr, Colors.red);
+          await openAppSettings();
+        } else {
+          showSnackbar("تنبيه".tr, "يجب إعطاء صلاحية الموقع والأجهزة المجاورة للوصول للطابعات".tr, Colors.orange);
+        }
+        isPrinting = false;
+        update();
+        return;
+      }
+
       bool bluetoothEnabled = await PrintBluetoothThermal.bluetoothEnabled;
 
       if (!bluetoothEnabled) {
@@ -766,8 +789,6 @@ class Shwoinvoicecontroller extends GetxController {
             myServices.sharedPreferences?.setString("mac_printer_address", selectedPrinter.macAdress);
             myServices.sharedPreferences?.setString("mac_printer_name", selectedPrinter.name);
         }
-
-        await PrintBluetoothThermal.isPermissionBluetoothGranted;
 
         try {
           await PrintBluetoothThermal.disconnect;

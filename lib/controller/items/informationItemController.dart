@@ -12,8 +12,10 @@ import 'package:Silaaty/core/class/Crud.dart';
 import 'package:Silaaty/core/class/Sqldb.dart';
 import 'package:Silaaty/data/model/Product_Model.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/rendering.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 import 'package:uuid/uuid.dart';
 import '../../core/functions/Snacpar.dart';
@@ -431,6 +433,28 @@ class Informationitemcontroller extends GetxController {
       bool isLabelMode =
           myservices.sharedPreferences?.getString("printer_mode") == "label";
 
+      Map<Permission, PermissionStatus> statuses = await [
+        Permission.bluetoothScan,
+        Permission.bluetoothConnect,
+        Permission.locationWhenInUse,
+      ].request();
+
+      if ((statuses[Permission.bluetoothConnect] != PermissionStatus.granted &&
+           statuses[Permission.bluetoothScan] != PermissionStatus.granted) ||
+           statuses[Permission.locationWhenInUse] != PermissionStatus.granted) {
+        if (statuses[Permission.bluetoothConnect] == PermissionStatus.permanentlyDenied ||
+            statuses[Permission.bluetoothScan] == PermissionStatus.permanentlyDenied ||
+            statuses[Permission.locationWhenInUse] == PermissionStatus.permanentlyDenied) {
+          showSnackbar("تنبيه".tr, "تم رفض الصلاحية نهائياً. سيتم فتح الإعدادات لتفعيلها يدوياً.".tr, Colors.red);
+          await openAppSettings();
+        } else {
+          showSnackbar("تنبيه".tr, "يجب إعطاء صلاحية الموقع والأجهزة المجاورة للوصول للطابعات".tr, Colors.orange);
+        }
+        isPrinting = false;
+        update();
+        return;
+      }
+
       bool bluetoothEnabled = await PrintBluetoothThermal.bluetoothEnabled;
       if (!bluetoothEnabled) {
         showSnackbar(
@@ -491,7 +515,7 @@ class Informationitemcontroller extends GetxController {
             myservices.sharedPreferences?.setString("mac_printer_name", selectedPrinter.name);
         }
 
-        await PrintBluetoothThermal.isPermissionBluetoothGranted;
+
         try {
           await PrintBluetoothThermal.disconnect;
         } catch (e) {}

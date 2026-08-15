@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:Silaaty/core/constant/Colorapp.dart';
 import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../core/functions/Snacpar.dart';
 
@@ -36,7 +37,6 @@ class Settengcontriller extends GetxController {
   gotoProfail() {
     Get.toNamed(Approutes.profail);
   }
-
 
   ChangePassword() {
     Get.toNamed(Approutes.reset);
@@ -73,13 +73,46 @@ class Settengcontriller extends GetxController {
   }
 
   Future<void> selectBluetoothPrinter() async {
-    bool bluetoothEnabled = await PrintBluetoothThermal.bluetoothEnabled;
-    if (!bluetoothEnabled) {
-      showSnackbar("تنبيه".tr, "الرجاء تفعيل البلوتوث أولاً".tr, Colors.orange);
+    Map<Permission, PermissionStatus> statuses = await [
+      Permission.bluetoothScan,
+      Permission.bluetoothConnect,
+      Permission.locationWhenInUse,
+    ].request();
+
+    if ((statuses[Permission.bluetoothConnect] != PermissionStatus.granted &&
+            statuses[Permission.bluetoothScan] != PermissionStatus.granted) ||
+        statuses[Permission.locationWhenInUse] != PermissionStatus.granted) {
+      if (statuses[Permission.bluetoothConnect] ==
+              PermissionStatus.permanentlyDenied ||
+          statuses[Permission.bluetoothScan] ==
+              PermissionStatus.permanentlyDenied ||
+          statuses[Permission.locationWhenInUse] ==
+              PermissionStatus.permanentlyDenied) {
+        showSnackbar(
+            "تنبيه".tr,
+            "تم رفض الصلاحية نهائياً. سيتم فتح الإعدادات لتفعيلها يدوياً.".tr,
+            Colors.red);
+        await openAppSettings();
+      } else {
+        showSnackbar(
+            "تنبيه".tr,
+            "يجب إعطاء صلاحية الموقع والأجهزة المجاورة للوصول للطابعات".tr,
+            Colors.orange);
+      }
+      bool bluetoothEnabled = await PrintBluetoothThermal.bluetoothEnabled;
+      if (!bluetoothEnabled) {
+        showSnackbar(
+            "تنبيه".tr, "الرجاء تفعيل البلوتوث أولاً".tr, Colors.orange);
+        return;
+      }
+
+      // Request permissions dynamically before fetching paired devices.
+
       return;
     }
 
-    final List<BluetoothInfo> pairedDevices = await PrintBluetoothThermal.pairedBluetooths;
+    final List<BluetoothInfo> pairedDevices =
+        await PrintBluetoothThermal.pairedBluetooths;
 
     if (pairedDevices.isEmpty) {
       showSnackbar("تنبيه".tr, "لا توجد طابعات مقترنة".tr, Colors.orange);
@@ -98,7 +131,8 @@ class Settengcontriller extends GetxController {
             itemBuilder: (context, index) {
               final device = pairedDevices[index];
               return ListTile(
-                leading: const Icon(Icons.print, color: AppColor.backgroundcolor),
+                leading:
+                    const Icon(Icons.print, color: AppColor.backgroundcolor),
                 title: Text(device.name),
                 subtitle: Text(device.macAdress),
                 onTap: () => Get.back(result: device),
@@ -110,11 +144,13 @@ class Settengcontriller extends GetxController {
     );
 
     if (selectedPrinter != null) {
-      myServices.sharedPreferences?.setString("mac_printer_address", selectedPrinter.macAdress);
-      myServices.sharedPreferences?.setString("mac_printer_name", selectedPrinter.name);
-      
+      myServices.sharedPreferences
+          ?.setString("mac_printer_address", selectedPrinter.macAdress);
+      myServices.sharedPreferences
+          ?.setString("mac_printer_name", selectedPrinter.name);
+
       await PrintBluetoothThermal.disconnect;
-      
+
       showSnackbar("نجاح".tr, "تم تحديد الطابعة بنجاح".tr, Colors.green);
       update();
     }
@@ -191,8 +227,12 @@ class Settengcontriller extends GetxController {
                     const SizedBox(height: 10),
                     ListTile(
                       leading: const Icon(Icons.bluetooth, color: Colors.blue),
-                      title: Text(controller.myServices.sharedPreferences?.getString("mac_printer_name") ?? "اختر طابعة بلوتوث".tr),
-                      subtitle: Text(controller.myServices.sharedPreferences?.getString("mac_printer_address") ?? "غير محدد".tr),
+                      title: Text(controller.myServices.sharedPreferences
+                              ?.getString("mac_printer_name") ??
+                          "اختر طابعة بلوتوث".tr),
+                      subtitle: Text(controller.myServices.sharedPreferences
+                              ?.getString("mac_printer_address") ??
+                          "غير محدد".tr),
                       trailing: const Icon(Icons.arrow_forward_ios, size: 16),
                       onTap: () {
                         Get.back();
