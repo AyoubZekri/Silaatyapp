@@ -73,14 +73,17 @@ class _AddConvictState extends State<AddConvict> {
                           items: [
                             DropdownMenuItem(value: 1, child: Text("تجزئة".tr)),
                             if (controller.sellType >= 2)
-                              DropdownMenuItem(value: 2, child: Text("نصف جملة".tr)),
+                              DropdownMenuItem(
+                                  value: 2, child: Text("نصف جملة".tr)),
                             if (controller.sellType >= 3)
-                              DropdownMenuItem(value: 3, child: Text("جملة".tr)),
+                              DropdownMenuItem(
+                                  value: 3, child: Text("جملة".tr)),
                           ],
                           value: controller.customerSaleType,
                           onChanged: (val) {
                             setState(() {
-                              if (val != null) controller.customerSaleType = val;
+                              if (val != null)
+                                controller.customerSaleType = val;
                             });
                           },
                         ),
@@ -94,27 +97,23 @@ class _AddConvictState extends State<AddConvict> {
                         ),
                         Custembutton(
                           text: "Add".tr,
-                          isLoading: controller.statusRequest == Statusrequest.loadeng,
+                          isLoading:
+                              controller.statusRequest == Statusrequest.loadeng,
                           onPressed: () {
-                            if (!validInputsnak(
-                                controller.nameController.text,
-                                1,
-                                10,
-                                "Name".tr)) {
+                            if (!validInputsnak(controller.nameController.text,
+                                1, 1000, "Name".tr)) {
                               return;
                             }
                             if (!validInputsnak(
                                 controller.familyNameController.text,
-                                1,
-                                10,
-                                "FrsetName".tr)) {
+                                0,
+                                1000,
+                                "FrsetName".tr,
+                                empty: false)) {
                               return;
                             }
-                            if (!validInputsnak(
-                                controller.phoneController.text,
-                                10,
-                                12,
-                                "Phone Numper".tr)) {
+                            if (!validInputsnak(controller.phoneController.text,
+                                2, 1000, "Phone Numper".tr)) {
                               return;
                             }
                             controller.type = 2;

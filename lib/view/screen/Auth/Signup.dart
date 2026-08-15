@@ -69,7 +69,7 @@ class _SignupState extends State<Signup> {
                           label: "إسم التاجر".tr,
                           iconData: Icons.person_2_outlined,
                           valid: (Val) {
-                            return validInput(Val!, 20, 1, "username");
+                            return validInput(Val!, 2000, 1, "username");
                           },
                         ),
                         Custemtextformauth(
@@ -79,7 +79,7 @@ class _SignupState extends State<Signup> {
                           label: "إسم المتجر".tr,
                           iconData: Icons.person_2_outlined,
                           valid: (Val) {
-                            return validInput(Val!, 20, 1, "username");
+                            return validInput(Val!, 2000, 1, "username");
                           },
                         ),
                         Custemtextformauth(
@@ -89,7 +89,7 @@ class _SignupState extends State<Signup> {
                           label: "Email".tr,
                           iconData: Icons.email_outlined,
                           valid: (Val) {
-                            return validInput(Val!, 100, 5, "Email");
+                            return validInput(Val!, 10000, 5, "Email");
                           },
                         ),
                         Custemtextformauth(
@@ -116,7 +116,7 @@ class _SignupState extends State<Signup> {
                                 ? Icons.visibility_off
                                 : Icons.visibility,
                             valid: (Val) {
-                              return validInput(Val!, 20, 6, "password");
+                              return validInput(Val!, 200, 6, "password");
                             },
                           ),
                         ),
@@ -134,7 +134,7 @@ class _SignupState extends State<Signup> {
                                 ? Icons.visibility_off
                                 : Icons.visibility,
                             valid: (Val) {
-                              return validInput(Val!, 20, 6, "password");
+                              return validInput(Val!, 200, 6, "password");
                             },
                           ),
                         ),

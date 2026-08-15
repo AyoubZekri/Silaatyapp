@@ -189,7 +189,7 @@ class _PaymentState extends State<Shwoinvoice> {
                                               if (!validInputsnak(
                                                   controller.qtyController.text,
                                                   1,
-                                                  20,
+                                                  100000,
                                                   "Name".tr)) {
                                                 return;
                                               }

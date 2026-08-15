@@ -119,7 +119,7 @@ class _ProfaileState extends State<Profaile> {
                           hintText: "إسم المتجر".tr,
                           label: "إسم المتجر".tr,
                           valid: (Val) {
-                            return validInput(Val!, 100, 3, "username");
+                            return validInput(Val!, 1000, 3, "username");
                           },
                           keyboardType: TextInputType.name,
                           contentPaddingvertical: 10,
@@ -152,7 +152,7 @@ class _ProfaileState extends State<Profaile> {
                           hintText: "adresse".tr,
                           label: "adresse".tr,
                           valid: (Val) {
-                            return validInput(Val!, 100, 3, "username");
+                            return validInput(Val!, 1000, 3, "username");
                           },
                           keyboardType: TextInputType.emailAddress,
                           contentPaddingvertical: 10,

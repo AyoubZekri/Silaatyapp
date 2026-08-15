@@ -121,7 +121,7 @@ class Login extends StatelessWidget {
                               label: "2".tr,
                               iconData: Icons.email_outlined,
                               valid: (Val) {
-                                return validInput(Val!, 100, 5, "email");
+                                return validInput(Val!, 1000, 5, "email");
                               },
                               keyboardType: TextInputType.emailAddress,
                             ),
@@ -140,7 +140,7 @@ class Login extends StatelessWidget {
                                     ? Icons.visibility_off
                                     : Icons.visibility,
                                 valid: (Val) {
-                                  return validInput(Val!, 20, 6, "Password");
+                                  return validInput(Val!, 200, 6, "Password");
                                 },
                               ),
                             ),

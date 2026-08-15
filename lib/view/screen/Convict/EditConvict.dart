@@ -96,18 +96,19 @@ class _EditConvictState extends State<EditConvict> {
                           isLoading: controller.statusrequest == Statusrequest.loadeng,
                           onPressed: () {
                             if (!validInputsnak(controller.nameController.text,
-                                1, 10, "Name".tr)) {
+                                1, 1000, "Name".tr)) {
                               return;
                             }
                             if (!validInputsnak(
                                 controller.familyNameController.text,
-                                1,
-                                10,
-                                "FrsetName".tr)) {
+                                0,
+                                1000,
+                                "FrsetName".tr,
+                              empty: false)) {
                               return;
                             }
                             if (!validInputsnak(controller.phoneController.text,
-                                10, 12, "Phone Numper".tr)) {
+                                1, 1000, "Phone Numper".tr)) {
                               return;
                             }
                             controller.editTransaction();

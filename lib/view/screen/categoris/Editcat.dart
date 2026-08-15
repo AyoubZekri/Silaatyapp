@@ -120,9 +120,9 @@ class _EditcatState extends State<Editcat> {
                               text: "Add".tr,
                               onPressed: () {
                                 if (!validInputsnak(controler.nameController.text, 1,
-                                    20, "Name Categoris".tr)) return;
+                                    2000, "Name Categoris".tr)) return;
                                 if (!validInputsnak(controler.nameController.text, 1,
-                                    20, "Name Categoris fr".tr)) return;
+                                    2000, "Name Categoris fr".tr)) return;
 
                                 controller.Editcat();
                               },

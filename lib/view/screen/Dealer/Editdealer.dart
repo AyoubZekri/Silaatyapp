@@ -40,85 +40,88 @@ class _EditDealerState extends State<EditDealer> {
             key: controller.formKey,
             child: GetBuilder<EditTransactionController>(builder: (controller) {
               return ListView(
-                  children: [
-                    Column(
-                      children: [
-                        Custemtextfromfild(
-                          MyController: controller.nameController,
-                          keyboardType: TextInputType.name,
-                          hintText: "Name".tr,
-                          label: "Name".tr,
-                          iconData: Icons.person_outline,
-                          enabled: true,
-                        ),
-                        Custemtextfromfild(
-                          MyController: controller.familyNameController,
-                          keyboardType: TextInputType.name,
-                          hintText: "FrsetName".tr,
-                          label: "FrsetName".tr,
-                          iconData: Icons.family_restroom,
-                          enabled: true,
-                        ),
-                        Custemtextfromfild(
-                          MyController: controller.phoneController,
-                          keyboardType: TextInputType.name,
-                          hintText: "Phone Numper".tr,
-                          label: "Phone Numper".tr,
-                          iconData: Icons.phone_outlined,
-                          enabled: true,
-                        ),
-                        Custemtextfromfild(
-                          MyController: controller.addressController,
-                          keyboardType: TextInputType.text,
-                          hintText: "العنوان".tr,
-                          label: "العنوان".tr,
-                          iconData: Icons.location_on_outlined,
-                          enabled: true,
-                        ),
-                        Custemtextfromfild(
-                          MyController: controller.supplierProductsController,
-                          keyboardType: TextInputType.text,
-                          hintText: "ماذا يبيع؟".tr,
-                          label: "ماذا يبيع؟".tr,
-                          iconData: Icons.store_outlined,
-                          enabled: true,
-                        ),
-                        Custemtextfromfild(
-                          MyController: controller.notesController,
-                          keyboardType: TextInputType.text,
-                          hintText: "ملاحظات".tr,
-                          label: "ملاحظات".tr,
-                          iconData: Icons.note_outlined,
-                          enabled: true,
-                        ),
-                        Custembutton(
-                          text: "Edit".tr,
-                          isLoading: controller.statusrequest == Statusrequest.loadeng,
-                          onPressed: () {
-                            if (!validInputsnak(controller.nameController.text,
-                                1, 10, "Name".tr)) {
-                              return;
-                            }
-                            if (!validInputsnak(
-                                controller.familyNameController.text,
-                                1,
-                                10,
-                                "FrsetName".tr)) {
-                              return;
-                            }
-                            if (!validInputsnak(controller.phoneController.text,
-                                10, 12, "Phone Numper".tr)) {
-                              return;
-                            }
-                            controller.editTransaction();
-                          },
-                          vertical: 10,
-                          horizontal: 10,
-                          paddingvertical: 15,
-                        )
-                      ],
-                    ),
-                  ],
+                children: [
+                  Column(
+                    children: [
+                      Custemtextfromfild(
+                        MyController: controller.nameController,
+                        keyboardType: TextInputType.name,
+                        hintText: "Name".tr,
+                        label: "Name".tr,
+                        iconData: Icons.person_outline,
+                        enabled: true,
+                      ),
+                      Custemtextfromfild(
+                        MyController: controller.familyNameController,
+                        keyboardType: TextInputType.name,
+                        hintText: "FrsetName".tr,
+                        label: "FrsetName".tr,
+                        iconData: Icons.family_restroom,
+                        enabled: true,
+                      ),
+                      Custemtextfromfild(
+                        MyController: controller.phoneController,
+                        keyboardType: TextInputType.name,
+                        hintText: "Phone Numper".tr,
+                        label: "Phone Numper".tr,
+                        iconData: Icons.phone_outlined,
+                        enabled: true,
+                      ),
+                      Custemtextfromfild(
+                        MyController: controller.addressController,
+                        keyboardType: TextInputType.text,
+                        hintText: "العنوان".tr,
+                        label: "العنوان".tr,
+                        iconData: Icons.location_on_outlined,
+                        enabled: true,
+                      ),
+                      Custemtextfromfild(
+                        MyController: controller.supplierProductsController,
+                        keyboardType: TextInputType.text,
+                        hintText: "ماذا يبيع؟".tr,
+                        label: "ماذا يبيع؟".tr,
+                        iconData: Icons.store_outlined,
+                        enabled: true,
+                      ),
+                      Custemtextfromfild(
+                        MyController: controller.notesController,
+                        keyboardType: TextInputType.text,
+                        hintText: "ملاحظات".tr,
+                        label: "ملاحظات".tr,
+                        iconData: Icons.note_outlined,
+                        enabled: true,
+                      ),
+                      Custembutton(
+                        text: "Edit".tr,
+                        isLoading:
+                            controller.statusrequest == Statusrequest.loadeng,
+                        onPressed: () {
+                          if (!validInputsnak(controller.nameController.text, 1,
+                              1000, "Name".tr)) {
+                            return;
+                          }
+                          if (!validInputsnak(
+                              controller.familyNameController.text,
+                              0,
+                              1000,
+                              "FrsetName".tr,
+                              empty: false)) {
+                            return;
+                          }
+                          if (!validInputsnak(controller.phoneController.text,
+                              1, 1000, "Phone Numper".tr,
+                              empty: false)) {
+                            return;
+                          }
+                          controller.editTransaction();
+                        },
+                        vertical: 10,
+                        horizontal: 10,
+                        paddingvertical: 15,
+                      )
+                    ],
+                  ),
+                ],
               );
             })),
       ),

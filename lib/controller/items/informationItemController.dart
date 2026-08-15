@@ -441,56 +441,75 @@ class Informationitemcontroller extends GetxController {
       bool isConnected = await PrintBluetoothThermal.connectionStatus;
 
       if (!isConnected) {
-        final List<BluetoothInfo> pairedDevices =
-            await PrintBluetoothThermal.pairedBluetooths;
+        String? savedMac = myservices.sharedPreferences?.getString("mac_printer_address");
+        String macToConnect = "";
+        
+        if (savedMac != null && savedMac.isNotEmpty) {
+           macToConnect = savedMac;
+        } else {
+            final List<BluetoothInfo> pairedDevices =
+                await PrintBluetoothThermal.pairedBluetooths;
 
-        if (pairedDevices.isEmpty) {
-          showSnackbar("تنبيه".tr, "لا توجد طابعات مقترنة".tr, Colors.orange);
-          isPrinting = false;
-          update();
-          return;
-        }
+            if (pairedDevices.isEmpty) {
+              showSnackbar("تنبيه".tr, "لا توجد طابعات مقترنة".tr, Colors.orange);
+              isPrinting = false;
+              update();
+              return;
+            }
 
-        BluetoothInfo? selectedPrinter = await Get.dialog<BluetoothInfo>(
-          AlertDialog(
-            backgroundColor: Colors.white,
-            title: Text("اختر الطابعة".tr, textAlign: TextAlign.center),
-            content: SizedBox(
-              width: double.maxFinite,
-              child: ListView.builder(
-                shrinkWrap: true,
-                itemCount: pairedDevices.length,
-                itemBuilder: (context, index) {
-                  final device = pairedDevices[index];
-                  return ListTile(
-                    leading: const Icon(Icons.print,
-                        color: AppColor.backgroundcolor),
-                    title: Text(device.name),
-                    subtitle: Text(device.macAdress),
-                    onTap: () => Get.back(result: device),
-                  );
-                },
+            BluetoothInfo? selectedPrinter = await Get.dialog<BluetoothInfo>(
+              AlertDialog(
+                backgroundColor: Colors.white,
+                title: Text("اختر الطابعة".tr, textAlign: TextAlign.center),
+                content: SizedBox(
+                  width: double.maxFinite,
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: pairedDevices.length,
+                    itemBuilder: (context, index) {
+                      final device = pairedDevices[index];
+                      return ListTile(
+                        leading: const Icon(Icons.print,
+                            color: AppColor.backgroundcolor),
+                        title: Text(device.name),
+                        subtitle: Text(device.macAdress),
+                        onTap: () => Get.back(result: device),
+                      );
+                    },
+                  ),
+                ),
               ),
-            ),
-          ),
-        );
+            );
 
-        if (selectedPrinter == null) {
-          isPrinting = false;
-          update();
-          return;
+            if (selectedPrinter == null) {
+              isPrinting = false;
+              update();
+              return;
+            }
+            macToConnect = selectedPrinter.macAdress;
+            myservices.sharedPreferences?.setString("mac_printer_address", selectedPrinter.macAdress);
+            myservices.sharedPreferences?.setString("mac_printer_name", selectedPrinter.name);
         }
 
         await PrintBluetoothThermal.isPermissionBluetoothGranted;
-        await PrintBluetoothThermal.disconnect;
-        await Future.delayed(const Duration(seconds: 1));
+        try {
+          await PrintBluetoothThermal.disconnect;
+        } catch (e) {}
+        await Future.delayed(const Duration(milliseconds: 500));
 
-        bool connectionStatus = await PrintBluetoothThermal.connect(
-                macPrinterAddress: selectedPrinter.macAdress)
-            .timeout(const Duration(seconds: 10));
+        bool connectionStatus = false;
+        String errorMessage = "";
+        try {
+          connectionStatus = await PrintBluetoothThermal.connect(
+            macPrinterAddress: macToConnect,
+          ).timeout(const Duration(seconds: 15));
+        } catch (e) {
+          connectionStatus = false;
+          errorMessage = e.toString();
+        }
 
         if (!connectionStatus) {
-          showSnackbar("خطأ".tr, "فشل الاتصال بالطابعة".tr, Colors.red);
+          showSnackbar("خطأ".tr, "فشل الاتصال بالطابعة\n$errorMessage".tr, Colors.red);
           isPrinting = false;
           update();
           return;

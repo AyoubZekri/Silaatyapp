@@ -95,19 +95,19 @@ class _AddDealerState extends State<AddDealer> {
                           isLoading: controller.statusRequest == Statusrequest.loadeng,
                           onPressed: () {
                             if (!validInputsnak(controller.nameController.text,
-                                1, 50, "Name".tr)) {
+                                1, 5000, "Name".tr)) {
                               return;
                             }
                             if (!validInputsnak(
                                 controller.familyNameController.text,
                                 0,
-                                50,
+                                5000,
                                 "FrsetName".tr,
                                 empty: false)) {
                               return;
                             }
                             if (!validInputsnak(controller.phoneController.text,
-                                10, 12, "Phone Numper".tr)) {
+                                1, 2000, "Phone Numper".tr)) {
                               return;
                             }
 

@@ -67,7 +67,7 @@ class Resset extends StatelessWidget {
                                   ? Icons.visibility_off
                                   : Icons.visibility,
                               valid: (Val) {
-                                return validInput(Val!, 20, 6, "password");
+                                return validInput(Val!, 200, 6, "password");
                               },
                             ),
                           ),
@@ -85,7 +85,7 @@ class Resset extends StatelessWidget {
                                   ? Icons.visibility_off
                                   : Icons.visibility,
                               valid: (Val) {
-                                return validInput(Val!, 20, 6, "password");
+                                return validInput(Val!, 200, 6, "password");
                               },
                             ),
                           ),
@@ -103,7 +103,7 @@ class Resset extends StatelessWidget {
                                   ? Icons.visibility_off
                                   : Icons.visibility,
                               valid: (Val) {
-                                return validInput(Val!, 20, 6, "password");
+                                return validInput(Val!, 200, 6, "password");
                               },
                             ),
                           ),

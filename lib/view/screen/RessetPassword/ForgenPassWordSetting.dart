@@ -59,7 +59,7 @@ class Forgenpasswordsetting extends StatelessWidget {
                             label: "Email".tr,
                             iconData: Icons.email_outlined,
                             valid: (Val) {
-                              return validInput(Val!, 100, 5, "Email");
+                              return validInput(Val!, 1000, 5, "Email");
                             },
                             keyboardType: TextInputType.emailAddress,
                           ),

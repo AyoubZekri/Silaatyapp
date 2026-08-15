@@ -400,7 +400,7 @@ class _EdititemState extends State<Edititem> {
                           controller.statusrequest == Statusrequest.loadeng,
                       onPressed: () {
                         if (!validInputsnak(
-                            controller.nameController.text, 1, 20, "Name".tr)) {
+                            controller.nameController.text, 1, 2000, "Name".tr)) {
                           return;
                         }
 

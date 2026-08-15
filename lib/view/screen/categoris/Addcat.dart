@@ -108,11 +108,11 @@ class _AddcatState extends State<Addcat> {
                               isLoading: controller.statusrequest == Statusrequest.loadeng,
                               text: "Add".tr,
                               onPressed: () {
-                                if (!validInputsnak(controler.nameController.text, 1, 20,
+                                if (!validInputsnak(controler.nameController.text, 1, 2000,
                                     "Name Categoris".tr)) {
                                   return;
                                 }
-                                if (!validInputsnak(controler.nameFrController.text, 1, 20,
+                                if (!validInputsnak(controler.nameFrController.text, 1, 2000,
                                     "Name Categoris fr".tr)) {
                                   return;
                                 }

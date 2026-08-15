@@ -596,7 +596,11 @@ class SaleController extends GetxController {
   }
 
   void resetData() {
-    selectedCustomer.value = type == 1 ? 'مورد'.tr : 'العميل'.tr;
+    if (type != 1) {
+      selectedCustomer.value = "virtualCustomer".tr;
+    } else {
+      selectedCustomer.value = 'مورد'.tr;
+    }
     selectedUuid.value = '';
     selectedName.value = '';
     selectedFamilyName.value = '';
@@ -632,18 +636,23 @@ class SaleController extends GetxController {
 
   @override
   void onInit() {
-    resetData();
-    selectedCustomer = (type == 1 ? 'مورد'.tr : 'العميل'.tr).obs;
-    print("=========================${selectedCustomer.value}");
     final arge = Get.arguments;
     print("=========================${arge}");
-    if (arge != null) {
+    
+    // First, set the type if passed in arguments
+    if (arge != null && arge["type"] != null) {
+      type = arge["type"];
+    }
+
+    // Now safely reset data according to the correct type
+    resetData();
+
+    // If specific customer details were passed, override the default
+    if (arge != null && arge["name"] != null && arge["famlyname"] != null) {
       selectedName.value = arge["name"];
       selectedFamilyName.value = arge["famlyname"];
-      selectedUuid.value = arge["uuid"];
-      type = arge["type"];
-      selectedCustomer.value =
-          '${selectedName.value} ${selectedFamilyName.value}';
+      selectedUuid.value = arge["uuid"] ?? '';
+      selectedCustomer.value = '${selectedName.value} ${selectedFamilyName.value}';
     }
 
     print("================================${selectedCustomer.value}");

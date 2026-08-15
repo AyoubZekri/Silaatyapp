@@ -160,7 +160,7 @@ class _PaymentState extends State<Payment> {
                             controller.statusrequest == Statusrequest.loadeng,
                         onPressed: () {
                           if (!validInputsnak(controller.paymentController.text,
-                              0, 20, "Name".tr, empty: false)) {
+                              0, 2000, "Name".tr, empty: false)) {
                             return;
                           }
                           controller.addSale(printInvoice: true);
@@ -177,7 +177,7 @@ class _PaymentState extends State<Payment> {
                             controller.statusrequest == Statusrequest.loadeng,
                         onPressed: () {
                           if (!validInputsnak(controller.paymentController.text,
-                              0, 20, "Name".tr, empty: false)) {
+                              0, 2000, "Name".tr, empty: false)) {
                             return;
                           }
                           controller.addSale(printInvoice: false);

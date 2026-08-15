@@ -7,6 +7,8 @@ import 'package:Silaaty/data/datasource/Remote/Auth/logen_data.dart';
 import 'package:Silaaty/view/widget/Setteng/custemLanguge.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:Silaaty/core/constant/Colorapp.dart';
+import 'package:print_bluetooth_thermal/print_bluetooth_thermal.dart';
 
 import '../../core/functions/Snacpar.dart';
 
@@ -68,6 +70,54 @@ class Settengcontriller extends GetxController {
     //   statusrequest = Statusrequest.failure;
     // }
     update();
+  }
+
+  Future<void> selectBluetoothPrinter() async {
+    bool bluetoothEnabled = await PrintBluetoothThermal.bluetoothEnabled;
+    if (!bluetoothEnabled) {
+      showSnackbar("تنبيه".tr, "الرجاء تفعيل البلوتوث أولاً".tr, Colors.orange);
+      return;
+    }
+
+    final List<BluetoothInfo> pairedDevices = await PrintBluetoothThermal.pairedBluetooths;
+
+    if (pairedDevices.isEmpty) {
+      showSnackbar("تنبيه".tr, "لا توجد طابعات مقترنة".tr, Colors.orange);
+      return;
+    }
+
+    BluetoothInfo? selectedPrinter = await Get.dialog<BluetoothInfo>(
+      AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text("اختر الطابعة".tr, textAlign: TextAlign.center),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: pairedDevices.length,
+            itemBuilder: (context, index) {
+              final device = pairedDevices[index];
+              return ListTile(
+                leading: const Icon(Icons.print, color: AppColor.backgroundcolor),
+                title: Text(device.name),
+                subtitle: Text(device.macAdress),
+                onTap: () => Get.back(result: device),
+              );
+            },
+          ),
+        ),
+      ),
+    );
+
+    if (selectedPrinter != null) {
+      myServices.sharedPreferences?.setString("mac_printer_address", selectedPrinter.macAdress);
+      myServices.sharedPreferences?.setString("mac_printer_name", selectedPrinter.name);
+      
+      await PrintBluetoothThermal.disconnect;
+      
+      showSnackbar("نجاح".tr, "تم تحديد الطابعة بنجاح".tr, Colors.green);
+      update();
+    }
   }
 
   void showLanguageSheet(BuildContext context) {
@@ -133,6 +183,23 @@ class Settengcontriller extends GetxController {
                       ),
                     ),
                     const SizedBox(height: 20),
+
+                    // --- تحديد الطابعة ---
+                    Text("تحديد الطابعة".tr,
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 10),
+                    ListTile(
+                      leading: const Icon(Icons.bluetooth, color: Colors.blue),
+                      title: Text(controller.myServices.sharedPreferences?.getString("mac_printer_name") ?? "اختر طابعة بلوتوث".tr),
+                      subtitle: Text(controller.myServices.sharedPreferences?.getString("mac_printer_address") ?? "غير محدد".tr),
+                      trailing: const Icon(Icons.arrow_forward_ios, size: 16),
+                      onTap: () {
+                        Get.back();
+                        controller.selectBluetoothPrinter();
+                      },
+                    ),
+                    const Divider(),
 
                     // --- نوع الطابعة ---
                     Text("نوع الطابعة".tr,

@@ -48,344 +48,363 @@ class _AdditemState extends State<Additem> {
           child: Form(
             key: controller.formstate,
             child: ListView(
-                children: [
-                  Column(
-                    children: [
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 30),
-                        height: 150,
-                        width: 150,
-                        decoration: BoxDecoration(
-                          color: AppColor.primarycolor,
-                          borderRadius: BorderRadius.circular(10),
-                          border: Border.all(width: 2),
-                        ),
-                        child: controller.file == null
-                            ? MaterialButton(
-                                onPressed: () {
-                                  controller.imageupload();
-                                },
-                                child: Text("اضافة صورة".tr),
-                              )
-                            : Stack(
-                                children: [
-                                  Center(
-                                    child: SizedBox(
-                                      height: 120,
-                                      child: ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.file(
-                                          controller.file!,
-                                          fit: BoxFit.cover,
-                                        ),
+              children: [
+                Column(
+                  children: [
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 30),
+                      height: 150,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        color: AppColor.primarycolor,
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(width: 2),
+                      ),
+                      child: controller.file == null
+                          ? MaterialButton(
+                              onPressed: () {
+                                controller.imageupload();
+                              },
+                              child: Text("اضافة صورة".tr),
+                            )
+                          : Stack(
+                              children: [
+                                Center(
+                                  child: SizedBox(
+                                    height: 120,
+                                    child: ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: Image.file(
+                                        controller.file!,
+                                        fit: BoxFit.cover,
                                       ),
                                     ),
                                   ),
-                                  Positioned(
-                                    bottom: 5,
-                                    right: 5,
-                                    child: IconButton(
-                                      icon: const Icon(Icons.edit,
-                                          color: Colors.white),
-                                      onPressed: () {
-                                        controller.imageupload();
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                      ),
-
-                      CustemDropDownField(
-                        hintText: "Category".tr,
-                        items: controller.categories
-                            .map((cat) => DropdownMenuItem<String>(
-                                  value: cat.uuid,
-                                  child: Text(Get.locale?.languageCode == "ar"
-                                      ? cat.categorisName ?? ''
-                                      : cat.categorisNameFr ?? ''),
-                                ))
-                            .toList(),
-                        value: controller.selectedtypeuuid,
-                        onChanged: (val) {
-                          setState(() {
-                            if (val == null) {
-                              showSnackbar("error".tr,
-                                  "يجب إختيار الفئة أولا".tr, Colors.red);
-                              return;
-                            }
-                            controller.selectedtypeuuid = val;
-                          });
-                        },
-                      ),
-
-                      CustemDropDownField(
-                        hintText: "نوع المنتج".tr,
-                        items: [
-                          DropdownMenuItem(value: 2, child: Text("ميزان".tr)),
-                          DropdownMenuItem(
-                              value: 1, child: Text("غير ميزان".tr)),
-                        ],
-                        value: controller.type,
-                        onChanged: (val) {
-                          if (val != null) {
-                            controller.typeProduct(val);
-                          }
-                        },
-                      ),
-
-                      CustemDropDownField(
-                        hintText: "Barcode Type".tr,
-                        items: [
-                          DropdownMenuItem(value: 0, child: Text("Auto".tr)),
-                          DropdownMenuItem(value: 1, child: Text("Manual".tr)),
-                          if (controller.type != 2)
-                            DropdownMenuItem(value: 2, child: Text("Scan".tr)),
-                        ],
-                        value: controller.barcodeMode,
-                        onChanged: (val) {
-                          if (val != null) {
-                            controller.toggleBarcodeMode(val, context);
-                          }
-                        },
-                        suffix: controller.type == 2
-                            ? null
-                            : IconButton(
-                                icon: const Icon(Icons.qr_code_scanner,
-                                    color: AppColor.backgroundcolor),
-                                onPressed: () {
-                                  controller.scanBarcode(context);
-                                },
-                              ),
-                      ),
-
-                      Custemtextfromfild(
-                        MyController: controller.barcodeController,
-                        keyboardType: TextInputType.number,
-                        hintText: "Barcode".tr,
-                        label: "Barcode".tr,
-                        iconData: Icons.qr_code,
-                        enabled: controller.barcodeMode != 0,
-                        suffix: controller.type == 2
-                            ? null
-                            : IconButton(
-                                icon: const Icon(Icons.qr_code_scanner,
-                                    color: AppColor.backgroundcolor),
-                                onPressed: () {
-                                  controller.scanBarcode(context);
-                                },
-                              ),
-                      ),
-                      Custemtextfromfild(
-                        MyController: controller.productCodeController,
-                        keyboardType: TextInputType.text,
-                        hintText: "كود المنتج".tr,
-                        label: "كود المنتج".tr,
-                        iconData: Icons.code,
-                        enabled: true,
-                      ),
-                      // CustemDropDownField(
-                      //   hintText: "Category".tr,
-                      //   items: [
-                      //     DropdownMenuItem<int>(
-                      //       value: 1,
-                      //       child: Text(Get.locale?.languageCode == 'ar'
-                      //           ? 'سلع'
-                      //           : 'Prodacts'),
-                      //     ),
-                      //     DropdownMenuItem<int>(
-                      //       value: 2,
-                      //       child: Text(Get.locale?.languageCode == 'ar'
-                      //           ? 'ضرورياب'
-                      //           : 'Necessary'),
-                      //     ),
-                      //   ],
-                      //   value: controller.selectedtypeId,
-                      //   onChanged: (val) {
-                      //     setState(() {
-                      //       controller.selectedCategoryId = val;
-
-                      //       if (val == 1) {
-                      //         controller.selectedCategoryId = 1;
-                      //       } else if (val == 2) {
-                      //         controller.selectedCategoryId = 2;
-                      //       }
-                      //     });
-                      //   },
-                      // ),
-                      Custemtextfromfild(
-                        MyController: controller.nameController,
-                        keyboardType: TextInputType.name,
-                        hintText: "Name Prodact".tr,
-                        label: "Name Prodact".tr,
-                        iconData: Icons.shopping_bag,
-                        enabled: true,
-                      ),
-                      // Custemtextfromfild(
-                      //     MyController: controller.descriptionController,
-                      //     keyboardType: TextInputType.name,
-                      //     hintText: "Description".tr,
-                      //     label: "Description".tr,
-                      //     iconData: Icons.description,
-                      //     valid: (val) {
-                      //       validInput(val!, 20, 300, "username");
-                      //       return null;
-                      //     }),
-                      Container(
-                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-                        decoration: BoxDecoration(
-                          color: controller.isByCarton ? AppColor.primarycolor : Colors.white,
-                          borderRadius: BorderRadius.circular(15),
-                          border: Border.all(
-                            color: controller.isByCarton ? AppColor.backgroundcolor : Colors.grey.shade300,
-                            width: 2,
-                          ),
-                        ),
-                        child: Column(
-                          children: [
-                            CheckboxListTile(
-                              title: Text(
-                                "إضافة بالكرتون".tr,
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 18,
-                                  color: controller.isByCarton ? AppColor.backgroundcolor : Colors.black87,
                                 ),
-                              ),
-                              value: controller.isByCarton,
-                              activeColor: AppColor.backgroundcolor,
-                              checkColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              side: BorderSide(
-                                color: controller.isByCarton ? AppColor.backgroundcolor : Colors.grey.shade400,
-                                width: 2,
-                              ),
-                              onChanged: (value) {
-                                controller.toggleByCarton(value);
+                                Positioned(
+                                  bottom: 5,
+                                  right: 5,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.edit,
+                                        color: Colors.white),
+                                    onPressed: () {
+                                      controller.imageupload();
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                    ),
+
+                    CustemDropDownField(
+                      hintText: "Category".tr,
+                      items: controller.categories
+                          .map((cat) => DropdownMenuItem<String>(
+                                value: cat.uuid,
+                                child: Text(Get.locale?.languageCode == "ar"
+                                    ? cat.categorisName ?? ''
+                                    : cat.categorisNameFr ?? ''),
+                              ))
+                          .toList(),
+                      value: controller.selectedtypeuuid,
+                      onChanged: (val) {
+                        setState(() {
+                          if (val == null) {
+                            showSnackbar("error".tr, "يجب إختيار الفئة أولا".tr,
+                                Colors.red);
+                            return;
+                          }
+                          controller.selectedtypeuuid = val;
+                        });
+                      },
+                    ),
+
+                    CustemDropDownField(
+                      hintText: "نوع المنتج".tr,
+                      items: [
+                        DropdownMenuItem(value: 2, child: Text("ميزان".tr)),
+                        DropdownMenuItem(value: 1, child: Text("غير ميزان".tr)),
+                      ],
+                      value: controller.type,
+                      onChanged: (val) {
+                        if (val != null) {
+                          controller.typeProduct(val);
+                        }
+                      },
+                    ),
+
+                    CustemDropDownField(
+                      hintText: "Barcode Type".tr,
+                      items: [
+                        DropdownMenuItem(value: 0, child: Text("Auto".tr)),
+                        DropdownMenuItem(value: 1, child: Text("Manual".tr)),
+                        if (controller.type != 2)
+                          DropdownMenuItem(value: 2, child: Text("Scan".tr)),
+                      ],
+                      value: controller.barcodeMode,
+                      onChanged: (val) {
+                        if (val != null) {
+                          controller.toggleBarcodeMode(val, context);
+                        }
+                      },
+                      suffix: controller.type == 2
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.qr_code_scanner,
+                                  color: AppColor.backgroundcolor),
+                              onPressed: () {
+                                controller.scanBarcode(context);
                               },
                             ),
-                            AnimatedSize(
-                              duration: const Duration(milliseconds: 400),
-                              curve: Curves.easeInOut,
-                              child: controller.isByCarton
-                                  ? Padding(
-                                      padding: const EdgeInsets.only(bottom: 10),
-                                      child: Column(
-                                        children: [
-                                          Custemtextfromfild(
-                                            MyController: controller.itemsPerCartonController,
-                                            keyboardType: TextInputType.number,
-                                            hintText: "الكمية في الكرتون".tr,
-                                            label: "الكمية في الكرتون".tr,
-                                            iconData: Icons.format_list_numbered,
-                                            enabled: true,
-                                          ),
-                                          Custemtextfromfild(
-                                            MyController: controller.numberOfCartonsController,
-                                            keyboardType: TextInputType.number,
-                                            hintText: "عدد الكراتين".tr,
-                                            label: "عدد الكراتين".tr,
-                                            iconData: Icons.view_module,
-                                            enabled: true,
-                                          ),
-                                        ],
-                                      ),
-                                    )
-                                  : const SizedBox.shrink(),
-                            ),
-                          ],
-                        ),
-                      ),
-                      QuantityInput(
-                        initialValue: controller.type == 2
-                            ? (double.tryParse(
-                                    controller.quantityController.text) ??
-                                1)
-                            : ((int.tryParse(
-                                        controller.quantityController.text) ??
-                                    1)
-                                .toDouble()),
-                        Mycontroller: controller.quantityController,
-                        hintText: controller.isByCarton ? "الكمية الإجمالية".tr : "Quantity".tr,
-                        label: controller.isByCarton ? "الكمية الإجمالية".tr : "Quantity".tr,
-                        onChanged: controller.onQuantityChanged,
-                        isDecimal: controller.type == 2,
-                        readOnly: controller.isByCarton,
-                      ),
-                      Custemtextfromfild(
-                        MyController: controller.priseController,
-                        keyboardType: TextInputType.number,
-                        hintText: "سعر التجزئة".tr,
-                        label: "سعر التجزئة".tr,
-                        iconData: Icons.attach_money,
-                        enabled: true,
-                      ),
-                      if (controller.sellType >= 2)
-                        Custemtextfromfild(
-                          MyController: controller.priseHalfWholesaleController,
-                          keyboardType: TextInputType.number,
-                          hintText: "سعر النصف جملة".tr,
-                          label: "سعر النصف جملة".tr,
-                          iconData: Icons.attach_money,
-                          enabled: true,
-                        ),
-                      if (controller.sellType >= 3)
-                        Custemtextfromfild(
-                          MyController: controller.priseWholesaleController,
-                          keyboardType: TextInputType.number,
-                          hintText: "سعر الجملة".tr,
-                          label: "سعر الجملة".tr,
-                          iconData: Icons.attach_money,
-                          enabled: true,
-                        ),
-                      Custemtextfromfild(
-                        MyController: controller.minSellingPriceController,
-                        keyboardType: TextInputType.number,
-                        hintText: "أقل سعر للبيع".tr,
-                        label: "أقل سعر للبيع".tr,
-                        iconData: Icons.price_change,
-                        enabled: true,
-                      ),
-                      Custemtextfromfild(
-                        MyController: controller.pricePurchaseController,
-                        keyboardType: TextInputType.number,
-                        hintText: "سعر التكلفة".tr,
-                        label: "سعر التكلفة".tr,
-                        iconData: Icons.attach_money,
-                        enabled: true,
-                      ),
-                      Custemtextfromfild(
-                        MyController: TextEditingController(
-                            text: formavalue(controller.priceTotalPurchase)),
-                        keyboardType: TextInputType.number,
-                        hintText: "إجمالي سعر التكلفة".tr,
-                        label: "إجمالي سعر التكلفة".tr,
-                        iconData: Icons.attach_money,
-                        enabled: true,
-                      ),
-                      Custemtextfromfild(
-                        MyController: TextEditingController(
-                            text: formavalue(controller.priceTotal)),
-                        keyboardType: TextInputType.number,
-                        hintText: "Selling Prise Total".tr,
-                        label: "Selling Prise Total".tr,
-                        iconData: Icons.attach_money,
-                        enabled: true,
-                      ),
-                          Custembutton(
-                              isLoading: controller.statusrequest == Statusrequest.loadeng,
-                              text: "Add".tr,
+                    ),
+
+                    Custemtextfromfild(
+                      MyController: controller.barcodeController,
+                      keyboardType: TextInputType.number,
+                      hintText: "Barcode".tr,
+                      label: "Barcode".tr,
+                      iconData: Icons.qr_code,
+                      enabled: controller.barcodeMode != 0,
+                      suffix: controller.type == 2
+                          ? null
+                          : IconButton(
+                              icon: const Icon(Icons.qr_code_scanner,
+                                  color: AppColor.backgroundcolor),
                               onPressed: () {
-                                if (!validInputsnak(controller.nameController.text, 1,
-                                    20, "Name".tr)) {
-                                  return;
-                                }
+                                controller.scanBarcode(context);
+                              },
+                            ),
+                    ),
+                    Custemtextfromfild(
+                      MyController: controller.productCodeController,
+                      keyboardType: TextInputType.text,
+                      hintText: "كود المنتج".tr,
+                      label: "كود المنتج".tr,
+                      iconData: Icons.code,
+                      enabled: true,
+                    ),
+                    // CustemDropDownField(
+                    //   hintText: "Category".tr,
+                    //   items: [
+                    //     DropdownMenuItem<int>(
+                    //       value: 1,
+                    //       child: Text(Get.locale?.languageCode == 'ar'
+                    //           ? 'سلع'
+                    //           : 'Prodacts'),
+                    //     ),
+                    //     DropdownMenuItem<int>(
+                    //       value: 2,
+                    //       child: Text(Get.locale?.languageCode == 'ar'
+                    //           ? 'ضرورياب'
+                    //           : 'Necessary'),
+                    //     ),
+                    //   ],
+                    //   value: controller.selectedtypeId,
+                    //   onChanged: (val) {
+                    //     setState(() {
+                    //       controller.selectedCategoryId = val;
+
+                    //       if (val == 1) {
+                    //         controller.selectedCategoryId = 1;
+                    //       } else if (val == 2) {
+                    //         controller.selectedCategoryId = 2;
+                    //       }
+                    //     });
+                    //   },
+                    // ),
+                    Custemtextfromfild(
+                      MyController: controller.nameController,
+                      keyboardType: TextInputType.name,
+                      hintText: "Name Prodact".tr,
+                      label: "Name Prodact".tr,
+                      iconData: Icons.shopping_bag,
+                      enabled: true,
+                    ),
+                    // Custemtextfromfild(
+                    //     MyController: controller.descriptionController,
+                    //     keyboardType: TextInputType.name,
+                    //     hintText: "Description".tr,
+                    //     label: "Description".tr,
+                    //     iconData: Icons.description,
+                    //     valid: (val) {
+                    //       validInput(val!, 20, 300, "username");
+                    //       return null;
+                    //     }),
+                    Container(
+                      margin: const EdgeInsets.symmetric(
+                          horizontal: 10, vertical: 10),
+                      decoration: BoxDecoration(
+                        color: controller.isByCarton
+                            ? AppColor.primarycolor
+                            : Colors.white,
+                        borderRadius: BorderRadius.circular(15),
+                        border: Border.all(
+                          color: controller.isByCarton
+                              ? AppColor.backgroundcolor
+                              : Colors.grey.shade300,
+                          width: 2,
+                        ),
+                      ),
+                      child: Column(
+                        children: [
+                          CheckboxListTile(
+                            title: Text(
+                              "إضافة بالكرتون".tr,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 18,
+                                color: controller.isByCarton
+                                    ? AppColor.backgroundcolor
+                                    : Colors.black87,
+                              ),
+                            ),
+                            value: controller.isByCarton,
+                            activeColor: AppColor.backgroundcolor,
+                            checkColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            side: BorderSide(
+                              color: controller.isByCarton
+                                  ? AppColor.backgroundcolor
+                                  : Colors.grey.shade400,
+                              width: 2,
+                            ),
+                            onChanged: (value) {
+                              controller.toggleByCarton(value);
+                            },
+                          ),
+                          AnimatedSize(
+                            duration: const Duration(milliseconds: 400),
+                            curve: Curves.easeInOut,
+                            child: controller.isByCarton
+                                ? Padding(
+                                    padding: const EdgeInsets.only(bottom: 10),
+                                    child: Column(
+                                      children: [
+                                        Custemtextfromfild(
+                                          MyController: controller
+                                              .itemsPerCartonController,
+                                          keyboardType: TextInputType.number,
+                                          hintText: "الكمية في الكرتون".tr,
+                                          label: "الكمية في الكرتون".tr,
+                                          iconData: Icons.format_list_numbered,
+                                          enabled: true,
+                                        ),
+                                        Custemtextfromfild(
+                                          MyController: controller
+                                              .numberOfCartonsController,
+                                          keyboardType: TextInputType.number,
+                                          hintText: "عدد الكراتين".tr,
+                                          label: "عدد الكراتين".tr,
+                                          iconData: Icons.view_module,
+                                          enabled: true,
+                                        ),
+                                      ],
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
+                        ],
+                      ),
+                    ),
+                    QuantityInput(
+                      initialValue: controller.type == 2
+                          ? (double.tryParse(
+                                  controller.quantityController.text) ??
+                              1)
+                          : ((int.tryParse(
+                                      controller.quantityController.text) ??
+                                  1)
+                              .toDouble()),
+                      Mycontroller: controller.quantityController,
+                      hintText: controller.isByCarton
+                          ? "الكمية الإجمالية".tr
+                          : "Quantity".tr,
+                      label: controller.isByCarton
+                          ? "الكمية الإجمالية".tr
+                          : "Quantity".tr,
+                      onChanged: controller.onQuantityChanged,
+                      isDecimal: controller.type == 2,
+                      readOnly: controller.isByCarton,
+                    ),
+                    Custemtextfromfild(
+                      MyController: controller.priseController,
+                      keyboardType: TextInputType.number,
+                      hintText: "سعر التجزئة".tr,
+                      label: "سعر التجزئة".tr,
+                      iconData: Icons.attach_money,
+                      enabled: true,
+                    ),
+                    if (controller.sellType >= 2)
+                      Custemtextfromfild(
+                        MyController: controller.priseHalfWholesaleController,
+                        keyboardType: TextInputType.number,
+                        hintText: "سعر النصف جملة".tr,
+                        label: "سعر النصف جملة".tr,
+                        iconData: Icons.attach_money,
+                        enabled: true,
+                      ),
+                    if (controller.sellType >= 3)
+                      Custemtextfromfild(
+                        MyController: controller.priseWholesaleController,
+                        keyboardType: TextInputType.number,
+                        hintText: "سعر الجملة".tr,
+                        label: "سعر الجملة".tr,
+                        iconData: Icons.attach_money,
+                        enabled: true,
+                      ),
+                    Custemtextfromfild(
+                      MyController: controller.minSellingPriceController,
+                      keyboardType: TextInputType.number,
+                      hintText: "أقل سعر للبيع".tr,
+                      label: "أقل سعر للبيع".tr,
+                      iconData: Icons.price_change,
+                      enabled: true,
+                    ),
+                    Custemtextfromfild(
+                      MyController: controller.pricePurchaseController,
+                      keyboardType: TextInputType.number,
+                      hintText: "سعر التكلفة".tr,
+                      label: "سعر التكلفة".tr,
+                      iconData: Icons.attach_money,
+                      enabled: true,
+                    ),
+                    Custemtextfromfild(
+                      MyController: TextEditingController(
+                          text: formavalue(controller.priceTotalPurchase)),
+                      keyboardType: TextInputType.number,
+                      hintText: "إجمالي سعر التكلفة".tr,
+                      label: "إجمالي سعر التكلفة".tr,
+                      iconData: Icons.attach_money,
+                      enabled: true,
+                    ),
+                    Custemtextfromfild(
+                      MyController: TextEditingController(
+                          text: formavalue(controller.priceTotal)),
+                      keyboardType: TextInputType.number,
+                      hintText: "Selling Prise Total".tr,
+                      label: "Selling Prise Total".tr,
+                      iconData: Icons.attach_money,
+                      enabled: true,
+                    ),
+                    Custembutton(
+                      isLoading:
+                          controller.statusrequest == Statusrequest.loadeng,
+                      text: "Add".tr,
+                      onPressed: () {
+                        if (!validInputsnak(controller.nameController.text, 1,
+                            2000, "Name".tr)) {
+                          return;
+                        }
 
                         if (controller.type == 2) {
                           if (controller.barcodeController.text.length != 5) {
-                            showSnackbar("تنبيه".tr, "باركود الميزان يجب أن يتكون من 5 أرقام (سيضاف الرقم 25 تلقائياً)".tr, Colors.orange);
+                            showSnackbar(
+                                "تنبيه".tr,
+                                "باركود الميزان يجب أن يتكون من 5 أرقام (سيضاف الرقم 25 تلقائياً)"
+                                    .tr,
+                                Colors.orange);
                             return;
                           }
                         } else {
@@ -395,15 +414,15 @@ class _AdditemState extends State<Additem> {
                           }
                         }
 
-                                controller.addProduct();
-                              },
-                              vertical: 10,
-                              horizontal: 10,
-                              paddingvertical: 15,
-                            )
-                    ],
-                  ),
-                ],
+                        controller.addProduct();
+                      },
+                      vertical: 10,
+                      horizontal: 10,
+                      paddingvertical: 15,
+                    )
+                  ],
+                ),
+              ],
             ),
           ),
         );
