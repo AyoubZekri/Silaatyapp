@@ -25,6 +25,7 @@ import 'package:Silaaty/view/screen/Profaile/Dealer.dart';
 import 'package:Silaaty/view/screen/Profaile/necessary.dart';
 import 'package:Silaaty/view/screen/Report/Report.dart';
 import 'package:Silaaty/view/screen/Report/ShwoReport.dart';
+import 'package:Silaaty/view/screen/Expense/Expense.dart';
 import 'package:Silaaty/view/screen/RessetPassword/VeriFiyCodeSetting.dart';
 import 'package:Silaaty/view/screen/Setteng.dart';
 import 'package:Silaaty/view/screen/Setteng/InformationAPP.dart';
@@ -116,6 +117,7 @@ List<GetPage<dynamic>> routes = [
 
   GetPage(name: Approutes.report, page: () => const Report()),
   GetPage(name: Approutes.shwoReport, page: () => const Shworeport()),
+  GetPage(name: Approutes.expense, page: () => const Expense()),
 
   GetPage(name: Approutes.invoicesall, page: () => const Invoicesall()),
   GetPage(name: Approutes.newSale, page: () => NewSale()),

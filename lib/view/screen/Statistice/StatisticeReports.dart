@@ -105,58 +105,6 @@ class _StatisticereportsState extends State<Statisticereports> {
                           );
                         },
                       ),
-                      // const SizedBox(width: 15),
-                      // Custemcartbutton(
-                      //   Title: 'المصروفات'.tr,
-                      //   iconData: Icons.description_outlined,
-                      //   ontap: () {
-                      //     showDialog(
-                      //       context: context,
-                      //       builder: (context) {
-                      //         return StatefulBuilder(
-                      //           builder: (context, setStateDialog) {
-                      //             return Custemfilterdialog<String>(
-                      //                 onConfirm: () {},
-                      //                 onCancel: () {
-                      //                   Get.back();
-                      //                 },
-                      //                 title: 'إختر النطاق',
-                      //                 hintText: 'النطاق',
-                      //                 value: controller.filterController,
-                      //                 items: controller.ranges.entries.map((e) {
-                      //                   return DropdownMenuItem<String>(
-                      //                     value: e.key,
-                      //                     child: Text(e.value),
-                      //                   );
-                      //                 }).toList(),
-                      //                 onChanged: (value) async {
-                      //                   setStateDialog(() {
-                      //                     controller.filterController =
-                      //                         value.toString();
-                      //                   });
-
-                      //                   if (value == "custom") {
-                      //                     final result =
-                      //                         await showCustomRangePicker(
-                      //                             context);
-
-                      //                     if (result != null) {
-                      //                       controller.customStartDate =
-                      //                           result["start"]!;
-                      //                       controller.customEndDate =
-                      //                           result["end"]!;
-                      //                       controller.update();
-                      //                     } else {
-                      //                       controller.filterController = "";
-                      //                     }
-                      //                   }
-                      //                 });
-                      //           },
-                      //         );
-                      //       },
-                      //     );
-                      //   },
-                      // ),
                     ],
                   ),
                 ),

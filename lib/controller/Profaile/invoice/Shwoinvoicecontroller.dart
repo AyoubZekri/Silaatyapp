@@ -1491,4 +1491,5 @@ class Shwoinvoicecontroller extends GetxController {
     bytes.addAll([0x1D, 0x56, 0x41, 0x00]); // Cut
     return bytes;
   }
+
 }

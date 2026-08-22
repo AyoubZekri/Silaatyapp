@@ -20,7 +20,7 @@ class SQLDB {
     Database mydb = await openDatabase(
       path,
       onCreate: _onCreate,
-      version: 4,
+      version: 5,
       onUpgrade: _onUpgrade,
     );
     return mydb;
@@ -137,6 +137,22 @@ class SQLDB {
       } catch (e) {
         print("Table seller_stock might not exist or already renamed: \$e");
       }
+    }
+    
+    if (oldversion < 5) {
+      await db.execute('''
+      CREATE TABLE IF NOT EXISTS expenses(
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        uuid TEXT UNIQUE,
+        name TEXT,
+        price REAL DEFAULT 0,
+        description TEXT,
+        user_id INTEGER,
+        is_delete INTEGER NOT NULL DEFAULT 0,
+        created_at TEXT,
+        updated_at TEXT
+      )
+      ''');
     }
   }
 
@@ -294,6 +310,21 @@ class SQLDB {
         updated_at TEXT
       );
     ''');
+
+    /// جدول المصاريف
+    batch.execute('''
+    CREATE TABLE expenses(
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      uuid TEXT UNIQUE,
+      name TEXT,
+      price REAL DEFAULT 0,
+      description TEXT,
+      user_id INTEGER,
+      is_delete INTEGER NOT NULL DEFAULT 0,
+      created_at TEXT,
+      updated_at TEXT
+    )
+  ''');
 
     // ==============================
     // جداول خاصة بالمزامنة

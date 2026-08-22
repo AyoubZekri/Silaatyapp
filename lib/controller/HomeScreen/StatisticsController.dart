@@ -21,6 +21,10 @@ class Statisticecontroller extends GetxController {
     Get.toNamed(Approutes.statisticereports);
   }
 
+  gotoExpenses() {
+    Get.toNamed(Approutes.expense);
+  }
+
   loadChartData() async {
     try {
       update();

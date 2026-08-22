@@ -159,10 +159,12 @@ class Invoicedata {
 
     double sumPrice = 0.0;
     double sumPaymentPrice = 0.0;
-    
+
     for (var inv in invoices) {
-      sumPrice += double.tryParse(inv['total_after_discount'].toString()) ?? 0.0;
-      sumPaymentPrice += double.tryParse(inv['Payment_price'].toString()) ?? 0.0;
+      sumPrice +=
+          double.tryParse(inv['total_after_discount'].toString()) ?? 0.0;
+      sumPaymentPrice +=
+          double.tryParse(inv['Payment_price'].toString()) ?? 0.0;
     }
 
     return {

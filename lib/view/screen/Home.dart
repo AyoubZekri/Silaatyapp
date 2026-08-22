@@ -17,6 +17,13 @@ class Home extends StatefulWidget {
 
 class _HomeState extends State<Home> {
   Homecontroller controller = Get.put(Homecontroller());
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -83,7 +90,8 @@ class _HomeState extends State<Home> {
                         color: Colors.green,
                         iconData: FontAwesomeIcons.sackDollar,
                         Price: controller.statisticsHome?.todayIncome != null
-                            ? formavalue(controller.statisticsHome!.todayIncome!)
+                            ? formavalue(
+                                controller.statisticsHome!.todayIncome!)
                             : "0,0",
                         Title: "المبيعات".tr,
                       ),
@@ -105,7 +113,8 @@ class _HomeState extends State<Home> {
                         color: Colors.grey,
                         iconData: FontAwesomeIcons.moneyBillWave,
                         Price: controller.statisticsHome?.todayNetProfit != null
-                            ? formavalue(controller.statisticsHome!.todayNetProfit!)
+                            ? formavalue(
+                                controller.statisticsHome!.todayNetProfit!)
                             : "0,0",
                         Title: "صافي الربح".tr,
                       ),
@@ -153,11 +162,50 @@ class _HomeState extends State<Home> {
                 ],
               ),
               const SizedBox(height: 30),
-              Custemtitle(title: "الإدارة والتحكم".tr),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Custemtitle(title: "الإدارة والتحكم".tr),
+                  TextButton(
+                    onPressed: () {
+                      if (_scrollController.hasClients) {
+                        _scrollController.animateTo(
+                          _scrollController.position.maxScrollExtent,
+                          duration: const Duration(milliseconds: 500),
+                          curve: Curves.easeInOut,
+                        );
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10.0),
+                    ),
+                    child: Row(
+                      children: [
+                        Text(
+                          "اسحب للمزيد".tr,
+                          style: const TextStyle(
+                            color: AppColor.backgroundcolor,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(width: 5),
+                        const Icon(
+                          Icons.arrow_back,
+                          color: AppColor.backgroundcolor,
+                          size: 16,
+                          textDirection: TextDirection.ltr,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
               const SizedBox(height: 20),
               SizedBox(
                 height: 100,
                 child: ListView(
+                  controller: _scrollController,
                   scrollDirection: Axis.horizontal,
                   children: [
                     Custemcartabbreviation(

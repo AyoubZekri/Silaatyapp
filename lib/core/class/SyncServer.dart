@@ -474,6 +474,7 @@ class SyncService {
     await pushQueue("transactions");
     await pushQueue("invoies");
     await pushQueue("sales");
+    await pushQueue("expenses");
     await pushQueue("notifications");
     await pushQueue("reports");
     await pushQueue("zakats");
@@ -485,6 +486,7 @@ class SyncService {
     await pullFromServer("transactions");
     await pullFromServer("invoies");
     await pullFromServer("sales");
+    await pullFromServer("expenses");
     await pullFromServer("notifications");
     await pullFromServer("reports");
     await pullFromServer("zakats");

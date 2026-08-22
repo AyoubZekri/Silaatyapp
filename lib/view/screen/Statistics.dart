@@ -192,6 +192,16 @@ class _StatisticsState extends State<Statistics> {
                   Title: "Reports".tr,
                   iconData: Icons.analytics,
                 ),
+                SizedBox(
+                  height: 15,
+                ),
+                Custemcartbutton(
+                  ontap: () {
+                    controller.gotoExpenses();
+                  },
+                  Title: "Expenses".tr,
+                  iconData: Icons.account_balance_wallet_outlined,
+                ),
               ],
             );
           })),

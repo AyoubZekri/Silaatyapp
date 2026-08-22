@@ -36,6 +36,7 @@ class Approutes {
 
   static const String report = "/Report";
   static const String shwoReport = "/ShwoReport";
+  static const String expense = "/Expense";
 
   static const String resePassword = "/resePassword";
   static const String checkemail = "/checkemail";

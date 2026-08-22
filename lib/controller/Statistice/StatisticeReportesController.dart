@@ -38,9 +38,9 @@ class Statisticereportescontroller extends GetxController {
     customEndDate = null;
   }
 
-  // gotoExpenses() {
-  //   // المصروفات
-  // }
+  gotoExpenses() {
+    Get.toNamed(Approutes.expense);
+  }
 
   gotoLowStock() {
     Get.toNamed(

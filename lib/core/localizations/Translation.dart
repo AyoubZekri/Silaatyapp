@@ -324,6 +324,7 @@ class MyTranslation extends Translations {
           "المجموع الفرعي": "المجموع الفرعي",
           "Paid": "مدفوع",
           "الإدارة والتحكم": "الإدارة والتحكم",
+          "اسحب للمزيد": "اسحب للمزيد",
           "دفع مستحقات الفاتورة": "دفع مستحقات الفاتورة",
           "طباعة": "طباعة",
           "المزيد من الأدوات": "المزيد من الأدوات",
@@ -654,6 +655,13 @@ class MyTranslation extends Translations {
           "يجب إعطاء صلاحية الموقع والأجهزة المجاورة للوصول للطابعات": "يجب إعطاء صلاحية الموقع والأجهزة المجاورة للوصول للطابعات",
           "الرجاء تفعيل البلوتوث أولاً": "الرجاء تفعيل البلوتوث أولاً",
           "لا توجد طابعات مقترنة": "لا توجد طابعات مقترنة",
+          "Expense": "المصروفات",
+          "Expenses": "المصروفات",
+          "Total Expenses": "إجمالي المصاريف",
+          "Add Expense": "إضافة مصروف",
+          "Edit Expense": "تعديل مصروف",
+          "No Expenses Added": "لا توجد مصاريف مضافة",
+          "هل تريد حذف المصروف؟": "هل تريد حذف المصروف؟",
         },
         // ::::::
         // ::::::
@@ -1069,6 +1077,7 @@ class MyTranslation extends Translations {
           "المجموع الفرعي": "Subtotal",
           "Paid": "Paid",
           "الإدارة والتحكم": "Management & Control",
+          "اسحب للمزيد": "Swipe for more",
           "دفع مستحقات الفاتورة": "Pay Invoice Dues",
           "طباعة": "Print",
           "عرض PDF": "View PDF",
@@ -1398,6 +1407,11 @@ class MyTranslation extends Translations {
           "يجب إعطاء صلاحية الموقع والأجهزة المجاورة للوصول للطابعات": "Location and nearby devices permissions are required to access printers.",
           "الرجاء تفعيل البلوتوث أولاً": "Please enable Bluetooth first.",
           "لا توجد طابعات مقترنة": "No paired printers found.",
+          "Expense Name": "Expense Name",
+          "Add Expense": "Add Expense",
+          "Edit Expense": "Edit Expense",
+          "No Expenses Added": "No Expenses Added",
+          "هل تريد حذف المصروف؟": "Do you want to delete the expense?",
         },
       };
 }
