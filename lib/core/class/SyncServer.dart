@@ -62,6 +62,8 @@ class SyncService {
             ? Map<String, dynamic>.from(jsonDecode(row["data"] as String))
             : <String, dynamic>{};
         data["uuid"] = row["row_id"];
+        // السيرفر يحتاج نوع العملية: تحديث سجل غير موجود يرجع not_found
+        if (row["operation"] != null) data["operation"] = row["operation"];
 
         final token =
             Get.find<Myservices>().sharedPreferences?.getString("token");
@@ -112,6 +114,16 @@ class SyncService {
               body: jsonEncode(data),
               headers: {...headers, "Content-Type": "application/json"},
             );
+          }
+
+          // ⚠️ التحديث لم يجد السجل في السيرفر (محذوف هناك):
+          // نعيد إرساله كإضافة بالسجل الكامل من القاعدة المحلية
+          if (res.statusCode == 200 && _isNotFound(res)) {
+            final fullData = await _buildInsertFromLocal(table, row["row_id"]);
+            if (fullData != null) {
+              print("➕ ${data["uuid"]} غير موجود في السيرفر — تحويل التحديث إلى إضافة");
+              res = await _sendDataRequest(table, fullData, headers);
+            }
           }
 
           if (res.statusCode == 200) {
@@ -183,6 +195,38 @@ class SyncService {
       body: jsonEncode({"uuid": data["uuid"]}),
       headers: {...headers, "Content-Type": "application/json"},
     );
+  }
+
+  /// هل رد السيرفر أن السجل المراد تحديثه غير موجود؟
+  bool _isNotFound(http.Response res) {
+    try {
+      final body = jsonDecode(res.body);
+      return body is List &&
+          body.any((r) => r is Map && r["status"] == "not_found");
+    } catch (_) {
+      return false;
+    }
+  }
+
+  /// بناء بيانات الإضافة من السجل الكامل في القاعدة المحلية
+  Future<Map<String, dynamic>?> _buildInsertFromLocal(
+      String table, Object? uuid) async {
+    final local =
+        await _db.readData("SELECT * FROM $table WHERE uuid = ?", [uuid]);
+    if (local.isEmpty) return null;
+
+    final data = Map<String, dynamic>.from(local.first);
+    data.remove("id");
+    data.removeWhere((key, value) => value == null);
+
+    // مسار صورة محلي لم يعد موجوداً لا فائدة من إرساله
+    for (final field in ["Product_image", "categoris_image"]) {
+      final path = data[field];
+      if (path is String && !File(path).existsSync()) data.remove(field);
+    }
+
+    data["operation"] = "insert";
+    return data;
   }
 
   Future<http.Response> _sendDataRequest(

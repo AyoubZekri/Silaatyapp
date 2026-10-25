@@ -36,7 +36,7 @@ class Data {
   int? id;
   int? categorieId;
   int? userId;
-  int? invoiesuuId;
+  String? invoiesuuId;
   String? categorisuuId;
   String? uuid; // ✅ uuid هنا
   String? productName;
@@ -86,10 +86,10 @@ class Data {
   });
 
   Data.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    categorieId = json['categorie_id'];
-    userId = json['user_id'];
-    invoiesuuId = json['invoies_uuid'];
+    id = _toInt(json['id']);
+    categorieId = _toInt(json['categorie_id']);
+    userId = _toInt(json['user_id']);
+    invoiesuuId = json['invoies_uuid']?.toString();
     categorisuuId = json['categoris_uuid'];
     uuid = json['uuid']; // ✅
     productName = json['product_name'];
@@ -101,12 +101,12 @@ class Data {
     productPriceWholesale = _toDouble(json['product_price_wholesale']);
     productPricePurchase = _toDouble(json['product_price_purchase']);
     productPriceTotalPurchase = _toDouble(json['product_price_total_purchase']);
-    type = json['type'];
+    type = _toInt(json['type']);
     productPriceTotal = _toDouble(json['product_price_total']);
-    codepar = json['codepar'];
-    productCode = json['product_code'];
-    itemsPerCarton = json['items_per_carton'];
-    quantityPerCarton = json['quantity_per_carton'];
+    codepar = _toInt(json['codepar']);
+    productCode = json['product_code']?.toString();
+    itemsPerCarton = _toInt(json['items_per_carton']);
+    quantityPerCarton = _toInt(json['quantity_per_carton']);
     minSellingPrice = _toDouble(json['min_selling_price']);
     createdAt = json['created_at'];
     updatedAt = json['updated_at'];
@@ -147,6 +147,15 @@ class Data {
     if (value is double) return value;
     if (value is int) return value.toDouble();
     if (value is String) return double.tryParse(value);
+    return null;
+  }
+
+  // القيمة قد تصل double (مثل 12.0) أو نص من السيرفر أو القاعدة المحلية
+  int? _toInt(dynamic value) {
+    if (value == null) return null;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return double.tryParse(value)?.toInt();
     return null;
   }
 }
